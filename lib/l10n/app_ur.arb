@@ -1,0 +1,72 @@
+{
+  "text_welcome_back": "خوش آمدید",
+  "text_login_description": "شناختی کارڈ اورموبائل نمبرسے لاگ ان کریں",
+
+"username_required": "صارف کا نام درکار ہے",
+"password_required": "پاس ورڈ درکار ہے",
+"valid_cnic_password": "براہ کرم درست شناختی کارڈ اور پاس ورڈ درج کریں",
+"please_wait_sign_in": " ان ہو رہا ہے، براہ کرم انتظار کریں...",
+
+
+
+  "valid_cnic": "درست قومی شناختی کارڈ نمبر درج کریں۔",
+  "valid_mobile_number": "درست  موبائل نمبر درج کریں۔",
+  "valid_password": "درست  پاس ورڈ درج کریں۔",
+  "valid_name": "درست نام درج کریں۔",
+  "password_match": "پاس ورڈ اور کنفرم پاس ورڈ ایک جیسا ہونا چاہیے۔",
+  "required": "درکار ہے*",
+  "text_alert": "الرٹ",
+  "text_dialog_logout": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
+  "text_dialog_internet": "انٹرنیٹ دستیاب نہیں ہے",
+  "text_dialog_internet_message": "براہ کرم اپنا انٹرنیٹ کنکشن چیک کریں۔",
+  "text_logging_out": "لاگ آؤٹ ہو رہا ہے",
+  "text_verifying": "تصدیق ہو رہی ہے، براہ کرم انتظار کریں...",
+
+  "text_close": "بند کریں",
+  "text_enter": "درج کریں",
+  "text_submit": "جمع کریں",
+  "text_resend": "یکباری پاسورڈ دوبارہ بھہجیں",
+
+  "text_not_have_account": "اگرپہلےرجسٹرڈ نہیں کیا ہوا",
+  "text_login_label": "اپنے کھاتے کا اندراج کریں",
+
+  "text_cnic": "شناختی کارڈ",
+  "text_mobile_number": " موبائل نمبر",
+  "text_username": "نام",
+  "text_password": "پاس ورڈ",
+  "text_confirm_password": "کنفرم پاس ورڈ",
+
+  "text_login": "لاگ ان",
+  "text_logout": "لاگ آوٹ",
+  "text_register": "رجسٹرکریں",
+  "text_register_only": "رجسٹر",
+  "text_register_description": "خود کو یہاں رجسٹر کریں",
+  "text_login_already_have_account": "لاگ ان کریں",
+  "text_already_have_account": "اگررجسٹرکیاہوا ہے تو لاگ ان کریں",
+
+  "text_otp": "یکباری پاسورڈ",
+  "text_otp_receive": "موصول شدہ کوڈ یہاں لکھیں",
+  "text_enter_otp": "موصول شدہ کوڈ یہاں لکھیں",
+  "text_please_enter_otp": "براہ کرم یکباری پاسورڈ درج کریں",
+
+
+  "text_drawer_dashboard": "ڈیش بورڈ",
+
+
+  "text_dashboard": " میں آپ رجسٹرڈ ہو چکے ہپں",
+  "text_user_name":  "احسن علی",
+  "text_contact_soon": "جلد آپ سے رابطہ کیا جائے گا",
+  "text_ehsas_ration": "احساس راشن پروگرام",
+  "text_new_user": "نئے صارف کو رجسٹر کریں۔",
+  "text_welcome_user": "احساس راشن پروگرام میں خوش آمدید",
+
+  "enter_password_description": "اپنا شناختی کارڈ اور پاسورڈ لکھیں",
+  "enter_password": "پاس ورڈ",
+  "text_new_password": "نیا پاس ورڈ بنائیں",
+  "text_create_new_password": "آپ نیا پاس ورڈ بنا سکتے ہیں۔",
+  "text_forgot_password": "پاسورڈ بھول گئے ؟",
+  "error_password": "پاس ورڈ یاد نہیں ؟",
+  "exit":"بند"
+
+
+}

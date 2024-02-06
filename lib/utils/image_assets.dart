@@ -1,0 +1,17 @@
+const String lockIconSvg = "assets/svgs/ic_lock.svg";
+const String phoneNumberIconSvg = "assets/svgs/ic_phone_number.svg";
+const String checkIconSvg = "assets/svgs/splash_logo.svg";
+const String splashLogoImageSvg = "assets/svgs/splash_logo.svg";
+const String splashBackgroundImage = "assets/images/bg_splash.png";
+const String eventLocationPinIcon = "assets/images/ic_event_location.png";
+const String timeIcon = "assets/svgs/ic_time.svg";
+const String locationIcon = "assets/svgs/ic_location.svg";
+const String checkInIcon = "assets/svgs/ic_check_in.svg";
+const String homeIcon = "assets/svgs/ic_home.svg";
+const String eventsIcon = "assets/svgs/ic_file.svg";
+const String notificationsIcon = "assets/svgs/ic_notification.svg";
+const String notificationsImg = "assets/images/ic_notification.png";
+const String menuIcon = "assets/svgs/ic_menu.svg";
+const String splashTextImageSvg = "assets/svgs/splash_text.svg";
+const String splashLogoImage = "assets/images/splash_logo.png";
+const String splashTextImage = "assets/images/splash_text.png";

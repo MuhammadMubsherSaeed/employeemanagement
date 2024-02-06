@@ -1,0 +1,69 @@
+{
+  "text_welcome_back": "Welcome Back",
+  "text_login_description": "Please login with CNIC and Mobile No.",
+
+"username_required": "Username Required",
+"password_required": "Password is required",
+"valid_cnic_password": "Please enter correct CNIC & Password",
+"please_wait_sign_in": "Please wait Signing In...",
+
+  "valid_cnic": "Enter valid CNIC no.",
+  "valid_mobile_number": "Enter valid Mobile Number.",
+  "valid_password": "Enter valid password",
+  "valid_name": "Enter valid name.",
+  "password_match": "Password and Confirm Password not matched",
+  "required": "Required*",
+  "text_alert": "Alert",
+  "text_dialog_logout": "Do you want to Logout?",
+  "text_dialog_internet": "No Internet Connection",
+  "text_dialog_internet_message": "Please check your internet connection",
+  "text_logging_out": "Logging Out...",
+
+  "text_close": "Close",
+  "text_enter": "Enter",
+  "text_submit": "Submit",
+  "text_resend": "Resend OTP",
+
+  "text_not_have_account": "If you don’t have login access",
+  "text_login_label": "Register",
+
+  "text_cnic": "CNIC",
+  "text_mobile_number": "Mobile No.",
+  "text_username": "Full Name",
+  "text_password": "Password",
+  "text_confirm_password": "Confirm Password",
+
+  "text_login": "Login",
+  "text_logout": "Logout",
+  "text_register": "Register",
+  "text_register_only": "Register",
+  "text_register_description": "Please register yourself here",
+  "text_login_already_have_account": "Login to your account",
+  "text_already_have_account": "You can login if you already registered",
+
+  "text_otp": "One Time Password",
+  "text_otp_receive": "Please enter your OTP below",
+  "text_enter_otp": "Please enter your OTP",
+  "text_please_enter_otp": "Please enter your OTP",
+
+
+  "text_drawer_dashboard": "Dashboard",
+
+
+  "text_dashboard": "You have been registered for",
+  "text_user_name":  "Ahsan Ali",
+  "text_contact_soon": "You will be contacted soon",
+  "text_ehsas_ration": "Ehsaas Ration Program",
+  "text_new_user": "Register New User",
+  "text_welcome_user": "Welcome to Ehsas Ration Program",
+
+  "enter_password_description": "Please enter your CNIC and password",
+  "enter_password": "Enter Password",
+  "text_new_password": "Create New Password",
+  "text_create_new_password": "You can create new password",
+  "text_forgot_password": "Forgot Password?",
+  "error_password": "Didn't Remember Password?",
+  "exit":"Exit"
+
+
+}
