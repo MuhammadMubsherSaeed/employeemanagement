@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_base/firebase_options.dart';
 import 'package:flutter_base/route/route_generator.dart';
 import 'package:flutter_base/theme.dart';
+import 'package:flutter_base/utils/firebase_notification_service.dart';
 import 'package:flutter_base/utils/logger.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -37,7 +38,8 @@ Future<void> main() async {
             [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown])
         .then((value) =>
             runApp(ProviderScope(observers: [Logger()], child: const MyApp())));
-    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseNotificationService.firebaseNotificationInit();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     runApp(ProviderScope(observers: [Logger()], child: const MyApp()));
   }, (error, stackTrace) {
     FirebaseCrashlytics.instance.recordError(error, stackTrace);

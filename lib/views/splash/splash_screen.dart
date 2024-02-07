@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_base/models/response/sync/SyncResponse.dart';
 import 'package:flutter_base/models/states.dart';
 import 'package:flutter_base/providers/api_auth_notifier.dart';
 import 'package:flutter_base/repository/auth_repository.dart';
@@ -44,6 +45,43 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
     final apiNotifier = ref.watch(apiAuthNotifierProvider);
     ref.listen(apiAuthNotifierProvider, (previous, apiStatesModel) async {
       switch (apiStatesModel.states) {
+        case States.APPUPDATE:
+          if (apiStatesModel.data is SyncResponse) {
+            final response = apiStatesModel.data as SyncResponse;
+            if ((response.version?.isForceUpdate ?? 0) == 1) {
+              DialogBuilder.showUpdateOrSessionDialog(
+                context: context,
+                title: "Update",
+                content: response.version?.dialogeMessage ?? "",
+                acceptButtonTitle: "OK",
+                onAcceptPressed: () {},
+                isDismissible: false,
+              );
+            } else {
+              DialogBuilder.showUpdateOrSessionDialog(
+                context: context,
+                title: "Update",
+                content: response.version?.dialogeMessage ?? "",
+                acceptButtonTitle: "OK",
+                cancelButtonTitle: "Not now",
+                onAcceptPressed: () {},
+                onCancelledPressed: () {},
+                isDismissible: false,
+              );
+            }
+          }
+          break;
+
+        case States.SESSIONEXPIRED:
+          DialogBuilder.showUpdateOrSessionDialog(
+            context: context,
+            title: sessionExpiredText,
+            content: sessionExpiredContent,
+            acceptButtonTitle: "OK",
+            onAcceptPressed: () {},
+            isDismissible: false,
+          );
+          break;
         case States.ERROR:
           // DialogBuilder.showNoInternetDialog(
           //     textSyncFailed, apiStatesModel.message, context, () {

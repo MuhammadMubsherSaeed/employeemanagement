@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDSsFWxvQaEqVRCM7D9MhXVg2Nsc68APRo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>34430649210</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.flutterBase.RunnerTests</string>
+	<key>PROJECT_ID</key>
+	<string>testproject-25789</string>
+	<key>STORAGE_BUCKET</key>
+	<string>testproject-25789.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:34430649210:ios:0a85636a516457d6de4cc3</string>
+	<key>DATABASE_URL</key>
+	<string>https://testproject-25789-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

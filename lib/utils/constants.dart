@@ -20,7 +20,8 @@ class Constants {
   static const errorInternalServer = 'Internal Server Error';
   static const errorSomethingWentWrong = 'Error Something Went Wrong';
   static int showLogs = 1;
-  static int connectionTimeOut = 60000;
+  static int connectionTimeOut = 20000;
+  static int receiveTimeOut = 20000;
 
   static const String PUBLIC_KEY = "your_public_key_here";
 }

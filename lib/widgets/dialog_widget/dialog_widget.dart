@@ -2,6 +2,7 @@ import 'package:flutter_base/widgets/button_widget/elevated_button_widget.dart';
 import 'package:flutter_base/widgets/poppins_text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:stylish_dialog/stylish_dialog.dart';
 
 import '../../utils/colors.dart';
@@ -241,6 +242,125 @@ class DialogBuilder {
       //   ),
       // ),
     ).show();
+  }
+
+  static void showUpdateOrSessionDialog(
+      {required BuildContext context,
+      required String title,
+      required String content,
+      required String acceptButtonTitle,
+      required VoidCallback onAcceptPressed,
+      String? cancelButtonTitle,
+      VoidCallback? onCancelledPressed,
+      bool? isDismissible}) {
+    showDialog(
+      //show confirm dialogue
+      //the return value will be from "Yes" or "No" options
+      context: context,
+      barrierDismissible: isDismissible ?? true,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                  left: 20.w, right: 20.w, top: 16.h, bottom: 8.h),
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      textStyle:
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10.h,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          content,
+                          style: GoogleFonts.poppins(
+                            textStyle: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10.h,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      (cancelButtonTitle != null)
+                          ? TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.grey,
+                              ),
+                              onPressed: () {
+                                Navigator.of(ctx).pop();
+                                if (onCancelledPressed != null) {
+                                  onCancelledPressed();
+                                }
+                              },
+                              child: Text(
+                                cancelButtonTitle,
+                                style: GoogleFonts.poppins(
+                                  textStyle: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                ),
+                              ),
+                            )
+                          : Container(),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey,
+                        ),
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          onAcceptPressed();
+                        },
+                        child: Text(
+                          acceptButtonTitle,
+                          style: GoogleFonts.poppins(
+                            textStyle: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
 // void showCameraOptionsDialog({

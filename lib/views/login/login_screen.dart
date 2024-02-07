@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_base/models/response/login_response/LoginResponse.dart';
@@ -324,9 +327,16 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                       isOutlined: false,
                       buttonTitle: signIn,
                       onPressed: () async {
-                        // print(await FirebaseMessaging.instance.getToken());
-                        await Utils.isAllPermissionsGranted();
-                        if (formKey.currentState!.validate()) {}
+                        DialogBuilder.showUpdateOrSessionDialog(
+                          context: context,
+                          title: "Session Expired",
+                          content:
+                              "Your session has been expired please login again",
+                          acceptButtonTitle: "OK",
+                          onAcceptPressed: () {},
+                          cancelButtonTitle: "Not now",
+                          onCancelledPressed: () {},
+                        );
                       },
                       buttonTitleStyle: TextStyle(
                         fontSize: 16.sp,
@@ -394,8 +404,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           buttonTitle: null,
                           onPressed: () async {
                             // print(await FirebaseMessaging.instance.getToken());
-                            await Utils.isAllPermissionsGranted();
-                            if (formKey.currentState!.validate()) {}
+                            FirebaseCrashlytics.instance.crash();
                           },
                           buttonTitleStyle: TextStyle(
                             fontSize: 16.sp,

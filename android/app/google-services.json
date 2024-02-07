@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "34430649210",
+    "firebase_url": "https://testproject-25789-default-rtdb.firebaseio.com",
+    "project_id": "testproject-25789",
+    "storage_bucket": "testproject-25789.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:34430649210:android:4175d1110efb90e4de4cc3",
+        "android_client_info": {
+          "package_name": "com.AMI.test_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "34430649210-djue8gmvt2v57gn9tdntp7pkjvl5ib09.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-59OwtXLHT8g2_l7je0-YN-NdmaLKeuQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "34430649210-djue8gmvt2v57gn9tdntp7pkjvl5ib09.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "34430649210-ad2lpic8v9lhsmpt2oboj7kl2kga2jk6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.AMI.testProject"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:34430649210:android:f2115a563ac0fd03de4cc3",
+        "android_client_info": {
+          "package_name": "com.example.flutter_base"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "34430649210-djue8gmvt2v57gn9tdntp7pkjvl5ib09.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-59OwtXLHT8g2_l7je0-YN-NdmaLKeuQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "34430649210-djue8gmvt2v57gn9tdntp7pkjvl5ib09.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "34430649210-ad2lpic8v9lhsmpt2oboj7kl2kga2jk6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.AMI.testProject"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

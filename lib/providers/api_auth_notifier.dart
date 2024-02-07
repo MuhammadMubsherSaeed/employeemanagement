@@ -97,6 +97,8 @@ class ApiAuthNotifier extends StateNotifier<ApiStatesModel> {
   //     if (response.statusCode == 400) {
   //       state =
   //           ApiStatesModel(States.SESSIONEXPIRED, response.message!, response);
+  //     } else if (response.statusCode == 1000) {
+  //       state = ApiStatesModel(States.APPUPDATE, response, response);
   //     } else {
   //       state = ApiStatesModel(States.DATA, response.message!, response);
   //     }

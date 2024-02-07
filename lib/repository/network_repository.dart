@@ -40,8 +40,8 @@ final clientProvider = StateProvider((ref) async {
   Dio dio = Dio(BaseOptions(
     headers: headers,
     baseUrl: baseUrl,
-    connectTimeout: 20000,
-    receiveTimeout: 20000,
+    connectTimeout: Constants.connectionTimeOut,
+    receiveTimeout: Constants.receiveTimeOut,
   ));
   dio.interceptors
       .add(DioLoggingInterceptor(level: Level.body, compact: false));

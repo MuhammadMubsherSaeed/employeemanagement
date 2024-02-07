@@ -31,33 +31,49 @@ TextTheme _buildTextTheme(TextTheme base) {
       fontWeight: FontWeight.w700,
       fontFamily: "assets/fonts/lato/Lato-Regular.ttf",
       color: headingColor,
+      fontSize: 38,
     ),
     headlineMedium: base.headlineMedium?.copyWith(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w400,
       fontFamily: "assets/fonts/inter/Inter-Regular.ttf",
       color: headingColor,
+      fontSize: 30,
     ),
     headlineSmall: base.headlineSmall?.copyWith(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w300,
       fontFamily: "assets/fonts/inter/Inter-Regular.ttf",
       color: headingColor,
+      fontSize: 22,
     ),
     bodyLarge: base.bodyLarge?.copyWith(
       fontFamily: "assets/fonts/lato/Lato-Regular.ttf",
       fontWeight: FontWeight.w400,
+      fontSize: 18,
       color: textColor,
     ),
     bodyMedium: base.bodyMedium?.copyWith(
       fontFamily: "assets/fonts/inter/Inter-Regular.ttf",
       fontWeight: FontWeight.w400,
+      fontSize: 14,
       color: textColor,
     ),
     bodySmall: base.bodySmall?.copyWith(
       fontFamily: "assets/fonts/inter/Inter-Regular.ttf",
       fontWeight: FontWeight.w400,
+      fontSize: 12,
       color: textColor,
     ),
-    titleLarge: base.bodySmall?.copyWith(
+    titleLarge: base.titleLarge?.copyWith(
+      fontFamily: "assets/fonts/inter/Inter-Regular.ttf",
+      fontWeight: FontWeight.w400,
+      color: textColor,
+    ),
+    titleMedium: base.titleMedium?.copyWith(
+      fontFamily: "assets/fonts/inter/Inter-Regular.ttf",
+      fontWeight: FontWeight.w400,
+      color: textColor,
+    ),
+    titleSmall: base.titleSmall?.copyWith(
       fontFamily: "assets/fonts/inter/Inter-Regular.ttf",
       fontWeight: FontWeight.w400,
       color: textColor,

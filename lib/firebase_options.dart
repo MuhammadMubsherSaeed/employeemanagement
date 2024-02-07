@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -47,30 +44,42 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCSgEIpi2hvQ7aH3Cvmy1vQqoIXgEqpIls',
-    appId: '1:193428864437:web:37259eae0c27b79becedfc',
-    messagingSenderId: '193428864437',
-    projectId: 'punjab-job-center',
-    authDomain: 'punjab-job-center.firebaseapp.com',
-    storageBucket: 'punjab-job-center.appspot.com',
-    measurementId: 'G-EH8SS84QWJ',
+    apiKey: 'AIzaSyBnO1Ka7kq-R5qxCC_97BwfooxQYATOF08',
+    appId: '1:34430649210:web:9ba75dd11c711409de4cc3',
+    messagingSenderId: '34430649210',
+    projectId: 'testproject-25789',
+    authDomain: 'testproject-25789.firebaseapp.com',
+    databaseURL: 'https://testproject-25789-default-rtdb.firebaseio.com',
+    storageBucket: 'testproject-25789.appspot.com',
+    measurementId: 'G-3JPK1CWG30',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAeslZg42Hd17A9D0Cqway22Fy8dzv6-BI',
-    appId: '1:593068160415:android:ebb01eaf55b519442af9aa',
-    messagingSenderId: '593068160415',
-    projectId: 'punjab-job-center-c118c',
-    storageBucket: 'punjab-job-center-c118c.appspot.com',
+    apiKey: 'AIzaSyD-59OwtXLHT8g2_l7je0-YN-NdmaLKeuQ',
+    appId: '1:34430649210:android:f2115a563ac0fd03de4cc3',
+    messagingSenderId: '34430649210',
+    projectId: 'testproject-25789',
+    databaseURL: 'https://testproject-25789-default-rtdb.firebaseio.com',
+    storageBucket: 'testproject-25789.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyACVu2QO6x78oeu-IlgX-8kVgbHAgSbTP0',
-    appId: '1:593068160415:ios:306c6f02104ed55b2af9aa',
-    messagingSenderId: '593068160415',
-    projectId: 'punjab-job-center-c118c',
-    storageBucket: 'punjab-job-center-c118c.appspot.com',
-    iosClientId: '593068160415-dbitbshthbffdubjq5ck3p2c0upsvopv.apps.googleusercontent.com',
-    iosBundleId: 'PITB.job-center',
+    apiKey: 'AIzaSyDSsFWxvQaEqVRCM7D9MhXVg2Nsc68APRo',
+    appId: '1:34430649210:ios:051fd64687e4ee68de4cc3',
+    messagingSenderId: '34430649210',
+    projectId: 'testproject-25789',
+    databaseURL: 'https://testproject-25789-default-rtdb.firebaseio.com',
+    storageBucket: 'testproject-25789.appspot.com',
+    iosBundleId: 'com.example.flutterBase',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDSsFWxvQaEqVRCM7D9MhXVg2Nsc68APRo',
+    appId: '1:34430649210:ios:0a85636a516457d6de4cc3',
+    messagingSenderId: '34430649210',
+    projectId: 'testproject-25789',
+    databaseURL: 'https://testproject-25789-default-rtdb.firebaseio.com',
+    storageBucket: 'testproject-25789.appspot.com',
+    iosBundleId: 'com.example.flutterBase.RunnerTests',
   );
 }
