@@ -25,7 +25,7 @@ class TextInputFields extends ConsumerWidget {
   String? title;
 
   TextInputFields(
-      {Key? key,
+      {super.key,
       this.title,
       this.hintText,
       this.isEnable,
@@ -39,8 +39,7 @@ class TextInputFields extends ConsumerWidget {
       this.lengthLimit,
       this.maxLines,
       this.hintColor,
-      this.readOnly})
-      : super(key: key);
+      this.readOnly});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

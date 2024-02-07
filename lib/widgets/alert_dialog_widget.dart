@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_base/widgets/poppins_text_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 
 class AlertDialogWidget extends ConsumerStatefulWidget {
   String title;
@@ -59,7 +58,7 @@ class AlertDialogWidgetState extends ConsumerState<AlertDialogWidget> {
                           },
                           child: Padding(
                             padding: EdgeInsets.only(top: 10.h),
-                            child: Icon(
+                            child: const Icon(
                               Icons.close,
                             ),
                           )),

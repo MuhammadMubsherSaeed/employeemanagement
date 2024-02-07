@@ -98,16 +98,16 @@ ThemeData _buildDarkTheme() {
     primaryColor: primaryColor,
     primaryColorDark: secondaryColor,
     // primaryColorLight: secondaryColor,
-    buttonBarTheme: ButtonBarThemeData(
+    buttonBarTheme: const ButtonBarThemeData(
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
     ),
     indicatorColor: primaryColor,
     hintColor: secondaryColor,
-    snackBarTheme: SnackBarThemeData().copyWith(
+    snackBarTheme: const SnackBarThemeData().copyWith(
       backgroundColor: primaryColor,
     ),
-    scaffoldBackgroundColor: Color(0xFF1E2024),
-    appBarTheme: AppBarTheme(
+    scaffoldBackgroundColor: const Color(0xFF1E2024),
+    appBarTheme: const AppBarTheme(
       iconTheme: IconThemeData(color: Colors.white),
       titleTextStyle: TextStyle(color: Colors.white),
     ),
@@ -136,14 +136,14 @@ ThemeData _buildLightTheme() {
     primaryColorLight: secondaryColor,
     indicatorColor: primaryColor,
     hintColor: secondaryColor,
-    buttonBarTheme: ButtonBarThemeData(
+    buttonBarTheme: const ButtonBarThemeData(
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
     ),
-    snackBarTheme: SnackBarThemeData().copyWith(
+    snackBarTheme: const SnackBarThemeData().copyWith(
       backgroundColor: primaryColor,
     ),
     scaffoldBackgroundColor: colorPrimary3,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       iconTheme: IconThemeData(color: Colors.white),
       titleTextStyle: TextStyle(color: Colors.white),

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_base/views/login/login_screen.dart';
 import 'package:flutter_base/views/splash/splash_screen.dart';
@@ -10,10 +9,10 @@ class RouteGenerator {
 
     switch (settings.name) {
       case Routes.LOGIN:
-        return MaterialPageRoute<dynamic>(builder: (_) => LoginScreen());
+        return MaterialPageRoute<dynamic>(builder: (_) => const LoginScreen());
 
       case Routes.SPLASH:
-        return MaterialPageRoute<dynamic>(builder: (_) => SplashScreen());
+        return MaterialPageRoute<dynamic>(builder: (_) => const SplashScreen());
 
       // case Routes.signUp:
       //   ScreenArguments arguments = args;

@@ -26,7 +26,7 @@ class CustomizableTextField extends StatelessWidget {
   EdgeInsetsGeometry? suffixPadding;
   List<TextInputFormatter>? inputFormatters;
 
-  CustomizableTextField({
+  CustomizableTextField({super.key, 
     required this.controller,
     required this.hintText,
     required this.focusNode,
@@ -60,25 +60,25 @@ class CustomizableTextField extends StatelessWidget {
             EdgeInsets.only(left: 0.w, right: 20.w, top: 18.h, bottom: 18.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4.sp),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: colorPrimary13,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4.sp),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: colorPrimary13,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4.sp),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: headingColor,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4.sp),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: Colors.red,
           ),
         ),
@@ -99,7 +99,7 @@ class CustomizableTextField extends StatelessWidget {
                     ),
                 child: prefixWidget)
             : prefixIcon == null
-                ? SizedBox(
+                ? const SizedBox(
                     width: 1,
                   )
                 : Padding(

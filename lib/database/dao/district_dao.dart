@@ -32,7 +32,7 @@ abstract class DistrictDao {
 class DistrictDao extends DatabaseAccessor<MyDatabase>
     with _$DistrictDaoMixin
     implements IDistrictTable {
-  DistrictDao(MyDatabase db) : super(db);
+  DistrictDao(super.db);
 
   @override
   Future<void> deleteAll() {
@@ -53,8 +53,7 @@ class DistrictDao extends DatabaseAccessor<MyDatabase>
 
   @override
   Future<District?> getData() {
-    return (select(districtTable)..limit(1)).getSingleOrNull()
-        as Future<District?>;
+    return (select(districtTable)..limit(1)).getSingleOrNull();
   }
 
   @override
@@ -64,7 +63,7 @@ class DistrictDao extends DatabaseAccessor<MyDatabase>
             (t) =>
                 OrderingTerm(expression: t.districtName, mode: OrderingMode.asc)
           ]))
-        .get() as List<District>;
+        .get();
   }
 
   @override
@@ -75,7 +74,7 @@ class DistrictDao extends DatabaseAccessor<MyDatabase>
             (t) =>
                 OrderingTerm(expression: t.districtName, mode: OrderingMode.asc)
           ]))
-        .get() as List<District>;
+        .get();
   }
 
   @override

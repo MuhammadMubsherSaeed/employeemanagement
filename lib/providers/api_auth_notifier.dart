@@ -1,9 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_base/models/states.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../database/my_database.dart';
-import '../utils/constants.dart';
 
 final apiAuthNotifierProvider =
     StateNotifierProvider.autoDispose<ApiAuthNotifier, ApiStatesModel>(

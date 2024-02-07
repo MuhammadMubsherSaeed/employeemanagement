@@ -11,8 +11,8 @@ import '../../utils/strings.dart';
 
 class LoadingWidget extends ConsumerStatefulWidget {
   const LoadingWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   LoadingWidgetState createState() => LoadingWidgetState();

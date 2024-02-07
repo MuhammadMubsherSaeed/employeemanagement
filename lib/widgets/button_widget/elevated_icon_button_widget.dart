@@ -10,13 +10,12 @@ class ElevatedButtonWithIcon extends StatefulWidget {
   final IconData? icons;
 
   const ElevatedButtonWithIcon(
-      {Key? key,
+      {super.key,
       required this.callback,
       required this.color,
       this.textColor,
       required this.btnText,
-      this.icons})
-      : super(key: key);
+      this.icons});
 
   @override
   _ElevatedButtonWithIconState createState() => _ElevatedButtonWithIconState();

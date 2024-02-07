@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -78,11 +77,11 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
           break;
         case States.DATA:
           if (apiStatesModel.data is LoginResponse) {
-            final _response = apiStatesModel.data as LoginResponse;
-            if (!(_response).success!) {
-              if (_response.statusCode == 700) {
+            final response = apiStatesModel.data as LoginResponse;
+            if (!(response).success!) {
+              if (response.statusCode == 700) {
                 Utils.showUpdateDialog(
-                    message: _response.message ?? "Please Update your app",
+                    message: response.message ?? "Please Update your app",
                     context: context);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -90,10 +89,10 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 ));
               }
             } else {
-              if (_response.data != null) {
-                if (_response.data!.username != null) {
-                  if (_response.data!.otpVerificationRequired == 1) {
-                    print('My OTp: ${_response.data?.otpCode.toString()}');
+              if (response.data != null) {
+                if (response.data!.username != null) {
+                  if (response.data!.otpVerificationRequired == 1) {
+                    print('My OTp: ${response.data?.otpCode.toString()}');
                     // Navigator.of(context).pushNamed(Routes.OTP);
                   } else {
                     Utils.setIsLoggedIn(true);
@@ -128,7 +127,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     return Stack(
       children: [
         _mainLayout(),
-        LoadingWidget(),
+        const LoadingWidget(),
       ],
     );
   }
@@ -201,7 +200,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           ref.read(phoneLoginProvider.notifier).state = value,
                       inputType: TextInputType.number,
                       inputAction: TextInputAction.done,
-                      prefixWidget: Icon(
+                      prefixWidget: const Icon(
                         Icons.quick_contacts_mail_rounded,
                         color: primaryColor,
                       ),
@@ -220,7 +219,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                       onChanged: (value) {},
                       prefixIcon: null,
                       suffixIcon: null,
-                      prefixWidget: Icon(
+                      prefixWidget: const Icon(
                         Icons.quick_contacts_mail_rounded,
                         color: primaryColor,
                       ),
@@ -248,13 +247,13 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                       onChanged: (value) {},
                       prefixIcon: null,
                       suffixIcon: null,
-                      prefixWidget: Icon(
+                      prefixWidget: const Icon(
                         Icons.lock,
                         color: primaryColor,
                       ),
                       suffixWidget: InkWell(
                           onTap: () {},
-                          child: Icon(
+                          child: const Icon(
                             Icons.remove_red_eye_sharp,
                             color: Colors.grey,
                           )),
@@ -319,7 +318,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     CustomizableTextButton(
                       prefixButtonIcon: null,
-                      suffixButtonIcon: Icon(
+                      suffixButtonIcon: const Icon(
                         Icons.arrow_forward,
                         color: Colors.white,
                       ),
@@ -348,7 +347,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     CustomizableTextButton(
                       prefixButtonIcon: null,
-                      suffixButtonIcon: Icon(
+                      suffixButtonIcon: const Icon(
                         Icons.arrow_forward,
                         color: Colors.black,
                       ),
@@ -371,7 +370,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                     Row(
                       children: [
                         CustomizableTextButton(
-                          suffixButtonIcon: Icon(
+                          suffixButtonIcon: const Icon(
                             Icons.arrow_forward,
                             color: Colors.black,
                           ),
@@ -395,7 +394,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           width: 10.w,
                         ),
                         CustomizableTextButton(
-                          suffixButtonIcon: Icon(
+                          suffixButtonIcon: const Icon(
                             Icons.arrow_forward,
                             color: Colors.white,
                           ),
