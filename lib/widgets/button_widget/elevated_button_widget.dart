@@ -10,13 +10,13 @@ class ElevatedButtonWithoutIcon extends StatefulWidget {
   final double? textSize;
 
   const ElevatedButtonWithoutIcon({
-    Key? key,
+    super.key,
     required this.callback,
     required this.color,
     required this.btnText,
     this.textColor,
     this.textSize,
-  }) : super(key: key);
+  });
 
   @override
   _ElevatedButtonWithoutIconState createState() =>

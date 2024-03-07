@@ -63,14 +63,12 @@ class TitleTextFormFieldWidgetState
           child: TextFormField(
             controller: widget.textEditingController,
             focusNode: widget.focusNode,
-            validator: widget.onValidate == null
-                ? (value) {
+            validator: widget.onValidate ?? (value) {
                     if (value!.isEmpty) {
                       return fieldEmpty;
                     }
                     return null;
-                  }
-                : widget.onValidate,
+                  },
             style: GoogleFonts.poppins(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w500,

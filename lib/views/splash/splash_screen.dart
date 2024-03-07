@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_base/models/response/sync/SyncResponse.dart';
 import 'package:flutter_base/models/states.dart';
 import 'package:flutter_base/providers/api_auth_notifier.dart';
-import 'package:flutter_base/repository/auth_repository.dart';
 import 'package:flutter_base/route/routes.dart';
 import 'package:flutter_base/utils/image_assets.dart';
 import 'package:flutter_base/utils/strings.dart';
@@ -148,7 +146,7 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
               splashBackgroundImage,

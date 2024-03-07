@@ -16,61 +16,61 @@ import 'colors.dart';
 
 class Utils {
   static Future<void> setIsDownload(bool isDownload) async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.setBool("download_count", isDownload);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("download_count", isDownload);
   }
 
   static Future<bool> getIsDownload() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    bool? isDownload = _prefs.getBool("download_count");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isDownload = prefs.getBool("download_count");
     return isDownload ?? false;
   }
 
   static Future<void> removeIsDownload() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.remove("download_count");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("download_count");
   }
 
   static void setAccessToken(String accesToken) async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.setString("token", accesToken);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("token", accesToken);
   }
 
   static Future<String?> getAccessToken() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    String? token = _prefs.getString("token");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("token");
     return token;
   }
 
   static Future<void> removeAccessToken() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.remove("token");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("token");
   }
 
   static void setIsLoggedIn(bool isLoggedIn) async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.setBool("is_logged_in", isLoggedIn);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("is_logged_in", isLoggedIn);
   }
 
   static Future<bool> getIsLoggedIn() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    bool? isLoggedIn = _prefs.getBool("is_logged_in");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isLoggedIn = prefs.getBool("is_logged_in");
     return isLoggedIn ?? false;
   }
 
   static Future<void> removeIsLoggedIn() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.remove("is_logged_in");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("is_logged_in");
   }
 
   static void setUserData(Data userData) async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.setString("user_data", jsonEncode(userData.toJson()));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("user_data", jsonEncode(userData.toJson()));
   }
 
   static Future<Data?> getUserData() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    String? data = _prefs.getString("user_data");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? data = prefs.getString("user_data");
     if (data != null) {
       Data userData = Data.fromJson(jsonDecode(data));
       return userData;
@@ -80,8 +80,8 @@ class Utils {
   }
 
   static Future<void> removeUserData() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.remove("user_data");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("user_data");
   }
 
   static Future<bool> isAllPermissionsGranted() async {
@@ -138,28 +138,28 @@ class Utils {
   static InputDecoration dropdownInputDecoration() {
     return InputDecoration(
       border: OutlineInputBorder(
-        borderSide: BorderSide(
+        borderSide: const BorderSide(
           width: 1,
           color: textFieldBorderColor,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(
+        borderSide: const BorderSide(
           width: 1,
           color: textFieldBorderColor,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
+        borderSide: const BorderSide(
           width: 1,
           color: textFieldBorderColor,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
       errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(
+        borderSide: const BorderSide(
           width: 1,
           color: redColor,
         ),

@@ -17,7 +17,7 @@ class CustomizableTextButton extends StatelessWidget {
   final double? verticalPadding;
 
   CustomizableTextButton(
-      {this.buttonTitle,
+      {super.key, this.buttonTitle,
       required this.onPressed,
       this.buttonWidth,
       this.isFullWidth = false,
@@ -74,7 +74,7 @@ class CustomizableTextButton extends StatelessWidget {
             ),
             Visibility(
               visible: suffixButtonIcon != null && buttonTitle != null,
-              child: Container(
+              child: SizedBox(
                 height: 24.h,
                 width: 24.h,
               ),
