@@ -90,6 +90,7 @@ dependencies:
   pointycastle: ^3.7.4
   envied: ^0.5.3
   dio_logging_interceptor: ^1.0.1
+  upgrader: ^9.0.0
 
 
 

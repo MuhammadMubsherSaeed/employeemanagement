@@ -21,6 +21,7 @@ import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:upgrader/upgrader.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -139,356 +140,359 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
         SystemNavigator.pop();
         return true;
       },
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 38.h,
-                    ),
-                    Image.asset(
-                      splashLogoImage,
-                      height: 148.h,
-                      width: 148.w,
-                    ),
-                    SizedBox(
-                      height: 18.h,
-                    ),
-                    PoppinsTextWidget(
-                      fontsize: 24.sp,
-                      fontWeight: FontWeight.w500,
-                      color: textColor1,
-                      text: "Welcome to",
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: appName,
-                            style: GoogleFonts.poppins(
-                              fontSize: 28.sp,
-                              fontWeight: FontWeight.w600,
-                              color: textColor1,
-                            ),
-                          ),
-                        ],
+      child: UpgradeAlert(
+        canDismissDialog: false,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 38.h,
                       ),
-                    ),
-                    SizedBox(
-                      height: 64.h,
-                    ),
-                    TextInputFields(
-                      title: mobileNumberText,
-                      hintText: "03xx-xxxxxxx",
-                      isEnable: true,
-                      controller: usernameController,
-                      validator: (value) {
-                        if (value!.length < 12) {
-                          return "Enter correct mobile number";
-                        } else {
-                          return null;
-                        }
-                      },
-                      valueChanged: (value) =>
-                          ref.read(phoneLoginProvider.notifier).state = value,
-                      inputType: TextInputType.number,
-                      inputAction: TextInputAction.done,
-                      prefixWidget: Icon(
-                        Icons.quick_contacts_mail_rounded,
-                        color: primaryColor,
+                      Image.asset(
+                        splashLogoImage,
+                        height: 148.h,
+                        width: 148.w,
                       ),
-                      hintColor: hintColor,
-                    ),
-                    SizedBox(
-                      height: 12.h,
-                    ),
-                    CustomizableTextField(
-                      controller: usernameController,
-                      hintText: "03xx-xxxxxxx",
-                      focusNode: FocusNode(),
-                      validator: (value) {
-                        return "";
-                      },
-                      onChanged: (value) {},
-                      prefixIcon: null,
-                      suffixIcon: null,
-                      prefixWidget: Icon(
-                        Icons.quick_contacts_mail_rounded,
-                        color: primaryColor,
+                      SizedBox(
+                        height: 18.h,
                       ),
-                      //Prefix Widget != null
-                      prefixPadding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 16.h,
+                      PoppinsTextWidget(
+                        fontsize: 24.sp,
+                        fontWeight: FontWeight.w500,
+                        color: textColor1,
+                        text: "Welcome to",
                       ),
-                      suffixPadding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 16.h,
-                      ),
-                      focusedIconColor: Colors.black,
-                      unfocusedIconColor: Colors.grey,
-                      hideText: false,
-                      textInputType: TextInputType.number,
-                    ),
-                    CustomizableTextField(
-                      controller: usernameController,
-                      hintText: "03xx-xxxxxxx",
-                      focusNode: FocusNode(),
-                      validator: (value) {
-                        return "";
-                      },
-                      onChanged: (value) {},
-                      prefixIcon: null,
-                      suffixIcon: null,
-                      prefixWidget: Icon(
-                        Icons.lock,
-                        color: primaryColor,
-                      ),
-                      suffixWidget: InkWell(
-                          onTap: () {},
-                          child: Icon(
-                            Icons.remove_red_eye_sharp,
-                            color: Colors.grey,
-                          )),
-                      //if using suffixIcon than use code below for onclick
-                      // onSuffixIconPressed: ,
-                      //Prefix Widget != null
-                      prefixPadding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 16.h,
-                      ),
-                      suffixPadding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 16.h,
-                      ),
-                      focusedIconColor: Colors.black,
-                      unfocusedIconColor: Colors.grey,
-                      hideText: true,
-                      textInputType: TextInputType.number,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
+                      RichText(
+                        text: TextSpan(
                           children: [
-                            Container(
-                              height: 18.h,
-                              width: 18.h,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: primaryColor),
+                            TextSpan(
+                              text: appName,
+                              style: GoogleFonts.poppins(
+                                fontSize: 28.sp,
+                                fontWeight: FontWeight.w600,
+                                color: textColor1,
                               ),
-                              child: Center(
-                                child: Icon(
-                                  Icons.check,
-                                  color: primaryColor,
-                                  size: 14.sp,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 8.w,
-                            ),
-                            PoppinsTextWidget(
-                              fontsize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: textColor3,
-                              text: rememberMeText,
                             ),
                           ],
                         ),
-                        PoppinsTextWidget(
-                          fontsize: 14.sp,
+                      ),
+                      SizedBox(
+                        height: 64.h,
+                      ),
+                      TextInputFields(
+                        title: mobileNumberText,
+                        hintText: "03xx-xxxxxxx",
+                        isEnable: true,
+                        controller: usernameController,
+                        validator: (value) {
+                          if (value!.length < 12) {
+                            return "Enter correct mobile number";
+                          } else {
+                            return null;
+                          }
+                        },
+                        valueChanged: (value) =>
+                            ref.read(phoneLoginProvider.notifier).state = value,
+                        inputType: TextInputType.number,
+                        inputAction: TextInputAction.done,
+                        prefixWidget: Icon(
+                          Icons.quick_contacts_mail_rounded,
+                          color: primaryColor,
+                        ),
+                        hintColor: hintColor,
+                      ),
+                      SizedBox(
+                        height: 12.h,
+                      ),
+                      CustomizableTextField(
+                        controller: usernameController,
+                        hintText: "03xx-xxxxxxx",
+                        focusNode: FocusNode(),
+                        validator: (value) {
+                          return "";
+                        },
+                        onChanged: (value) {},
+                        prefixIcon: null,
+                        suffixIcon: null,
+                        prefixWidget: Icon(
+                          Icons.quick_contacts_mail_rounded,
+                          color: primaryColor,
+                        ),
+                        //Prefix Widget != null
+                        prefixPadding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 16.h,
+                        ),
+                        suffixPadding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 16.h,
+                        ),
+                        focusedIconColor: Colors.black,
+                        unfocusedIconColor: Colors.grey,
+                        hideText: false,
+                        textInputType: TextInputType.number,
+                      ),
+                      CustomizableTextField(
+                        controller: usernameController,
+                        hintText: "03xx-xxxxxxx",
+                        focusNode: FocusNode(),
+                        validator: (value) {
+                          return "";
+                        },
+                        onChanged: (value) {},
+                        prefixIcon: null,
+                        suffixIcon: null,
+                        prefixWidget: Icon(
+                          Icons.lock,
+                          color: primaryColor,
+                        ),
+                        suffixWidget: InkWell(
+                            onTap: () {},
+                            child: Icon(
+                              Icons.remove_red_eye_sharp,
+                              color: Colors.grey,
+                            )),
+                        //if using suffixIcon than use code below for onclick
+                        // onSuffixIconPressed: ,
+                        //Prefix Widget != null
+                        prefixPadding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 16.h,
+                        ),
+                        suffixPadding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 16.h,
+                        ),
+                        focusedIconColor: Colors.black,
+                        unfocusedIconColor: Colors.grey,
+                        hideText: true,
+                        textInputType: TextInputType.number,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                height: 18.h,
+                                width: 18.h,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: primaryColor),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.check,
+                                    color: primaryColor,
+                                    size: 14.sp,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 8.w,
+                              ),
+                              PoppinsTextWidget(
+                                fontsize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: textColor3,
+                                text: rememberMeText,
+                              ),
+                            ],
+                          ),
+                          PoppinsTextWidget(
+                            fontsize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: textColor3,
+                            text: forgotPassword,
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: SizedBox(
+                          height: 40.h,
+                        ),
+                      ),
+                      CustomizableTextButton(
+                        prefixButtonIcon: null,
+                        suffixButtonIcon: Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                        ),
+                        isFullWidth: true,
+                        isOutlined: false,
+                        buttonTitle: signIn,
+                        onPressed: () async {
+                          DialogBuilder.showUpdateOrSessionDialog(
+                            context: context,
+                            title: "Session Expired",
+                            content:
+                                "Your session has been expired please login again",
+                            acceptButtonTitle: "OK",
+                            onAcceptPressed: () {},
+                            cancelButtonTitle: "Not now",
+                            onCancelledPressed: () {},
+                          );
+                        },
+                        buttonTitleStyle: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.white,
                           fontWeight: FontWeight.w500,
-                          color: textColor3,
-                          text: forgotPassword,
                         ),
-                      ],
-                    ),
-                    Expanded(
-                      child: SizedBox(
-                        height: 40.h,
+                        buttonBorderRadius: 10,
+                        buttonColor: primaryColor,
                       ),
-                    ),
-                    CustomizableTextButton(
-                      prefixButtonIcon: null,
-                      suffixButtonIcon: Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                      ),
-                      isFullWidth: true,
-                      isOutlined: false,
-                      buttonTitle: signIn,
-                      onPressed: () async {
-                        DialogBuilder.showUpdateOrSessionDialog(
-                          context: context,
-                          title: "Session Expired",
-                          content:
-                              "Your session has been expired please login again",
-                          acceptButtonTitle: "OK",
-                          onAcceptPressed: () {},
-                          cancelButtonTitle: "Not now",
-                          onCancelledPressed: () {},
-                        );
-                      },
-                      buttonTitleStyle: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      buttonBorderRadius: 10,
-                      buttonColor: primaryColor,
-                    ),
-                    CustomizableTextButton(
-                      prefixButtonIcon: null,
-                      suffixButtonIcon: Icon(
-                        Icons.arrow_forward,
-                        color: Colors.black,
-                      ),
-                      isFullWidth: false,
-                      isOutlined: true,
-                      buttonTitle: signIn,
-                      onPressed: () async {
-                        // print(await FirebaseMessaging.instance.getToken());
-                        await Utils.isAllPermissionsGranted();
-                        if (formKey.currentState!.validate()) {}
-                      },
-                      buttonTitleStyle: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      buttonBorderRadius: 10,
-                      buttonColor: primaryColor,
-                    ),
-                    Row(
-                      children: [
-                        CustomizableTextButton(
-                          suffixButtonIcon: Icon(
-                            Icons.arrow_forward,
-                            color: Colors.black,
-                          ),
-                          isFullWidth: false,
-                          isOutlined: true,
-                          buttonTitle: null,
-                          onPressed: () async {
-                            // print(await FirebaseMessaging.instance.getToken());
-                            await Utils.isAllPermissionsGranted();
-                            if (formKey.currentState!.validate()) {}
-                          },
-                          buttonTitleStyle: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          buttonBorderRadius: 10,
-                          buttonColor: primaryColor,
+                      CustomizableTextButton(
+                        prefixButtonIcon: null,
+                        suffixButtonIcon: Icon(
+                          Icons.arrow_forward,
+                          color: Colors.black,
                         ),
-                        SizedBox(
-                          width: 10.w,
+                        isFullWidth: false,
+                        isOutlined: true,
+                        buttonTitle: signIn,
+                        onPressed: () async {
+                          // print(await FirebaseMessaging.instance.getToken());
+                          await Utils.isAllPermissionsGranted();
+                          if (formKey.currentState!.validate()) {}
+                        },
+                        buttonTitleStyle: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
                         ),
-                        CustomizableTextButton(
-                          suffixButtonIcon: Icon(
-                            Icons.arrow_forward,
-                            color: Colors.white,
+                        buttonBorderRadius: 10,
+                        buttonColor: primaryColor,
+                      ),
+                      Row(
+                        children: [
+                          CustomizableTextButton(
+                            suffixButtonIcon: Icon(
+                              Icons.arrow_forward,
+                              color: Colors.black,
+                            ),
+                            isFullWidth: false,
+                            isOutlined: true,
+                            buttonTitle: null,
+                            onPressed: () async {
+                              // print(await FirebaseMessaging.instance.getToken());
+                              await Utils.isAllPermissionsGranted();
+                              if (formKey.currentState!.validate()) {}
+                            },
+                            buttonTitleStyle: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            buttonBorderRadius: 10,
+                            buttonColor: primaryColor,
                           ),
-                          isFullWidth: false,
-                          isOutlined: false,
-                          buttonTitle: null,
-                          onPressed: () async {
-                            // print(await FirebaseMessaging.instance.getToken());
-                            FirebaseCrashlytics.instance.crash();
-                          },
-                          buttonTitleStyle: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
+                          SizedBox(
+                            width: 10.w,
                           ),
-                          buttonBorderRadius: 10,
-                          buttonColor: primaryColor,
+                          CustomizableTextButton(
+                            suffixButtonIcon: Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                            ),
+                            isFullWidth: false,
+                            isOutlined: false,
+                            buttonTitle: null,
+                            onPressed: () async {
+                              // print(await FirebaseMessaging.instance.getToken());
+                              FirebaseCrashlytics.instance.crash();
+                            },
+                            buttonTitleStyle: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            buttonBorderRadius: 10,
+                            buttonColor: primaryColor,
+                          ),
+                        ],
+                      ),
+                      CustomizableTextButton(
+                        prefixButtonIcon: Icon(
+                          Icons.home_outlined,
+                          color: Colors.white,
+                          size: 24.sp,
                         ),
-                      ],
-                    ),
-                    CustomizableTextButton(
-                      prefixButtonIcon: Icon(
-                        Icons.home_outlined,
-                        color: Colors.white,
-                        size: 24.sp,
+                        isFullWidth: false,
+                        isOutlined: false,
+                        buttonTitle: signIn,
+                        onPressed: () async {
+                          // print(await FirebaseMessaging.instance.getToken());
+                          await Utils.isAllPermissionsGranted();
+                          if (formKey.currentState!.validate()) {}
+                        },
+                        buttonTitleStyle: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        buttonBorderRadius: 10,
+                        buttonColor: primaryColor,
                       ),
-                      isFullWidth: false,
-                      isOutlined: false,
-                      buttonTitle: signIn,
-                      onPressed: () async {
-                        // print(await FirebaseMessaging.instance.getToken());
-                        await Utils.isAllPermissionsGranted();
-                        if (formKey.currentState!.validate()) {}
-                      },
-                      buttonTitleStyle: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
+                      SizedBox(
+                        height: 10.h,
                       ),
-                      buttonBorderRadius: 10,
-                      buttonColor: primaryColor,
-                    ),
-                    SizedBox(
-                      height: 10.h,
-                    ),
-                    CustomizableTextButton(
-                      prefixButtonIcon: null,
-                      suffixButtonIcon: null,
-                      isFullWidth: true,
-                      isOutlined: false,
-                      buttonTitle: registerText,
-                      onPressed: () {
-                        Navigator.of(context).pushNamed(Routes.REGISTER);
-                      },
-                      buttonTitleStyle: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
+                      CustomizableTextButton(
+                        prefixButtonIcon: null,
+                        suffixButtonIcon: null,
+                        isFullWidth: true,
+                        isOutlined: false,
+                        buttonTitle: registerText,
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(Routes.REGISTER);
+                        },
+                        buttonTitleStyle: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        buttonBorderRadius: 10,
+                        buttonColor: primaryColor,
                       ),
-                      buttonBorderRadius: 10,
-                      buttonColor: primaryColor,
-                    ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     PoppinsTextWidget(
-                    //       fontsize: 18.sp,
-                    //       fontWeight: FontWeight.w400,
-                    //       color: textColor5,
-                    //       text: dontHaveAnAccountText,
-                    //     ),
-                    //     InkWell(
-                    //       onTap: () {
-                    //         ref.invalidate(divisionValueProvider);
-                    //         ref.invalidate(districtValueProvider);
-                    //         ref.invalidate(tehsilValueProvider);
-                    //         ref.invalidate(ucsValueProvider);
-                    //         ref.invalidate(ppValueProvider);
-                    //         Navigator.of(context).pushNamed(Routes.SIGNUP);
-                    //       },
-                    //       child: PoppinsTextWidget(
-                    //         fontsize: 18.sp,
-                    //         fontWeight: FontWeight.w500,
-                    //         color: primaryColor,
-                    //         text: registerText,
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    SizedBox(
-                      height: 24.h,
-                    ),
-                  ],
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     PoppinsTextWidget(
+                      //       fontsize: 18.sp,
+                      //       fontWeight: FontWeight.w400,
+                      //       color: textColor5,
+                      //       text: dontHaveAnAccountText,
+                      //     ),
+                      //     InkWell(
+                      //       onTap: () {
+                      //         ref.invalidate(divisionValueProvider);
+                      //         ref.invalidate(districtValueProvider);
+                      //         ref.invalidate(tehsilValueProvider);
+                      //         ref.invalidate(ucsValueProvider);
+                      //         ref.invalidate(ppValueProvider);
+                      //         Navigator.of(context).pushNamed(Routes.SIGNUP);
+                      //       },
+                      //       child: PoppinsTextWidget(
+                      //         fontsize: 18.sp,
+                      //         fontWeight: FontWeight.w500,
+                      //         color: primaryColor,
+                      //         text: registerText,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      SizedBox(
+                        height: 24.h,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
