@@ -33,7 +33,7 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
       if (!isLoggedIn) {
         _navigateTo(Routes.LOGIN);
       } else {
-        _navigateTo(Routes.HOME);
+        _navigateTo(Routes.LOGIN);
       }
     });
   }
@@ -100,7 +100,7 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
           // if (apiStatesModel.data is SyncResponse) {
           //   final _response = apiStatesModel.data as SyncResponse;
           //   if (!(_response).success!) {
-          //     if (_response.statusCode == 400) {
+          //     if (_response.statusCode == 400) {1
           //       DialogBuilder.showLogoutDialog(
           //         title: "Session Expired",
           //         content: sessionExpiredText,
@@ -158,19 +158,19 @@ class SplashScreenState extends ConsumerState<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                splashLogoImage,
-                height: 148.h,
-                width: 148.w,
-              ),
+              // Image.asset(
+              //   splashLogoImage,
+              //   height: 148.h,
+              //   width: 148.w,
+              // ),
               SizedBox(
                 height: 16.h,
               ),
-              Image.asset(
-                splashTextImage,
-                width: 154.w,
-                height: 130.h,
-              ),
+              // Image.asset(
+              //   splashTextImage,
+              //   width: 154.w,
+              //   height: 130.h,
+              // ),
               // PoppinsTextWidget(
               //   text: quaidText.toUpperCase(),
               //   color: Colors.white,

@@ -91,6 +91,7 @@ dependencies:
   envied: ^0.5.3
   dio_logging_interceptor: ^1.0.1
   upgrader: ^9.0.0
+  diffutil_dart: ^4.0.1
 
 
 

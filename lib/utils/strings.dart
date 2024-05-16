@@ -10,6 +10,7 @@ const String hideString = "Hide";
 const String rememberLogin = "Keep me Logged-In";
 const String forgotPassword = "Forgot Password?";
 const String signIn = "Sign In";
+const String diffUtil = "diff utill";
 const String fieldEmpty = "Please fill this required field!";
 const String homeText = "Home";
 const String resturantText = "Restaurant";

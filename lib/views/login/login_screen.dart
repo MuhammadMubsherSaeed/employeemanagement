@@ -11,6 +11,8 @@ import 'package:flutter_base/utils/colors.dart';
 import 'package:flutter_base/utils/image_assets.dart';
 import 'package:flutter_base/utils/strings.dart';
 import 'package:flutter_base/utils/utils.dart';
+import 'package:flutter_base/views/diffutill/diffutill_screen.dart';
+import 'package:flutter_base/views/pagination/pagination_screen.dart';
 import 'package:flutter_base/widgets/button_widget/customizable_button.dart';
 import 'package:flutter_base/widgets/dialog_widget/dialog_widget.dart';
 import 'package:flutter_base/widgets/loading_widget.dart';
@@ -385,6 +387,10 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                               // print(await FirebaseMessaging.instance.getToken());
                               await Utils.isAllPermissionsGranted();
                               if (formKey.currentState!.validate()) {}
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const PaginationScreen()),
+                              );
                             },
                             buttonTitleStyle: TextStyle(
                               fontSize: 16.sp,
@@ -418,6 +424,29 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                             buttonColor: primaryColor,
                           ),
                         ],
+                      ),
+                      CustomizableTextButton(
+                        prefixButtonIcon: Icon(
+                          Icons.home_outlined,
+                          color: Colors.white,
+                          size: 24.sp,
+                        ),
+                        isFullWidth: false,
+                        isOutlined: false,
+                        buttonTitle: diffUtil,
+                        onPressed: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const DiffUtillScreen()),
+                          );
+                        },
+                        buttonTitleStyle: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        buttonBorderRadius: 10,
+                        buttonColor: primaryColor,
                       ),
                       CustomizableTextButton(
                         prefixButtonIcon: Icon(
