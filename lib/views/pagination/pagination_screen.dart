@@ -13,7 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_base/utils/pagination_controller.dart';
 
 import '../../widgets/dialog_widget/dialog_widget.dart';
+
 final itemsList = StateProvider<List>((ref) => []);
+
 class PaginationScreen extends ConsumerStatefulWidget {
   const PaginationScreen({super.key});
 
@@ -29,20 +31,22 @@ class PaginationScreenState extends ConsumerState<PaginationScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _paginationController = PaginationController(items: ref.read(itemsList.notifier).state, pageItems: 25, ref: ref);
+    _paginationController = PaginationController(
+        items: ref.read(itemsList.notifier).state, pageItems: 25, ref: ref);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       initializeItemsList();
 
       _paginationController.updatePages();
     });
-
-
   }
+
   void initializeItemsList() {
     // Generate items list and notify listeners
-    var items = List.generate(500, (index) => Item(id: '$index', name: 'Item $index'));
+    var items =
+        List.generate(500, (index) => Item(id: '$index', name: 'Item $index'));
     ref.read(itemsList.notifier).state = items;
   }
+
   @override
   Widget build(BuildContext context) {
     final apiNotifier = ref.watch(apiAuthNotifierProvider);
@@ -150,25 +154,28 @@ class PaginationScreenState extends ConsumerState<PaginationScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Pagination"),
+        title: const Text("Pagination"),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-
             Expanded(
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3),
                 itemCount: _paginationController.pageItems,
                 itemBuilder: (context, index) {
-                  int itemIndex = ref.watch(_paginationController.currentPage) * _paginationController.pageItems + index;
+                  int itemIndex = ref.watch(_paginationController.currentPage) *
+                          _paginationController.pageItems +
+                      index;
                   if (itemIndex < _paginationController.items.length) {
-                    return Card(child: Text(ref.watch(itemsList)[itemIndex].name));
+                    return Card(
+                        child: Text(ref.watch(itemsList)[itemIndex].name));
                   } else {
-                    return SizedBox.shrink(); // Return an empty widget if there's no item
+                    return const SizedBox
+                        .shrink(); // Return an empty widget if there's no item
                   }
-
                 },
               ),
             ),
@@ -179,20 +186,23 @@ class PaginationScreenState extends ConsumerState<PaginationScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                !ref.watch(_paginationController.hasPreviousPage)?SizedBox():IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: (){
-                    navigateToPreviousPage(_paginationController);
-
-                  },
-                ),
-                !ref.watch(_paginationController.hasNextPage)?SizedBox():IconButton(
-                  icon: Icon(Icons.arrow_forward),
-                  onPressed: (){
-                    navigateToNextPage(_paginationController);
-                  },
-                  // disabled:,
-                ),
+                !ref.watch(_paginationController.hasPreviousPage)
+                    ? const SizedBox()
+                    : IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          navigateToPreviousPage(_paginationController);
+                        },
+                      ),
+                !ref.watch(_paginationController.hasNextPage)
+                    ? const SizedBox()
+                    : IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: () {
+                          navigateToNextPage(_paginationController);
+                        },
+                        // disabled:,
+                      ),
               ],
             ),
           ],
@@ -200,9 +210,7 @@ class PaginationScreenState extends ConsumerState<PaginationScreen> {
       ),
     );
   }
-
 }
-
 
 class Item {
   final String id;
