@@ -1,0 +1,16 @@
+exclude = [
+    ".venv",
+    "**/migrations/*.py",
+    "apps/employees",
+    "apps/attendance",
+    "apps/leave",
+    "apps/organization",
+    "apps/core",
+]
+
+[lint]
+select = ["E", "F", "I", "UP", "RUF"]
+ignore = ["RUF012"]
+
+[lint.per-file-ignores]
+"config/settings/*.py" = ["F403", "F405"]
