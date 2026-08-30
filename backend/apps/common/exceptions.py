@@ -5,7 +5,6 @@ from rest_framework.status import (
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
-    HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
 
@@ -45,7 +44,43 @@ class ConflictError(APIError):
     default_code = "CONFLICT"
 
 
-class ServerError(APIError):
-    status_code = HTTP_500_INTERNAL_SERVER_ERROR
-    default_detail = "An unexpected error occurred."
-    default_code = "SERVER_ERROR"
+class Unauthorized(APIError):
+    status_code = HTTP_401_UNAUTHORIZED
+    default_detail = "Authentication required."
+    default_code = "UNAUTHORIZED"
+
+
+class InvalidCredentials(APIError):
+    status_code = HTTP_401_UNAUTHORIZED
+    default_detail = "Invalid email or password."
+    default_code = "INVALID_CREDENTIALS"
+
+
+class AccountInactive(APIError):
+    status_code = HTTP_403_FORBIDDEN
+    default_detail = "This account is inactive."
+    default_code = "ACCOUNT_INACTIVE"
+
+
+class TokenInvalid(APIError):
+    status_code = HTTP_401_UNAUTHORIZED
+    default_detail = "The token is invalid."
+    default_code = "TOKEN_INVALID"
+
+
+class TokenExpired(APIError):
+    status_code = HTTP_401_UNAUTHORIZED
+    default_detail = "The token has expired."
+    default_code = "TOKEN_EXPIRED"
+
+
+class TokenBlacklisted(APIError):
+    status_code = HTTP_401_UNAUTHORIZED
+    default_detail = "The token is no longer valid."
+    default_code = "TOKEN_BLACKLISTED"
+
+
+class PasswordResetFailed(APIError):
+    status_code = HTTP_400_BAD_REQUEST
+    default_detail = "Password reset failed."
+    default_code = "PASSWORD_RESET_FAILED"

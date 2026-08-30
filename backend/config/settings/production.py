@@ -46,3 +46,13 @@ SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = [
 LOGGING["root"]["level"] = "INFO"
 LOGGING["handlers"]["console"]["formatter"] = "verbose"
 LOGGING["loggers"]["django.request"]["level"] = "ERROR"
+
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+)
+if EMAIL_BACKEND.endswith("smtp.EmailBackend") and not EMAIL_HOST:
+    raise ImproperlyConfigured(
+        "EMAIL_HOST must be set when using SMTP in production."
+    )
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")

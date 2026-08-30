@@ -71,13 +71,22 @@ def api_exception_handler(exc: Exception, context: dict[str, Any]):
     )
 
 
+_CODE_ALIASES = {
+    "TOKEN_NOT_VALID": "TOKEN_INVALID",
+    "NOT_AUTHENTICATED": "UNAUTHORIZED",
+    "AUTHENTICATION_FAILED": "UNAUTHORIZED",
+    "NO_ACTIVE_ACCOUNT": "INVALID_CREDENTIALS",
+}
+
+
 def _code_from_exc(exc: Exception, status_code: int) -> str:
     if isinstance(exc, APIException) and getattr(exc, "default_code", None):
         code = str(exc.default_code).upper()
+        code = _CODE_ALIASES.get(code, code)
         if code not in {"ERROR", "INVALID"}:
             return code
     if isinstance(exc, (NotAuthenticated, AuthenticationFailed)):
-        return "AUTHENTICATION_ERROR"
+        return "UNAUTHORIZED"
     if isinstance(exc, PermissionDenied):
         return "PERMISSION_DENIED"
     if isinstance(exc, NotFound):

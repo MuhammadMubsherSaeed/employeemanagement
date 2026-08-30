@@ -77,7 +77,7 @@ Persistent connections (`CONN_MAX_AGE`) are used in production only. UTF-8 is ex
 
 ## 5. Accounts architecture
 
-`apps.accounts` owns identity. There are **no login, register, or token views** yet.
+`apps.accounts` owns identity and JWT authentication (`/api/v1/auth/`). See [`docs/authentication.md`](authentication.md). Company membership is not on `User` yet.
 
 `Session`/company membership will be added with multi-tenancy. Do not add a `company` foreign key on `User` until that prompt — a premature `OneToOne`/`ForeignKey` would block users who must not belong to a single tenant (platform `SUPER_ADMIN`).
 

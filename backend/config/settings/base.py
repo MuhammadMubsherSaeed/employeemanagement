@@ -90,10 +90,30 @@ AUTH_PASSWORD_VALIDATORS = [
             "UserAttributeSimilarityValidator"
         )
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+PASSWORD_RESET_TIMEOUT = env.int("PASSWORD_RESET_TIMEOUT", default=60 * 60 * 24)
+FRONTEND_PASSWORD_RESET_URL = env(
+    "FRONTEND_PASSWORD_RESET_URL",
+    default="http://localhost:8080/reset-password",
+)
+
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost")
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = env("DJANGO_TIME_ZONE", default="UTC")
@@ -135,6 +155,11 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSION": "v1",
     "ALLOWED_VERSIONS": ("v1",),
     "VERSION_PARAM": "version",
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_login": "10/min",
+        "auth_refresh": "30/min",
+        "auth_password": "5/min",
+    },
 }
 
 SIMPLE_JWT = {
@@ -154,8 +179,8 @@ SIMPLE_JWT = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "HRMS API",
     "DESCRIPTION": (
-        "Multi-tenant SaaS HRMS API. This foundation exposes health and "
-        "schema only. Authentication and business modules will be added later."
+        "Multi-tenant SaaS HRMS API. Authentication uses JWT Bearer tokens. "
+        "Business modules and tenant context will be added later."
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
