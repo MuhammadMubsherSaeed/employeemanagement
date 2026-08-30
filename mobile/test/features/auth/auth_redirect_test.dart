@@ -85,6 +85,44 @@ void main() {
     );
   });
 
+  test('EMPLOYEE is sent to their own profile instead of the directory', () {
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.employees,
+      ),
+      AppRoutes.employeesMe,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.employeesAdd,
+      ),
+      AppRoutes.employeesMe,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.employee('other-id'),
+      ),
+      AppRoutes.employeesMe,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.employeeEdit('other-id'),
+      ),
+      AppRoutes.employeesMe,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.employeesMe,
+      ),
+      isNull,
+    );
+  });
+
   test('redirect never returns the current location', () {
     expect(
       AuthRedirect.resolve(
