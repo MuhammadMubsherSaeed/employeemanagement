@@ -9,6 +9,9 @@ import 'package:flutter_base/features/auth/presentation/screens/home_screen.dart
 import 'package:flutter_base/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter_base/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:flutter_base/features/auth/presentation/screens/splash_screen.dart';
+import 'package:flutter_base/features/employees/presentation/screens/employee_details_screen.dart';
+import 'package:flutter_base/features/employees/presentation/screens/employee_form_screens.dart';
+import 'package:flutter_base/features/employees/presentation/screens/employees_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -74,6 +77,48 @@ GoRouter createAppRouter({
         name: 'home',
         builder: (BuildContext context, GoRouterState state) {
           return const HomeScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.employees,
+        name: 'employees',
+        builder: (BuildContext context, GoRouterState state) {
+          return const EmployeesScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.employeesAdd,
+        name: 'employees-add',
+        builder: (BuildContext context, GoRouterState state) {
+          return const AddEmployeeScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.employeesMe,
+        name: 'employees-me',
+        builder: (BuildContext context, GoRouterState state) {
+          return const EmployeeDetailsScreen(
+            employeeId: 'me',
+            isSelf: true,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/employees/:id/edit',
+        name: 'employee-edit',
+        builder: (BuildContext context, GoRouterState state) {
+          return EditEmployeeScreen(
+            employeeId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/employees/:id',
+        name: 'employee-detail',
+        builder: (BuildContext context, GoRouterState state) {
+          return EmployeeDetailsScreen(
+            employeeId: state.pathParameters['id'] ?? '',
+          );
         },
       ),
       GoRoute(

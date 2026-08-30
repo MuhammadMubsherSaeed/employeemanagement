@@ -24,6 +24,8 @@ void main() {
     expect(AppRoutes.resetPassword, '/reset-password');
     expect(AppRoutes.dashboard, '/dashboard');
     expect(AppRoutes.employees, '/employees');
+    expect(AppRoutes.employeesAdd, '/employees/add');
+    expect(AppRoutes.employeesMe, '/employees/me');
     expect(AppRoutes.attendance, '/attendance');
     expect(AppRoutes.leaves, '/leaves');
     expect(AppRoutes.devices, '/devices');

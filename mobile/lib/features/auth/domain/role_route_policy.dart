@@ -1,9 +1,8 @@
+import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
+import 'package:flutter_base/features/employees/domain/employee_access.dart';
 
-/// Foundation only: Role → (future) Permissions → route access.
-///
-/// No HRMS module restrictions are enforced yet. Unknown roles are allowed so
-/// a backend-introduced role does not lock the user out of the shell.
+/// Role → route access. Backend authorization remains mandatory.
 class RoleRoutePolicy {
   const RoleRoutePolicy();
 
@@ -11,6 +10,18 @@ class RoleRoutePolicy {
     required UserRole role,
     required String path,
   }) {
+    final EmployeeAccess access = EmployeeAccess(role);
+    if (path == AppRoutes.employeesAdd) {
+      return access.canCreate;
+    }
+    if (path.endsWith('/edit')) {
+      return access.canUpdate;
+    }
+    if (path == AppRoutes.employees ||
+        path == AppRoutes.employeesMe ||
+        path.startsWith('${AppRoutes.employees}/')) {
+      return true;
+    }
     return true;
   }
 }

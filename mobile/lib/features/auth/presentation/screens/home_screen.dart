@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/constants/app_constants.dart';
+import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/theme/theme_mode_controller.dart';
 import 'package:flutter_base/core/widgets/app_avatar.dart';
@@ -10,7 +11,9 @@ import 'package:flutter_base/core/widgets/app_status_badge.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -98,8 +101,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             AppCard(
+              onTap: () {
+                final EmployeeAccess access = EmployeeAccess(
+                  user?.role ?? UserRole.unknown,
+                );
+                context.push(
+                  access.isSelfService
+                      ? AppRoutes.employeesMe
+                      : AppRoutes.employees,
+                );
+              },
+              child: Row(
+                children: <Widget>[
+                  const Icon(Icons.groups_outlined),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      (user?.role == UserRole.employee)
+                          ? 'My employee profile'
+                          : 'Employees',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppCard(
               child: Text(
-                'This is a temporary home screen. HRMS modules will be added later.',
+                'HRMS modules will be added to this home screen over time.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
