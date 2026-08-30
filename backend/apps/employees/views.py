@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.viewsets import ModelViewSet
 
-from apps.common.mixins import TenantAwareQuerySetMixin
+from apps.common.mixins import EnvelopeMixin, TenantAwareQuerySetMixin
 from apps.common.permissions import HasPermission, IsAuthenticatedUser
 from apps.common.responses import success_response
 from apps.common.tenancy import get_tenant_context
@@ -41,43 +41,6 @@ _ORG_WRITE = {
     "partial_update": ORGANIZATION_WRITE_PERMISSION,
     "destroy": ORGANIZATION_WRITE_PERMISSION,
 }
-
-
-class EnvelopeMixin:
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(queryset if page is None else page, many=True)
-        if page is not None:
-            return self.get_paginated_response(serializer.data)
-        return success_response(data=serializer.data)
-
-    def retrieve(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object())
-        return success_response(data=serializer.data)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        body = self.get_read_serializer(serializer.instance)
-        return success_response(data=body.data, message="Created.")
-
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        body = self.get_read_serializer(serializer.instance)
-        return success_response(data=body.data, message="Updated.")
-
-    def destroy(self, request, *args, **kwargs):
-        self.get_object().delete()
-        return success_response(data={}, message="Deleted.")
-
-    def get_read_serializer(self, instance):
-        return self.get_serializer(instance)
 
 
 @extend_schema_view(

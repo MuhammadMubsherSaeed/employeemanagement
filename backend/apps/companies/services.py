@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from apps.accounts.models import RoleScope, UserRole
-from apps.companies.models import CompanyMembership
+from apps.companies.models import Company, CompanyMembership, CompanySettings
 
 
 class MembershipService:
@@ -51,3 +51,10 @@ class MembershipService:
         membership.is_active = False
         membership.save(update_fields=["is_active", "updated_at"])
         return membership
+
+
+def get_company_settings(company: Company) -> CompanySettings:
+    """Return persisted tenant settings, creating defaults if missing."""
+
+    settings, _created = CompanySettings.objects.get_or_create(company=company)
+    return settings

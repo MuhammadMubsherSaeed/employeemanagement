@@ -58,6 +58,8 @@ class ObjectAuthorization:
             return True
         if self._is_employee(obj):
             return self._can_view_employee(ctx, obj)
+        if self._is_attendance(obj):
+            return self._can_view_attendance(ctx, obj)
         visibility = getattr(obj, "visibility", "COMPANY")
         owner_id = getattr(obj, "owner_id", None)
         if visibility == "PRIVATE":
@@ -71,6 +73,8 @@ class ObjectAuthorization:
             return True
         if self._is_employee(obj):
             return self._can_change_employee(ctx, obj)
+        if self._is_attendance(obj):
+            return False
         owner_id = getattr(obj, "owner_id", None)
         if ctx.role_code == UserRole.MANAGER:
             return owner_id == ctx.user.id or self.team_scope.is_in_team(
@@ -86,8 +90,11 @@ class ObjectAuthorization:
         queryset = queryset.filter(company_id=ctx.company.id)
         if ctx.role_code == UserRole.COMPANY_ADMIN:
             return queryset
-        if queryset.model._meta.label == "employees.Employee":
+        label = queryset.model._meta.label
+        if label == "employees.Employee":
             return self._filter_employees(queryset, ctx)
+        if label == "attendance.Attendance":
+            return self._filter_attendance(queryset, ctx)
         if not hasattr(queryset.model, "visibility"):
             return queryset
         user_id = ctx.user.id
@@ -120,6 +127,25 @@ class ObjectAuthorization:
 
     def _is_employee(self, obj) -> bool:
         return getattr(obj._meta, "label", "") == "employees.Employee"
+
+    def _is_attendance(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "attendance.Attendance"
+
+    def _can_view_attendance(self, ctx: TenantContext, obj) -> bool:
+        employee = getattr(obj, "employee", None)
+        if employee is None:
+            return False
+        return self._can_view_employee(ctx, employee)
+
+    def _filter_attendance(self, queryset, ctx: TenantContext):
+        user_id = ctx.user.id
+        if ctx.role_code == UserRole.MANAGER:
+            my_id = self._actor_employee_id(ctx)
+            query = Q(employee__user_id=user_id)
+            if my_id is not None:
+                query |= Q(employee__manager_id=my_id)
+            return queryset.filter(query)
+        return queryset.filter(employee__user_id=user_id)
 
     def _actor_employee_id(self, ctx: TenantContext):
         from apps.employees.models import Employee
