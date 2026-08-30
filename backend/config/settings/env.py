@@ -15,6 +15,9 @@ env = environ.Env(
     POSTGRES_PORT=(int, 5432),
     JWT_ACCESS_MINUTES=(int, 15),
     JWT_REFRESH_DAYS=(int, 7),
+    EMAIL_PORT=(int, 587),
+    EMAIL_USE_TLS=(bool, True),
+    PASSWORD_RESET_TIMEOUT=(int, 60 * 60 * 24),
 )
 
 _env_file = BASE_DIR / ".env"

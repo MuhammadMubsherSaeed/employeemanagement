@@ -37,6 +37,17 @@ SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = [
     "rest_framework.permissions.AllowAny",
 ]
 
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    "auth_login": "120/min",
+    "auth_refresh": "120/min",
+    "auth_password": "60/min",
+}
+
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+
 LOGGING["root"]["level"] = "DEBUG"
 LOGGING["loggers"]["apps"]["level"] = "DEBUG"
 LOGGING["handlers"]["console"]["formatter"] = "console"
