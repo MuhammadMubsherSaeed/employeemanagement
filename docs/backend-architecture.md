@@ -204,4 +204,4 @@ Implemented. See [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 5. Inherit domain models from `TimeStampedModel`. Add a `company` FK and `TenantAwareQuerySetMixin`; never take `company_id` from the client.
 6. Use `ApiClient` on Flutter against `/api/v1/…`. Catch `AppException` shapes that match this envelope.
 
-Planned apps (do not create empty ones now): `employees`, `attendance`, `leaves`, `devices`, `reports`, `notifications`, `ai`, `subscriptions`.
+`apps.employees` is implemented. Remaining planned apps: `attendance`, `leaves`, `devices`, `reports`, `notifications`, `ai`, `subscriptions`.

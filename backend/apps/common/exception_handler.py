@@ -6,6 +6,7 @@ from typing import Any
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError
+from django.db.models.deletion import ProtectedError
 from rest_framework import status
 from rest_framework.exceptions import (
     APIException,
@@ -58,6 +59,15 @@ def api_exception_handler(exc: Exception, context: dict[str, Any]):
         logger.warning("Database integrity error")
         return error_response(
             message="Could not complete this request.",
+            code="CONFLICT",
+            status=status.HTTP_409_CONFLICT,
+        )
+
+    if isinstance(exc, ProtectedError):
+        return error_response(
+            message=(
+                "This record cannot be deleted because other records depend on it."
+            ),
             code="CONFLICT",
             status=status.HTTP_409_CONFLICT,
         )

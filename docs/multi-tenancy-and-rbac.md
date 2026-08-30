@@ -191,9 +191,11 @@ Models without a `visibility` field are tenant-filtered only.
 
 ## 10. Manager restrictions
 
-`TeamScope.is_in_team` currently returns **False**. Managers are **not** treated as having access to every colleague’s private records.
+`TeamScope.is_in_team` uses **direct reports** on `Employee.manager`: the actor’s employee row plus employees whose manager FK points at that row. There is no department-wide or transitive hierarchy.
 
-When Employee reporting exists, implement `TeamScope` (direct reports, assigned team, allowed departments) and pass it into `ObjectAuthorization`. Do not grant managers `settings.manage` or unrestricted company administration.
+Managers are **not** treated as having access to every colleague’s private records.
+
+When richer org rules exist, extend `TeamScope` (assigned team, allowed departments). Do not grant managers `settings.manage` or unrestricted company administration.
 
 ---
 

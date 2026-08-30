@@ -1,3 +1,4 @@
+from django.core.exceptions import FieldDoesNotExist
 from rest_framework.exceptions import NotFound, PermissionDenied
 
 from apps.common.authorization import ObjectAuthorization
@@ -9,6 +10,9 @@ class TenantAwareQuerySetMixin:
 
     Super admins see all rows (platform). Users without an active company
     membership see nothing. Cross-company IDs therefore 404, not 403.
+
+    perform_create always sets company from tenant context. owner is set
+    only when the model has that field (legacy tenancy probe records).
     """
 
     tenant_field = "company"
@@ -26,7 +30,13 @@ class TenantAwareQuerySetMixin:
         ctx = self.get_tenant_context()
         if ctx.company is None:
             raise PermissionDenied("You do not have access to this company.")
-        serializer.save(company=ctx.company, owner=ctx.user)
+        extras = {"company": ctx.company}
+        try:
+            serializer.Meta.model._meta.get_field("owner")
+            extras["owner"] = ctx.user
+        except FieldDoesNotExist:
+            pass
+        serializer.save(**extras)
 
     def check_object_permissions(self, request, obj):
         super().check_object_permissions(request, obj)
