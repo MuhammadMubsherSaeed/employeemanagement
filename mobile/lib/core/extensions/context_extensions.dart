@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/utils/date_formatter.dart';
 import 'package:flutter_base/l10n/app_localizations.dart';
 
 extension BuildContextX on BuildContext {
@@ -33,4 +34,14 @@ extension StringX on String {
     }
     return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
+
+  bool get isBlank => trim().isEmpty;
+}
+
+extension DateTimeX on DateTime {
+  String toAppDate({String? locale}) =>
+      AppDateFormatter.date(this, locale: locale);
+
+  String toAppDateTime({String? locale}) =>
+      AppDateFormatter.dateTime(this, locale: locale);
 }

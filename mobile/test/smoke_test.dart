@@ -1,5 +1,5 @@
+import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_base/core/constants/api_paths.dart';
 
 void main() {
   test('API path constants are initialized', () {

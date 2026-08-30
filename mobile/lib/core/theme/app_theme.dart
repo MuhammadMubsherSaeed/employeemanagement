@@ -1,44 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_colors.dart';
-
-class AppTypography {
-  AppTypography._();
-
-  static TextTheme textTheme(ColorScheme scheme) {
-    final Typography platform = Typography.material2021(
-      platform: TargetPlatform.android,
-    );
-    final TextTheme base = (scheme.brightness == Brightness.dark
-            ? platform.white
-            : platform.black)
-        .apply(
-      bodyColor: scheme.onSurface,
-      displayColor: scheme.onSurface,
-    );
-
-    return base.copyWith(
-      headlineLarge: base.headlineLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.5,
-      ),
-      headlineMedium: base.headlineMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      titleLarge: base.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      titleMedium: base.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      bodyMedium: base.bodyMedium?.copyWith(
-        color: scheme.onSurface.withValues(alpha: 0.78),
-      ),
-      labelLarge: base.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
+import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/theme/app_typography.dart';
 
 class AppTheme {
   AppTheme._();
@@ -69,13 +32,13 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         backgroundColor: scaffold,
         foregroundColor: scheme.onSurface,
-        elevation: 0,
+        elevation: AppElevation.none,
         centerTitle: false,
         titleTextStyle: AppTypography.textTheme(scheme).titleLarge,
       ),
       cardTheme: CardThemeData(
         color: scheme.surface,
-        elevation: 0,
+        elevation: AppElevation.none,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.card),
         margin: EdgeInsets.zero,
       ),
@@ -94,6 +57,10 @@ class AppTheme {
           borderRadius: AppRadius.field,
           borderSide: BorderSide(color: scheme.primary, width: 1.5),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.field,
+          borderSide: BorderSide(color: scheme.error),
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,
@@ -105,12 +72,18 @@ class AppTheme {
           foregroundColor: scheme.onPrimary,
           minimumSize: const Size.fromHeight(48),
           shape: const RoundedRectangleBorder(borderRadius: AppRadius.button),
-          elevation: 0,
+          elevation: AppElevation.none,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
+          minimumSize: const Size.fromHeight(48),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadius.button),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(48),
           shape: const RoundedRectangleBorder(borderRadius: AppRadius.button),
         ),

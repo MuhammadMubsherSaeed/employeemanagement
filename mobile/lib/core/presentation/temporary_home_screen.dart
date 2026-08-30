@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_base/core/config/env_config.dart';
-import 'package:flutter_base/core/config/env_config_provider.dart';
+import 'package:flutter_base/core/config/app_config.dart';
+import 'package:flutter_base/core/config/app_config_provider.dart';
 import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
-import 'package:flutter_base/core/theme/app_colors.dart';
+import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/theme/theme_mode_controller.dart';
 import 'package:flutter_base/core/widgets/app_avatar.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
@@ -20,7 +20,7 @@ class TemporaryHomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final EnvConfig env = ref.watch(envConfigProvider);
+    final AppConfig env = ref.watch(appConfigProvider);
     final ThemeMode themeMode = ref.watch(themeModeControllerProvider);
 
     return Scaffold(
@@ -29,7 +29,8 @@ class TemporaryHomeScreen extends ConsumerWidget {
         actions: <Widget>[
           IconButton(
             tooltip: 'Toggle theme',
-            onPressed: () => ref.read(themeModeControllerProvider.notifier).cycle(),
+            onPressed: () =>
+                ref.read(themeModeControllerProvider.notifier).cycle(),
             icon: Icon(_themeIcon(themeMode)),
           ),
         ],
@@ -41,10 +42,10 @@ class TemporaryHomeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Foundation', style: context.textTheme.titleLarge),
+                Text('HRMS Foundation', style: context.textTheme.titleLarge),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Temporary home used to verify GoRouter, theme, and shared widgets.',
+                  'Foundation setup complete.',
                   style: context.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -52,8 +53,14 @@ class TemporaryHomeScreen extends ConsumerWidget {
                   spacing: AppSpacing.xs,
                   runSpacing: AppSpacing.xs,
                   children: <Widget>[
-                    AppStatusBadge(label: env.flavor.name, tone: AppBadgeTone.info),
-                    const AppStatusBadge(label: 'Ready', tone: AppBadgeTone.success),
+                    AppStatusBadge(
+                      label: env.environmentName,
+                      tone: AppBadgeTone.info,
+                    ),
+                    const AppStatusBadge(
+                      label: 'Ready',
+                      tone: AppBadgeTone.success,
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -68,10 +75,12 @@ class TemporaryHomeScreen extends ConsumerWidget {
           const AppCard(
             child: Row(
               children: <Widget>[
-                AppAvatar(name: 'Alex Morgan'),
+                AppAvatar(name: 'HRMS Foundation'),
                 SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text('Reusable widgets are wired and ready for features.'),
+                  child: Text(
+                    'Reusable widgets are wired and ready for features.',
+                  ),
                 ),
               ],
             ),

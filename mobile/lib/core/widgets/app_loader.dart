@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_base/core/theme/app_colors.dart';
+import 'package:flutter_base/core/theme/app_spacing.dart';
 
 class AppLoader extends StatelessWidget {
   const AppLoader({super.key, this.message});
