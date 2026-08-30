@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('temporary home screen loads through GoRouter', (
+  testWidgets('unauthenticated app opens the login screen', (
     WidgetTester tester,
   ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
@@ -29,7 +29,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('HRMS Foundation'), findsOneWidget);
-    expect(find.text('Foundation setup complete.'), findsOneWidget);
+    expect(find.text('Sign in'), findsAtLeastNWidgets(1));
+    expect(find.text('Use your HRMS email and password.'), findsOneWidget);
   });
 }

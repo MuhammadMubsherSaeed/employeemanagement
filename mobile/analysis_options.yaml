@@ -24,7 +24,6 @@ analyzer:
     - lib/theme.dart
     - lib/core/error/**
     - lib/core/network/dio_client.dart
-    - lib/core/storage/token_storage.dart
     - "**/*.g.dart"
     - "**/*.freezed.dart"
   errors:

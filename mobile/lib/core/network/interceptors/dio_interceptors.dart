@@ -1,7 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/errors/error_mapper.dart';
+import 'package:flutter_base/core/network/auth_endpoints.dart';
+import 'package:flutter_base/core/network/models/api_envelope.dart';
+import 'package:flutter_base/core/network/token_refresh_coordinator.dart';
 import 'package:flutter_base/core/storage/secure_storage_service.dart';
+import 'package:flutter_base/core/storage/token_storage.dart';
 import 'package:flutter_base/core/utils/app_logger.dart';
 
 class RequestIdInterceptor extends Interceptor {
@@ -25,19 +29,137 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    if (_shouldSkip(options)) {
+      options.headers.remove(ApiHeaders.authorization);
+      handler.next(options);
+      return;
+    }
+
     final String? token = await _storage.readAccessToken();
     if (token != null && token.isNotEmpty) {
       options.headers[ApiHeaders.authorization] = 'Bearer $token';
     }
     handler.next(options);
   }
+
+  bool _shouldSkip(RequestOptions options) {
+    if (options.extra[AuthRequestExtra.skipAuthHeader] == true) {
+      return true;
+    }
+    return AuthEndpoints.isPublic(options.path) ||
+        AuthEndpoints.isPublic(options.uri.path);
+  }
 }
 
-/// Extension point for refresh-token. Auth will implement retry here later.
+/// Refreshes once per 401 wave, persists rotated tokens, retries the request.
 class TokenRefreshInterceptor extends Interceptor {
+  TokenRefreshInterceptor({
+    required Dio dio,
+    required TokenStorage tokenStorage,
+    required TokenRefreshCoordinator coordinator,
+    void Function()? onSessionInvalidated,
+  })  : _dio = dio,
+        _tokenStorage = tokenStorage,
+        _coordinator = coordinator,
+        _onSessionInvalidated = onSessionInvalidated;
+
+  final Dio _dio;
+  final TokenStorage _tokenStorage;
+  final TokenRefreshCoordinator _coordinator;
+  final void Function()? _onSessionInvalidated;
+
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) {
-    handler.next(err);
+  Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
+    if (_isRetriedUnauthorized(err)) {
+      await _invalidateSession();
+      handler.next(err);
+      return;
+    }
+
+    if (!_shouldRefresh(err)) {
+      handler.next(err);
+      return;
+    }
+
+    try {
+      final TokenPair? tokens = await _coordinator.run(_refreshTokens);
+      if (tokens == null || tokens.access.isEmpty) {
+        await _invalidateSession();
+        handler.next(err);
+        return;
+      }
+
+      final RequestOptions retry = err.requestOptions;
+      retry.extra[AuthRequestExtra.authRetried] = true;
+      retry.headers[ApiHeaders.authorization] = 'Bearer ${tokens.access}';
+      final Response<dynamic> response = await _dio.fetch<dynamic>(retry);
+      handler.resolve(response);
+    } catch (_) {
+      await _invalidateSession();
+      handler.next(err);
+    }
+  }
+
+  bool _shouldRefresh(DioError err) {
+    if (err.response?.statusCode != 401) {
+      return false;
+    }
+    if (err.requestOptions.extra[AuthRequestExtra.skipAuthRefresh] == true) {
+      return false;
+    }
+    if (err.requestOptions.extra[AuthRequestExtra.authRetried] == true) {
+      return false;
+    }
+    final String path = err.requestOptions.path;
+    final String uriPath = err.requestOptions.uri.path;
+    if (AuthEndpoints.isPublic(path) || AuthEndpoints.isPublic(uriPath)) {
+      return false;
+    }
+    return true;
+  }
+
+  bool _isRetriedUnauthorized(DioError err) {
+    return err.response?.statusCode == 401 &&
+        err.requestOptions.extra[AuthRequestExtra.authRetried] == true;
+  }
+
+  Future<TokenPair?> _refreshTokens() async {
+    final String? refresh = await _tokenStorage.getRefreshToken();
+    if (refresh == null || refresh.isEmpty) {
+      return null;
+    }
+
+    final Response<dynamic> response = await _dio.post<dynamic>(
+      AuthEndpoints.refresh,
+      data: <String, dynamic>{'refresh': refresh},
+      options: Options(
+        extra: <String, dynamic>{
+          AuthRequestExtra.skipAuthHeader: true,
+          AuthRequestExtra.skipAuthRefresh: true,
+        },
+      ),
+    );
+
+    final Map<String, dynamic> data =
+        ApiEnvelope.parse(response.data).requireDataMap();
+    final Object? accessRaw = data['access'];
+    if (accessRaw is! String || accessRaw.isEmpty) {
+      return null;
+    }
+    final Object? refreshRaw = data['refresh'];
+    final String? nextRefresh =
+        refreshRaw is String && refreshRaw.isNotEmpty ? refreshRaw : null;
+
+    await _tokenStorage.saveTokens(
+      accessToken: accessRaw,
+      refreshToken: nextRefresh,
+    );
+    return TokenPair(access: accessRaw, refresh: nextRefresh);
+  }
+
+  Future<void> _invalidateSession() async {
+    await _tokenStorage.clearTokens();
+    _onSessionInvalidated?.call();
   }
 }
 
@@ -133,12 +255,21 @@ class DioInterceptorFactory {
   static List<Interceptor> build({
     required SecureStorageService storage,
     required bool enableLogging,
+    required Dio dio,
+    required TokenStorage tokenStorage,
+    required TokenRefreshCoordinator coordinator,
+    void Function()? onSessionInvalidated,
   }) {
     return <Interceptor>[
       RequestIdInterceptor(),
       AuthInterceptor(storage: storage),
-      TokenRefreshInterceptor(),
       LoggingInterceptor(enabled: enableLogging),
+      TokenRefreshInterceptor(
+        dio: dio,
+        tokenStorage: tokenStorage,
+        coordinator: coordinator,
+        onSessionInvalidated: onSessionInvalidated,
+      ),
       ErrorInterceptor(),
     ];
   }
