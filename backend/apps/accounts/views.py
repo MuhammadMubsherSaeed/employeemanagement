@@ -91,6 +91,12 @@ class CurrentUserView(APIView):
 
     @extend_schema(
         tags=["Authentication"],
+        description=(
+            "Authenticated user plus active company context. "
+            "`role` is the membership role, or SUPER_ADMIN for platform operators. "
+            "`company` is {id, name, slug} or null. "
+            "Tenant is never taken from the client."
+        ),
         responses={200: CurrentUserSerializer},
     )
     def get(self, request, **_kwargs):

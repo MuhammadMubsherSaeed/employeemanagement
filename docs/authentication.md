@@ -1,6 +1,6 @@
 # Authentication
 
-JWT authentication for the HRMS API. Company membership and RBAC are **not** implemented yet. Do not send or expect `company` / `company_id` on auth responses until the multi-tenant prompt.
+JWT authentication for the HRMS API. Tenant and RBAC live in [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md). JWT authenticates the **user** only; company context is resolved from `CompanyMembership`, never from token claims or a client-supplied `company_id`.
 
 Base path: `/api/v1/auth/`
 
@@ -28,9 +28,9 @@ Body: `{ "email", "password" }`. Email is normalized (`UserManager.normalize_ema
 
 - Wrong email or password → `401 INVALID_CREDENTIALS` with the **same** message (no account enumeration).
 - Correct password, inactive user → `403 ACCOUNT_INACTIVE`.
-- Success → access + refresh + public user (`id`, `email`, names, `full_name`, `role`). `last_login` is updated.
+- Success → access + refresh + public user (`id`, `email`, names, `full_name`, `role`, `company`). `last_login` is updated.
 
-Role values are `UserRole` members (`EMPLOYEE`, `MANAGER`, …), always uppercase.
+`role` is the active membership role, or `SUPER_ADMIN` for platform operators. `company` is `{id, name, slug}` or `null`. Role codes are always uppercase (`EMPLOYEE`, `MANAGER`, `COMPANY_ADMIN`, `SUPER_ADMIN`).
 
 ---
 
@@ -130,9 +130,32 @@ Do not put API secrets in the Flutter app.
 
 ---
 
-## 10. Future multi-tenant session
+## 10. Company context on `/me/` and login
 
-When `Company` membership exists, extend `LoginUserSerializer` / `CurrentUserSerializer` (and optionally the login `data` object) with `company` and `permissions` from the **backend** session. Do not invent those fields in the client. `SUPER_ADMIN` stays platform-level and may have no company.
+`GET /api/v1/auth/me/` and the login `user` object include the authenticated user's **active** company:
+
+```json
+{
+  "success": true,
+  "message": "User retrieved successfully.",
+  "data": {
+    "id": 1,
+    "email": "user@example.com",
+    "first_name": "User",
+    "last_name": "Name",
+    "full_name": "User Name",
+    "role": "EMPLOYEE",
+    "is_active": true,
+    "company": {
+      "id": "…uuid…",
+      "name": "Example Company",
+      "slug": "example-company"
+    }
+  }
+}
+```
+
+Users without an active membership (and all `SUPER_ADMIN` operators) receive `"company": null`. Membership internals are not exposed. `PATCH /me/` is not implemented (no self-service role change). Flutter may ignore `company` until a later integration prompt; do not send `company_id` to select a tenant.
 
 ---
 

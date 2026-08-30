@@ -333,23 +333,22 @@ SimpleJWT is **installed and configured**. Obtain/refresh routes are **not** inc
 
 ## 8. Role / permission architecture
 
-Roles (single role per user for v1):
+Implemented on the Django API. Details: [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 
-| Role | Meaning |
+| Role | Scope |
 | --- | --- |
-| `admin` | Full tenant. Users, org, all employees, config |
-| `manager` | Team employees, team attendance, leave approvals |
-| `employee` | Self: profile, attendance, leave |
+| `SUPER_ADMIN` | Platform. Not a company tenant. |
+| `COMPANY_ADMIN` | Full access within one company (via membership). |
+| `MANAGER` | Team operations. No `settings.manage`. Team graph comes later. |
+| `EMPLOYEE` | Self-service codes; object-level rules restrict private data. |
 
-Enforcement (later):
+Enforcement:
 
-1. **API:** DRF permissions (`IsAdmin`, `IsManager`, `IsSelfOrManager`) plus queryset scoping
-2. **Mobile:** GoRouter redirects + hide nav items the role cannot use (UI is not security)
-3. **Object level:** managers only see their reporting tree; employees only `request.user`
+1. **API:** `HasPermission("code")` + `TenantAwareQuerySetMixin` + `ObjectAuthorization`
+2. **Mobile:** hide nav items the role cannot use (UI is not security)
+3. **Object level:** managers are not granted every colleague’s private records until reporting exists
 
-v1 does **not** use a generic RBAC table. If payroll/docs need finer grants, add `django-guardian` or a permission table later.
-
-`User.role` already exists so the first auth feature does not need a user-model migration for roles.
+Do not use a generic `ADMIN` label. Flutter company/RBAC UI is a later prompt.
 
 ---
 
