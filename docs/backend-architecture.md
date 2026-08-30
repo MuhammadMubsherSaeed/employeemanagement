@@ -21,8 +21,8 @@ backend/
 │   └── wsgi.py
 ├── apps/
 │   ├── common/               # timestamps, errors, pagination, health
-│   ├── accounts/             # custom User (email), roles
-│   └── companies/            # placeholder module only
+│   ├── accounts/             # custom User, Role, Permission, JWT auth
+│   └── companies/            # Company, CompanyMembership, tenant isolation probes
 ├── requirements/
 │   ├── base.txt
 │   ├── development.txt
@@ -77,9 +77,9 @@ Persistent connections (`CONN_MAX_AGE`) are used in production only. UTF-8 is ex
 
 ## 5. Accounts architecture
 
-`apps.accounts` owns identity and JWT authentication (`/api/v1/auth/`). See [`docs/authentication.md`](authentication.md). Company membership is not on `User` yet.
+`apps.accounts` owns identity, JWT authentication (`/api/v1/auth/`), and the RBAC catalog (`Role`, `Permission`). See [`docs/authentication.md`](authentication.md) and [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 
-`Session`/company membership will be added with multi-tenancy. Do not add a `company` foreign key on `User` until that prompt — a premature `OneToOne`/`ForeignKey` would block users who must not belong to a single tenant (platform `SUPER_ADMIN`).
+There is **no** `company` foreign key on `User`. Tenant access is `CompanyMembership`. Platform `SUPER_ADMIN` users are not company members.
 
 ---
 
@@ -106,14 +106,13 @@ Persistent connections (`CONN_MAX_AGE`) are used in production only. UTF-8 is ex
 ## 7. Role architecture
 
 ```text
-UserRole:
-  SUPER_ADMIN     platform-level
-  COMPANY_ADMIN   company-level (later)
-  MANAGER         company-level (later)
-  EMPLOYEE        company-level (later)
+SUPER_ADMIN     PLATFORM (User.role / is_superuser; not a company membership)
+COMPANY_ADMIN   COMPANY (CompanyMembership → Role)
+MANAGER         COMPANY
+EMPLOYEE        COMPANY
 ```
 
-This is a **choices field only**. No RBAC matrix, no object-level permissions, no company assignment.
+Company authorization uses Role ↔ Permission codes. `User.role` stays for admin and users without membership; membership role is authoritative when present. Seed with `python manage.py seed_rbac`.
 
 ---
 
@@ -186,22 +185,13 @@ Console logging at DEBUG/INFO/WARNING/ERROR/CRITICAL. Development is more verbos
 
 ---
 
-## 13. Future multi-tenant readiness
+## 13. Multi-tenant readiness
 
-Intended shape:
+Implemented. See [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 
-```
-Platform
- └── SUPER_ADMIN
- └── Company A / Company B
-      ├── COMPANY_ADMIN
-      ├── MANAGER
-      └── EMPLOYEE
-```
+`apps.companies` owns `Company` and `CompanyMembership`. Company-scoped APIs live under `/api/v1/tenancy/` as a reference isolation surface (not HR product modules). Future apps should use `TenantAwareQuerySetMixin` and `HasPermission("…")`.
 
-`apps.companies` is registered and routed at `/api/v1/companies/` with **no Company model** yet, so the first tenant schema can be designed without a throwaway migration. Do not filter querysets by company until tenant middleware and membership exist.
-
-`TimeStampedModel` is the shared abstract base. Company FKs belong on membership / resource models later, not on every row by accident.
+`TimeStampedModel` remains the shared abstract base. Put `company` on membership and resource models, not on `User`.
 
 ---
 
@@ -211,7 +201,7 @@ Platform
 2. Set `name = "apps.<name>"` and a unique `label` in `AppConfig`.
 3. Add it to `LOCAL_APPS` in `config/settings/base.py`.
 4. Include `path("<name>/", include("apps.<name>.urls"))` from `apps/common/urls.py` so the public path is `/api/v1/<name>/`.
-5. Inherit domain models from `TimeStampedModel`. Add tenant isolation in the multi-tenant prompt, not ad hoc in the first model.
+5. Inherit domain models from `TimeStampedModel`. Add a `company` FK and `TenantAwareQuerySetMixin`; never take `company_id` from the client.
 6. Use `ApiClient` on Flutter against `/api/v1/…`. Catch `AppException` shapes that match this envelope.
 
 Planned apps (do not create empty ones now): `employees`, `attendance`, `leaves`, `devices`, `reports`, `notifications`, `ai`, `subscriptions`.

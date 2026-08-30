@@ -216,7 +216,7 @@ class AuthAPITests(TestCase):
         self.assertEqual(data["email"], "user@example.com")
         self.assertEqual(data["role"], "EMPLOYEE")
         self.assertTrue(data["is_active"])
-        self.assertNotIn("company", data)
+        self.assertIsNone(data["company"])
         self.assertNotIn("company_id", data)
 
     def test_forgot_password_existing_and_missing_look_the_same(self) -> None:

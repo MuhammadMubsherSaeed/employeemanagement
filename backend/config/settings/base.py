@@ -179,8 +179,9 @@ SIMPLE_JWT = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "HRMS API",
     "DESCRIPTION": (
-        "Multi-tenant SaaS HRMS API. Authentication uses JWT Bearer tokens. "
-        "Business modules and tenant context will be added later."
+        "Multi-tenant SaaS HRMS API. JWT authenticates the user; company "
+        "context is resolved from CompanyMembership, never from the payload. "
+        "Authorization uses Role ↔ Permission codes (not Django ContentTypes)."
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,

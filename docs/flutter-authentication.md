@@ -1,6 +1,6 @@
 # Flutter authentication
 
-Client authentication for the HRMS Flutter app against `POST/GET /api/v1/auth/*`. Company membership and RBAC are **not** implemented. Auth responses must not invent `company` / `company_id`.
+Client authentication for the HRMS Flutter app against `POST/GET /api/v1/auth/*`. The API now returns `company` (`{id, name, slug}` or `null`) and a membership-resolved `role` on login and `/me/`. Flutter does not yet map company/RBAC UI; ignore extra fields until that prompt. Never send `company_id` to pick a tenant.
 
 See also [`docs/authentication.md`](authentication.md) (Django) and [`docs/flutter-architecture.md`](flutter-architecture.md).
 

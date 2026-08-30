@@ -1,14 +1,23 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.accounts.models import User
 
 
+class CompanySummarySerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    slug = serializers.CharField()
+
+
 class LoginUserSerializer(serializers.ModelSerializer):
-    """Public user payload after login. Extend later with company/permissions."""
+    """Public user payload after login. Company comes from membership."""
 
     full_name = serializers.CharField(source="get_full_name", read_only=True)
+    role = serializers.SerializerMethodField()
+    company = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -19,8 +28,19 @@ class LoginUserSerializer(serializers.ModelSerializer):
             "last_name",
             "full_name",
             "role",
+            "company",
         )
         read_only_fields = fields
+
+    def get_role(self, user: User) -> str:
+        return user.resolve_role_code()
+
+    @extend_schema_field(CompanySummarySerializer(allow_null=True))
+    def get_company(self, user: User):
+        company = user.current_company
+        if company is None:
+            return None
+        return CompanySummarySerializer(company).data
 
 
 class CurrentUserSerializer(LoginUserSerializer):
