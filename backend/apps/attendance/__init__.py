@@ -1,1 +1,1 @@
-"""Attendance domain. Not implemented yet."""
+"""Attendance domain."""

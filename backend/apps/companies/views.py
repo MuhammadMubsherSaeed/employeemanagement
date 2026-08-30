@@ -8,6 +8,7 @@ from apps.common.responses import success_response
 from apps.common.tenancy import get_tenant_context
 from apps.companies.models import TenantOwnedRecord
 from apps.companies.serializers import TenantOwnedRecordSerializer
+from apps.companies.services import get_company_settings
 
 _ACTION_PERMISSIONS = {
     "list": "employees.view",
@@ -112,9 +113,22 @@ class CompanySettingsView(APIView):
                     "name": ctx.company.name,
                     "slug": ctx.company.slug,
                 },
+                **_settings_payload(get_company_settings(ctx.company)),
             },
             message="Company settings.",
         )
+
+
+def _settings_payload(row) -> dict:
+    return {
+        "timezone": row.timezone,
+        "work_start_time": row.work_start_time.isoformat(),
+        "work_end_time": row.work_end_time.isoformat(),
+        "grace_period_minutes": row.grace_period_minutes,
+        "minimum_working_minutes": row.minimum_working_minutes,
+        "overtime_enabled": row.overtime_enabled,
+        "working_days": row.working_days,
+    }
 
 
 class PlatformScopeView(APIView):
