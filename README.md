@@ -51,8 +51,9 @@ python manage.py migrate   # needs PostgreSQL
 python manage.py runserver
 ```
 
-- Health: `GET http://127.0.0.1:8000/api/health/`
-- API root: `GET http://127.0.0.1:8000/api/v1/`
+- Health: `GET http://127.0.0.1:8000/api/v1/health/`
+- Schema: `GET http://127.0.0.1:8000/api/schema/`
+- Docs: `http://127.0.0.1:8000/api/docs/`
 - Admin: `http://127.0.0.1:8000/admin/` (after migrate + `createsuperuser`)
 
 ## Docker
@@ -67,7 +68,7 @@ Compose starts PostgreSQL 16 and the Django app. Redis, Celery, and object stora
 
 ## Roles
 
-Admin, Manager, Employee. See the architecture document for the permission model.
+`SUPER_ADMIN` (platform), `COMPANY_ADMIN`, `MANAGER`, `EMPLOYEE` (company-level, assigned later). See [`docs/backend-architecture.md`](docs/backend-architecture.md).
 
 ## License
 
