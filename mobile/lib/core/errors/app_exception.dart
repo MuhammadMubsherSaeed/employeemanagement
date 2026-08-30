@@ -1,19 +1,28 @@
+// ignore_for_file: use_super_parameters
+
 sealed class AppException implements Exception {
-  const AppException(this.message, {this.statusCode});
+  const AppException(this.message, {this.statusCode, this.code});
 
   final String message;
   final int? statusCode;
+  final String? code;
 
   @override
   String toString() => message;
 }
 
 class NetworkException extends AppException {
-  const NetworkException([super.message = 'No internet connection.']);
+  const NetworkException([
+    String message = 'No internet connection.',
+    String? code,
+  ]) : super(message, code: code);
 }
 
 class TimeoutException extends AppException {
-  const TimeoutException([super.message = 'The request timed out.']);
+  const TimeoutException([
+    String message = 'The request timed out.',
+    String? code,
+  ]) : super(message, code: code);
 }
 
 class CancelledException extends AppException {
@@ -21,24 +30,32 @@ class CancelledException extends AppException {
 }
 
 class UnauthorizedException extends AppException {
-  const UnauthorizedException([String message = 'Please sign in again.'])
-      : super(message, statusCode: 401);
+  const UnauthorizedException([
+    String message = 'Please sign in again.',
+    String? code,
+  ]) : super(message, statusCode: 401, code: code);
 }
 
 class ForbiddenException extends AppException {
-  const ForbiddenException([String message = 'You do not have access.'])
-      : super(message, statusCode: 403);
+  const ForbiddenException([
+    String message = 'You do not have access.',
+    String? code,
+  ]) : super(message, statusCode: 403, code: code);
 }
 
 class NotFoundException extends AppException {
   const NotFoundException([
     String message = 'The requested resource was not found.',
-  ]) : super(message, statusCode: 404);
+    String? code,
+  ]) : super(message, statusCode: 404, code: code);
 }
 
 class ValidationException extends AppException {
-  const ValidationException(String message, {this.fieldErrors})
-      : super(message, statusCode: 400);
+  const ValidationException(
+    String message, {
+    this.fieldErrors,
+    String? code,
+  }) : super(message, statusCode: 400, code: code);
 
   final Map<String, List<String>>? fieldErrors;
 }
@@ -47,9 +64,13 @@ class ServerException extends AppException {
   const ServerException([
     String message = 'Something went wrong on the server.',
     int statusCode = 500,
-  ]) : super(message, statusCode: statusCode);
+    String? code,
+  ]) : super(message, statusCode: statusCode, code: code);
 }
 
 class UnknownException extends AppException {
-  const UnknownException([super.message = 'Something went wrong.']);
+  const UnknownException([
+    String message = 'Something went wrong.',
+    String? code,
+  ]) : super(message, code: code);
 }

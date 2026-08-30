@@ -15,13 +15,17 @@ class AppDropdown<T> extends StatelessWidget {
     this.value,
     this.label,
     this.hint,
+    this.enabled = true,
+    this.errorText,
   });
 
   final List<AppDropdownItem<T>> items;
-  final ValueChanged<T?> onChanged;
+  final ValueChanged<T?>? onChanged;
   final T? value;
   final String? label;
   final String? hint;
+  final bool enabled;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +39,11 @@ class AppDropdown<T> extends StatelessWidget {
             ),
           )
           .toList(),
-      onChanged: onChanged,
+      onChanged: enabled ? onChanged : null,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        errorText: errorText,
       ),
     );
   }

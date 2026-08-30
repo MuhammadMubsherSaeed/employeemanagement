@@ -29,9 +29,18 @@ class SharedPrefsService {
     return _prefs.setString(StorageKeys.themeMode, mode.name);
   }
 
+  bool get onboardingComplete {
+    return _prefs.getBool(StorageKeys.onboardingComplete) ?? false;
+  }
+
+  Future<bool> setOnboardingComplete({required bool complete}) {
+    return _prefs.setBool(StorageKeys.onboardingComplete, complete);
+  }
+
   String? getString(String key) => _prefs.getString(key);
 
-  Future<bool> setString(String key, String value) => _prefs.setString(key, value);
+  Future<bool> setString(String key, String value) =>
+      _prefs.setString(key, value);
 
   bool? getBool(String key) => _prefs.getBool(key);
 

@@ -14,6 +14,7 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.enabled = true,
     this.maxLines = 1,
+    this.errorText,
   });
 
   final TextEditingController? controller;
@@ -27,6 +28,7 @@ class AppTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final bool enabled;
   final int maxLines;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,7 @@ class AppTextField extends StatelessWidget {
         hintText: hint,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
+        errorText: errorText,
       ),
     );
   }

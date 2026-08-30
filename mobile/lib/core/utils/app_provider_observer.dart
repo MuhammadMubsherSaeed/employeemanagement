@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter_base/core/utils/app_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppProviderObserver extends ProviderObserver {
@@ -9,8 +9,7 @@ class AppProviderObserver extends ProviderObserver {
     Object? newValue,
     ProviderContainer container,
   ) {
-    if (kDebugMode) {
-      debugPrint('[riverpod] ${provider.name ?? provider.runtimeType} -> $newValue');
-    }
+    // Do not log provider values — they may later include tokens or PII.
+    AppLogger.debug('[riverpod] ${provider.name ?? provider.runtimeType}');
   }
 }

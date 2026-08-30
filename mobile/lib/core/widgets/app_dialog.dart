@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_base/core/router/app_routes.dart';
 
 class AppDialog {
   AppDialog._();
 
   static Future<bool?> confirm({
+    required BuildContext context,
     required String title,
     required String message,
     String confirmLabel = 'OK',
     String cancelLabel = 'Cancel',
-    BuildContext? context,
+    bool barrierDismissible = true,
   }) {
-    final BuildContext? ctx = context ?? rootNavigatorKey.currentContext;
-    if (ctx == null) {
-      return Future<bool?>.value(null);
-    }
-
     return showDialog<bool>(
-      context: ctx,
+      context: context,
+      barrierDismissible: barrierDismissible,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(title),
@@ -38,18 +34,15 @@ class AppDialog {
   }
 
   static Future<void> alert({
+    required BuildContext context,
     required String title,
     required String message,
     String confirmLabel = 'OK',
-    BuildContext? context,
+    bool barrierDismissible = true,
   }) {
-    final BuildContext? ctx = context ?? rootNavigatorKey.currentContext;
-    if (ctx == null) {
-      return Future<void>.value();
-    }
-
     return showDialog<void>(
-      context: ctx,
+      context: context,
+      barrierDismissible: barrierDismissible,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(title),

@@ -1,26 +1,26 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_base/core/config/env_config.dart';
+import 'package:flutter_base/core/config/app_config.dart';
 import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/errors/app_exception.dart';
+import 'package:flutter_base/core/errors/error_mapper.dart';
 import 'package:flutter_base/core/network/interceptors/dio_interceptors.dart';
 import 'package:flutter_base/core/storage/secure_storage_service.dart';
 
 class ApiClient {
   ApiClient({
-    required EnvConfig env,
+    required AppConfig config,
     required SecureStorageService storage,
     Dio? dio,
   }) : _dio = dio ??
             Dio(
               BaseOptions(
-                baseUrl: env.apiBaseUrl,
+                baseUrl: config.apiBaseUrl,
                 connectTimeout: AppConstants.dioTimeoutMs,
                 receiveTimeout: AppConstants.dioTimeoutMs,
+                sendTimeout: AppConstants.dioTimeoutMs,
                 headers: <String, dynamic>{
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json',
-                  if (env.apiKey.isNotEmpty) 'X-API-KEY': env.apiKey,
-                  if (env.appKey.isNotEmpty) 'X-APP-KEY': env.appKey,
+                  ApiHeaders.accept: ApiHeaders.json,
+                  ApiHeaders.contentType: ApiHeaders.json,
                 },
               ),
             ) {
@@ -28,7 +28,7 @@ class ApiClient {
       _dio.interceptors.addAll(
         DioInterceptorFactory.build(
           storage: storage,
-          enableLogging: env.isDevelopment,
+          enableLogging: config.enableVerboseLogging,
         ),
       );
     }
@@ -42,12 +42,14 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
+    CancelToken? cancelToken,
   }) {
     return _guard(
       () => _dio.get<T>(
         path,
         queryParameters: queryParameters,
         options: options,
+        cancelToken: cancelToken,
       ),
     );
   }
@@ -57,6 +59,7 @@ class ApiClient {
     Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    CancelToken? cancelToken,
   }) {
     return _guard(
       () => _dio.post<T>(
@@ -64,6 +67,7 @@ class ApiClient {
         data: data,
         queryParameters: queryParameters,
         options: options,
+        cancelToken: cancelToken,
       ),
     );
   }
@@ -73,6 +77,7 @@ class ApiClient {
     Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    CancelToken? cancelToken,
   }) {
     return _guard(
       () => _dio.put<T>(
@@ -80,6 +85,7 @@ class ApiClient {
         data: data,
         queryParameters: queryParameters,
         options: options,
+        cancelToken: cancelToken,
       ),
     );
   }
@@ -89,6 +95,7 @@ class ApiClient {
     Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    CancelToken? cancelToken,
   }) {
     return _guard(
       () => _dio.patch<T>(
@@ -96,6 +103,7 @@ class ApiClient {
         data: data,
         queryParameters: queryParameters,
         options: options,
+        cancelToken: cancelToken,
       ),
     );
   }
@@ -105,6 +113,7 @@ class ApiClient {
     Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    CancelToken? cancelToken,
   }) {
     return _guard(
       () => _dio.delete<T>(
@@ -112,6 +121,7 @@ class ApiClient {
         data: data,
         queryParameters: queryParameters,
         options: options,
+        cancelToken: cancelToken,
       ),
     );
   }
@@ -119,12 +129,12 @@ class ApiClient {
   Future<Response<T>> _guard<T>(Future<Response<T>> Function() request) async {
     try {
       return await request();
+    } on AppException {
+      rethrow;
     } on DioError catch (error) {
-      final Object? mapped = error.error;
-      if (mapped is AppException) {
-        throw mapped;
-      }
-      throw UnknownException(error.message);
+      throw ErrorMapper.mapDio(error);
+    } catch (_) {
+      throw const UnknownException();
     }
   }
 }

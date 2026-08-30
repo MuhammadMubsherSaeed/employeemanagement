@@ -1,6 +1,12 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+final flutterSecureStorageProvider = Provider<FlutterSecureStorage>((Ref ref) {
+  throw UnimplementedError(
+    'flutterSecureStorageProvider must be overridden in bootstrap.',
+  );
+});
 
 class SecureStorageService {
   const SecureStorageService(this._storage);
@@ -23,9 +29,18 @@ class SecureStorageService {
     return _storage.read(key: StorageKeys.refreshToken);
   }
 
-  Future<void> clearTokens() async {
+  Future<void> saveSessionJson(String json) {
+    return _storage.write(key: StorageKeys.session, value: json);
+  }
+
+  Future<String?> readSessionJson() {
+    return _storage.read(key: StorageKeys.session);
+  }
+
+  Future<void> clearSession() async {
     await _storage.delete(key: StorageKeys.accessToken);
     await _storage.delete(key: StorageKeys.refreshToken);
+    await _storage.delete(key: StorageKeys.session);
   }
 
   Future<void> write(String key, String value) {
@@ -42,9 +57,5 @@ class SecureStorageService {
 }
 
 final secureStorageServiceProvider = Provider<SecureStorageService>((Ref ref) {
-  return const SecureStorageService(
-    FlutterSecureStorage(
-      aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    ),
-  );
+  return SecureStorageService(ref.watch(flutterSecureStorageProvider));
 });

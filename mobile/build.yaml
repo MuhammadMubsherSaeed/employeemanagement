@@ -1,0 +1,19 @@
+targets:
+  $default:
+    sources:
+      include:
+        - lib/**
+        - test/**
+        - $package$
+      exclude:
+        - lib/database/**
+        - lib/env/**
+        - lib/models/**
+        - lib/views/**
+        - lib/widgets/**
+        - lib/repository/**
+        - lib/network/**
+        - lib/providers/**
+        - lib/utils/**
+        - lib/route/**
+        - lib/generated/**
