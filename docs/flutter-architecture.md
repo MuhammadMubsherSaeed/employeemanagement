@@ -1,6 +1,6 @@
 # Flutter architecture — HRMS foundation
 
-This document describes the **mobile client foundation** under `mobile/`. It is the client half of the multi-tenant SaaS HRMS. Business modules (auth UI, employees, attendance, and so on) are **not implemented yet**.
+This document describes the **mobile client foundation** under `mobile/`. It is the client half of the multi-tenant SaaS HRMS. Authentication is implemented; employees, attendance, and other business modules are **not**.
 
 Package name remains `flutter_base` until a later rename. Entry point: `lib/main.dart` → `bootstrap()`.
 
@@ -19,16 +19,16 @@ mobile/lib/
 │   ├── constants/       # App name, routes keys, storage keys, headers
 │   ├── errors/          # AppException + ErrorMapper
 │   ├── extensions/
-│   ├── network/         # ApiClient, interceptors, connectivity
-│   ├── presentation/   # Temporary home + error screen
-│   ├── router/          # GoRouter
-│   ├── session/         # UserSession + SessionStore (no fake user)
-│   ├── storage/         # SecureStorageService + SharedPrefsService
+│   ├── network/         # ApiClient, interceptors, token refresh
+│   ├── presentation/   # Shared error screen
+│   ├── router/          # GoRouter + auth redirect
+│   ├── session/         # UserSession + SessionStore + SessionInvalidator
+│   ├── storage/         # SecureStorageService + TokenStorage + SharedPrefs
 │   ├── theme/           # AppTheme, AppColors, AppTypography, AppSpacing
 │   ├── utils/           # Logger, dates
 │   └── widgets/         # Shared UI
 └── features/
-    └── auth/            # Placeholder only
+    └── auth/            # Login, session, password reset
 ```
 
 Legacy internship/event-tracking code (`lib/views`, `lib/widgets`, `lib/models`, …) is **not part of the foundation**. It is excluded from `flutter analyze`. Do not extend it. New work belongs under `lib/core/` and later `lib/features/<name>/`.
@@ -62,9 +62,9 @@ All HTTP goes through **one** `ApiClient` (Dio 4.x).
 - Connect / receive / send timeouts: 20s.
 - `CancelToken` is accepted on each verb.
 - JSON `Accept` / `Content-Type`.
-- Interceptors (order): request id → auth header → token-refresh slot → logging → error mapping.
+- Interceptors (order, Dio 4 FIFO): request id → auth header (skips public auth paths) → logging → token refresh → error mapping.
 
-`TokenRefreshInterceptor` is an empty extension point. Implement refresh inside it when auth exists; do not rewrite `ApiClient`.
+`TokenRefreshInterceptor` sits **before** error mapping so it sees raw 401s. It coordinates a single refresh, stores rotated tokens, and retries once. See [`docs/flutter-authentication.md`](flutter-authentication.md).
 
 The UI must catch **`AppException`**, never `DioError`.
 
@@ -110,14 +110,15 @@ Anything compiled into the app is public. Do **not** ship API secrets, app keys,
 
 Implemented routes:
 
-- `/` → redirects to `/home`
-- `/home` — temporary foundation screen
+- `/splash` — wait for `AuthController` restore
+- `/login`, `/forgot-password`, `/reset-password`
+- `/home` — temporary authenticated shell (logout + user)
 - `/error` — friendly error page
 - unknown paths → error builder (no stack traces)
 
-Placeholder **names only** (no screens): `/login`, `/dashboard`, `/employees`, `/attendance`, `/leaves`, `/devices`, `/reports`, `/ai`, `/settings`.
+Placeholder **names only** (no screens): `/dashboard`, `/employees`, `/attendance`, `/leaves`, `/devices`, `/reports`, `/ai`, `/settings`.
 
-`redirect` currently only remaps `/` → `/home`. Auth, role, company, and Super Admin guards will be added later **inside this redirect** (or as `GoRouter` refreshListenable). Do not implement them now.
+`redirect` is `AuthRedirect` driven by `authControllerProvider`. Details: [`docs/flutter-authentication.md`](flutter-authentication.md).
 
 ---
 
@@ -189,7 +190,7 @@ Planned feature names (do not create empty folders now):
 
 `auth` · `dashboard` · `employees` · `attendance` · `leaves` · `devices` · `reports` · `notifications` · `ai` · `subscriptions` · `settings`
 
-`features/auth/` exists only as a placeholder. Session types live in `core/session/` so the rest of the app can depend on them without an auth UI.
+`features/auth/` implements login, session restore, logout, and password reset. `UserSession` / `SessionStore` remain for future tenant context and must not be filled with a fake `companyId`.
 
 ---
 

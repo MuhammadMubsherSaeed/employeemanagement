@@ -4,12 +4,17 @@ import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/errors/error_mapper.dart';
 import 'package:flutter_base/core/network/interceptors/dio_interceptors.dart';
+import 'package:flutter_base/core/network/token_refresh_coordinator.dart';
 import 'package:flutter_base/core/storage/secure_storage_service.dart';
+import 'package:flutter_base/core/storage/token_storage.dart';
 
 class ApiClient {
   ApiClient({
     required AppConfig config,
     required SecureStorageService storage,
+    TokenStorage? tokenStorage,
+    TokenRefreshCoordinator? refreshCoordinator,
+    void Function()? onSessionInvalidated,
     Dio? dio,
   }) : _dio = dio ??
             Dio(
@@ -29,6 +34,10 @@ class ApiClient {
         DioInterceptorFactory.build(
           storage: storage,
           enableLogging: config.enableVerboseLogging,
+          dio: _dio,
+          tokenStorage: tokenStorage ?? SecureTokenStorage(storage),
+          coordinator: refreshCoordinator ?? TokenRefreshCoordinator(),
+          onSessionInvalidated: onSessionInvalidated,
         ),
       );
     }

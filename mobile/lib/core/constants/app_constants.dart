@@ -16,6 +16,12 @@ class ApiPaths {
 
   static const String health = '/api/health/';
   static const String v1 = '/api/v1';
+  static const String authLogin = 'auth/login/';
+  static const String authRefresh = 'auth/refresh/';
+  static const String authLogout = 'auth/logout/';
+  static const String authMe = 'auth/me/';
+  static const String authForgotPassword = 'auth/forgot-password/';
+  static const String authResetPassword = 'auth/reset-password/';
 }
 
 class ApiHeaders {
