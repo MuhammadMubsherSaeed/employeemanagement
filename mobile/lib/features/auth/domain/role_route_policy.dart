@@ -1,4 +1,5 @@
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 
@@ -21,6 +22,12 @@ class RoleRoutePolicy {
         path == AppRoutes.employeesMe ||
         path.startsWith('${AppRoutes.employees}/')) {
       return true;
+    }
+    if (path == AppRoutes.attendance ||
+        path == AppRoutes.attendanceHistory ||
+        path == AppRoutes.attendanceCalendar ||
+        path.startsWith('${AppRoutes.attendance}/')) {
+      return AttendanceAccess(role).canView;
     }
     return true;
   }

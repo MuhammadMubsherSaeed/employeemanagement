@@ -8,6 +8,7 @@ import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_status_badge.dart';
+import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
@@ -128,6 +129,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
+            if (AttendanceAccess(user?.role ?? UserRole.unknown).canView)
+              AppCard(
+                onTap: () => context.push(AppRoutes.attendance),
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.schedule_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'Attendance',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            if (AttendanceAccess(user?.role ?? UserRole.unknown).canView)
+              const SizedBox(height: AppSpacing.md),
             AppCard(
               child: Text(
                 'HRMS modules will be added to this home screen over time.',

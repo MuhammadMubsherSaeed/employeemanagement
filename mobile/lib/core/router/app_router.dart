@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_base/core/presentation/app_error_screen.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/router/auth_redirect.dart';
+import 'package:flutter_base/features/attendance/presentation/screens/attendance_calendar_screen.dart';
+import 'package:flutter_base/features/attendance/presentation/screens/attendance_dashboard_screen.dart';
+import 'package:flutter_base/features/attendance/presentation/screens/attendance_details_screen.dart';
+import 'package:flutter_base/features/attendance/presentation/screens/attendance_history_screen.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/auth/presentation/screens/forgot_password_screen.dart';
@@ -118,6 +122,36 @@ GoRouter createAppRouter({
         builder: (BuildContext context, GoRouterState state) {
           return EmployeeDetailsScreen(
             employeeId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.attendance,
+        name: 'attendance',
+        builder: (BuildContext context, GoRouterState state) {
+          return const AttendanceDashboardScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.attendanceHistory,
+        name: 'attendance-history',
+        builder: (BuildContext context, GoRouterState state) {
+          return const AttendanceHistoryScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.attendanceCalendar,
+        name: 'attendance-calendar',
+        builder: (BuildContext context, GoRouterState state) {
+          return const AttendanceCalendarScreen();
+        },
+      ),
+      GoRoute(
+        path: '/attendance/:id',
+        name: 'attendance-detail',
+        builder: (BuildContext context, GoRouterState state) {
+          return AttendanceDetailsScreen(
+            attendanceId: state.pathParameters['id'] ?? '',
           );
         },
       ),

@@ -123,6 +123,30 @@ void main() {
     );
   });
 
+  test('authenticated employees can open their attendance routes', () {
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.attendance,
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.attendanceHistory,
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.unauthenticated(),
+        location: AppRoutes.attendance,
+      ),
+      AppRoutes.login,
+    );
+  });
+
   test('redirect never returns the current location', () {
     expect(
       AuthRedirect.resolve(
