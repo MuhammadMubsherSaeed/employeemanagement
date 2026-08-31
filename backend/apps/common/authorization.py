@@ -60,6 +60,11 @@ class ObjectAuthorization:
             return self._can_view_employee(ctx, obj)
         if self._is_attendance(obj):
             return self._can_view_attendance(ctx, obj)
+        if self._is_leave_type(obj):
+            return True
+        if self._is_leave_employee_owned(obj):
+            employee = getattr(obj, "employee", None)
+            return employee is not None and self._can_view_employee(ctx, employee)
         visibility = getattr(obj, "visibility", "COMPANY")
         owner_id = getattr(obj, "owner_id", None)
         if visibility == "PRIVATE":
@@ -74,6 +79,28 @@ class ObjectAuthorization:
         if self._is_employee(obj):
             return self._can_change_employee(ctx, obj)
         if self._is_attendance(obj):
+            return False
+        if self._is_leave_type(obj):
+            return ctx.role_code in (UserRole.COMPANY_ADMIN, UserRole.MANAGER)
+        if self._is_leave_balance(obj):
+            employee = getattr(obj, "employee", None)
+            if employee is None:
+                return False
+            if ctx.role_code == UserRole.COMPANY_ADMIN:
+                return True
+            if ctx.role_code == UserRole.MANAGER:
+                return self._can_view_employee(ctx, employee)
+            return False
+        if self._is_leave_request(obj):
+            employee = getattr(obj, "employee", None)
+            if employee is None:
+                return False
+            if ctx.role_code == UserRole.COMPANY_ADMIN:
+                return True
+            if employee.user_id == ctx.user.id:
+                return True
+            if ctx.role_code == UserRole.MANAGER:
+                return self._is_direct_report(ctx, employee)
             return False
         owner_id = getattr(obj, "owner_id", None)
         if ctx.role_code == UserRole.MANAGER:
@@ -95,6 +122,10 @@ class ObjectAuthorization:
             return self._filter_employees(queryset, ctx)
         if label == "attendance.Attendance":
             return self._filter_attendance(queryset, ctx)
+        if label in ("leave.LeaveBalance", "leave.LeaveRequest"):
+            return self._filter_attendance(queryset, ctx)
+        if label == "leave.LeaveType":
+            return queryset
         if not hasattr(queryset.model, "visibility"):
             return queryset
         user_id = ctx.user.id
@@ -130,6 +161,18 @@ class ObjectAuthorization:
 
     def _is_attendance(self, obj) -> bool:
         return getattr(obj._meta, "label", "") == "attendance.Attendance"
+
+    def _is_leave_type(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "leave.LeaveType"
+
+    def _is_leave_balance(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "leave.LeaveBalance"
+
+    def _is_leave_request(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "leave.LeaveRequest"
+
+    def _is_leave_employee_owned(self, obj) -> bool:
+        return self._is_leave_balance(obj) or self._is_leave_request(obj)
 
     def _can_view_attendance(self, ctx: TenantContext, obj) -> bool:
         employee = getattr(obj, "employee", None)

@@ -1,6 +1,6 @@
 # Backend architecture — HRMS foundation
 
-This document describes the Django REST backend under `backend/`. Business modules (employees, attendance, leave, devices, billing, AI) are **not implemented yet**.
+This document describes the Django REST backend under `backend/`. Employees, attendance, and leave are implemented; devices, billing, and AI are not.
 
 Python 3.12 · Django 5.2 · DRF 3.16 · PostgreSQL 16.
 
@@ -20,9 +20,12 @@ backend/
 │   ├── asgi.py
 │   └── wsgi.py
 ├── apps/
-│   ├── common/               # timestamps, errors, pagination, health
+│   ├── common/               # timestamps, errors, pagination, health, audit events
 │   ├── accounts/             # custom User, Role, Permission, JWT auth
-│   └── companies/            # Company, CompanyMembership, tenant isolation probes
+│   ├── companies/            # Company, CompanyMembership, CompanySettings
+│   ├── employees/            # Employee, Department, Position
+│   ├── attendance/           # Attendance, Holiday
+│   └── leave/                # LeaveType, LeaveBalance, LeaveRequest
 ├── requirements/
 │   ├── base.txt
 │   ├── development.txt
@@ -31,7 +34,7 @@ backend/
 └── .env.example
 ```
 
-Empty leftover folders from an earlier init (`apps/employees`, `attendance`, `leave`, `organization`) are **not** in `INSTALLED_APPS`. Do not add models there until those features start.
+`apps.employees`, `apps.attendance`, and `apps.leave` are implemented. Remaining planned apps: `devices`, `reports`, `notifications`, `ai`, `subscriptions`. Leave details: [`docs/leave-management.md`](leave-management.md).
 
 ---
 
@@ -204,4 +207,4 @@ Implemented. See [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 5. Inherit domain models from `TimeStampedModel`. Add a `company` FK and `TenantAwareQuerySetMixin`; never take `company_id` from the client.
 6. Use `ApiClient` on Flutter against `/api/v1/…`. Catch `AppException` shapes that match this envelope.
 
-`apps.employees` is implemented. Remaining planned apps: `attendance`, `leaves`, `devices`, `reports`, `notifications`, `ai`, `subscriptions`.
+`apps.employees`, `apps.attendance`, and `apps.leave` are implemented. Remaining planned apps: `devices`, `reports`, `notifications`, `ai`, `subscriptions`.

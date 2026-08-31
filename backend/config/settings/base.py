@@ -30,6 +30,7 @@ LOCAL_APPS = [
     "apps.companies",
     "apps.employees",
     "apps.attendance",
+    "apps.leave",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -127,6 +128,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+LEAVE_ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -183,9 +185,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": (
         "Multi-tenant SaaS HRMS API. JWT authenticates the user; company "
         "context is resolved from CompanyMembership, never from the payload. "
-        "Employees, departments, positions, attendance, and holidays "
+        "Employees, departments, positions, attendance, holidays, and leave "
         "are company-scoped. CompanySettings hold timezone and work-hour "
-        "rules for attendance and future HR modules. "
+        "rules for attendance and leave. "
         "Authorization uses Role ↔ Permission codes (not Django ContentTypes)."
     ),
     "VERSION": "1.0.0",
