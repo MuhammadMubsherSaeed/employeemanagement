@@ -31,6 +31,7 @@ LOCAL_APPS = [
     "apps.employees",
     "apps.attendance",
     "apps.leave",
+    "apps.devices",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -185,9 +186,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": (
         "Multi-tenant SaaS HRMS API. JWT authenticates the user; company "
         "context is resolved from CompanyMembership, never from the payload. "
-        "Employees, departments, positions, attendance, holidays, and leave "
-        "are company-scoped. CompanySettings hold timezone and work-hour "
-        "rules for attendance and leave. "
+        "Employees, departments, positions, attendance, holidays, leave, "
+        "and devices are company-scoped. CompanySettings hold timezone and "
+        "work-hour rules for attendance and leave. "
         "Authorization uses Role ↔ Permission codes (not Django ContentTypes)."
     ),
     "VERSION": "1.0.0",

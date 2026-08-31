@@ -36,6 +36,13 @@ class SchemaAPITests(TestCase):
         self.assertIn("approve/", joined)
         self.assertIn("reject/", joined)
         self.assertIn("cancel/", joined)
+        self.assertIn("devices/", joined)
+        self.assertIn("assign/", joined)
+        self.assertIn("history/", joined)
+        device_return = next(
+            p for p in paths if "devices/" in p and p.rstrip("/").endswith("return")
+        )
+        self.assertIn("post", paths[device_return])
         attendance_item = next(p for p in paths if "attendance/" in p and "{id}" in p)
         self.assertNotIn("put", paths[attendance_item])
         self.assertNotIn("patch", paths[attendance_item])

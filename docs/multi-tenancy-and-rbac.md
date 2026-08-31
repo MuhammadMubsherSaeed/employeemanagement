@@ -1,6 +1,6 @@
 # Multi-tenancy and RBAC
 
-Backend foundation for the multi-tenant SaaS HRMS. Employees, attendance, leave, devices, reports, billing, and company/super-admin UIs are **not** implemented here. This document describes how company isolation and authorization work so those modules can adopt the same pattern.
+Backend foundation for the multi-tenant SaaS HRMS. Employees, attendance, leave, and devices are implemented. Reports, billing, and company/super-admin UIs are **not** implemented here. This document describes how company isolation and authorization work so those modules can adopt the same pattern.
 
 Related: [`docs/authentication.md`](authentication.md), [`docs/backend-architecture.md`](backend-architecture.md).
 
@@ -123,7 +123,7 @@ Default bindings are seeded by `python manage.py seed_rbac` (`apps.accounts.rbac
 | Role | Default permissions |
 | --- | --- |
 | `COMPANY_ADMIN` | All company permission codes currently defined |
-| `MANAGER` | `employees.view`, `employees.update`, `attendance.view`, `attendance.manage`, `leave.view`, `leave.approve`, `leave.reject`, `leave.manage`, `devices.view`, `reports.view`. **Not** `settings.manage` |
+| `MANAGER` | `employees.view`, `employees.update`, `attendance.view`, `attendance.manage`, `leave.view`, `leave.approve`, `leave.reject`, `leave.manage`, `devices.view`, `devices.assign`, `devices.return`, `reports.view`. **Not** `settings.manage` |
 | `EMPLOYEE` | `employees.view`, `attendance.view`, `attendance.check_in`, `attendance.check_out`, `leave.view`, `leave.create`, `devices.view` |
 | `SUPER_ADMIN` | Platform bypass in `TenantContext`. The role row has **no** company permission M2M rows |
 
