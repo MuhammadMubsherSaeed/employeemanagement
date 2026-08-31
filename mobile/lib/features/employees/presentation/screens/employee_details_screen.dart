@@ -8,6 +8,7 @@ import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
+import 'package:flutter_base/features/attendance/presentation/widgets/attendance_profile_link.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
@@ -84,7 +85,10 @@ class EmployeeDetailsScreen extends ConsumerWidget {
             body: TabBarView(
               children: <Widget>[
                 _OverviewTab(employee: employee),
-                const UpcomingModulePlaceholder(title: 'Attendance'),
+                AttendanceProfileLink(
+                  role: access.role,
+                  isSelf: isSelf,
+                ),
                 const UpcomingModulePlaceholder(title: 'Leaves'),
                 const UpcomingModulePlaceholder(title: 'Devices'),
                 const UpcomingModulePlaceholder(title: 'Documents'),

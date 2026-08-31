@@ -238,7 +238,8 @@ void main() {
 
     await tester.tap(find.text('Attendance'));
     await tester.pumpAndSettle();
-    expect(find.text('Attendance module coming soon.'), findsOneWidget);
+    expect(find.text('Open attendance'), findsOneWidget);
+    expect(find.text('Attendance module coming soon.'), findsNothing);
     await tester.tap(find.text('Leaves'));
     await tester.pumpAndSettle();
     expect(find.text('Leaves module coming soon.'), findsOneWidget);

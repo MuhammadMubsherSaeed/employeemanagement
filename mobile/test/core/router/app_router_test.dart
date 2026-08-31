@@ -27,6 +27,8 @@ void main() {
     expect(AppRoutes.employeesAdd, '/employees/add');
     expect(AppRoutes.employeesMe, '/employees/me');
     expect(AppRoutes.attendance, '/attendance');
+    expect(AppRoutes.attendanceHistory, '/attendance/history');
+    expect(AppRoutes.attendanceCalendar, '/attendance/calendar');
     expect(AppRoutes.leaves, '/leaves');
     expect(AppRoutes.devices, '/devices');
     expect(AppRoutes.reports, '/reports');

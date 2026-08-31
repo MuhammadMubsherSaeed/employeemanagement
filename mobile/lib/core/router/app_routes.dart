@@ -15,6 +15,8 @@ class AppRoutes {
   static const String employeesAdd = '/employees/add';
   static const String employeesMe = '/employees/me';
   static const String attendance = '/attendance';
+  static const String attendanceHistory = '/attendance/history';
+  static const String attendanceCalendar = '/attendance/calendar';
   static const String leaves = '/leaves';
   static const String devices = '/devices';
   static const String reports = '/reports';
@@ -24,4 +26,6 @@ class AppRoutes {
   static String employee(String id) => '/employees/$id';
 
   static String employeeEdit(String id) => '/employees/$id/edit';
+
+  static String attendanceDetail(String id) => '/attendance/$id';
 }
