@@ -1,6 +1,6 @@
 # Backend architecture — HRMS foundation
 
-This document describes the Django REST backend under `backend/`. Employees, attendance, and leave are implemented; devices, billing, and AI are not.
+This document describes the Django REST backend under `backend/`. Employees, attendance, leave, and devices are implemented; billing and AI are not.
 
 Python 3.12 · Django 5.2 · DRF 3.16 · PostgreSQL 16.
 
@@ -25,7 +25,8 @@ backend/
 │   ├── companies/            # Company, CompanyMembership, CompanySettings
 │   ├── employees/            # Employee, Department, Position
 │   ├── attendance/           # Attendance, Holiday
-│   └── leave/                # LeaveType, LeaveBalance, LeaveRequest
+│   ├── leave/                # LeaveType, LeaveBalance, LeaveRequest
+│   └── devices/              # Device, DeviceAssignment
 ├── requirements/
 │   ├── base.txt
 │   ├── development.txt
@@ -34,7 +35,7 @@ backend/
 └── .env.example
 ```
 
-`apps.employees`, `apps.attendance`, and `apps.leave` are implemented. Remaining planned apps: `devices`, `reports`, `notifications`, `ai`, `subscriptions`. Leave details: [`docs/leave-management.md`](leave-management.md).
+`apps.employees`, `apps.attendance`, `apps.leave`, and `apps.devices` are implemented. Remaining planned apps: `reports`, `notifications`, `ai`, `subscriptions`. Leave details: [`docs/leave-management.md`](leave-management.md). Device details: [`docs/device-management.md`](device-management.md).
 
 ---
 
@@ -207,4 +208,4 @@ Implemented. See [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 5. Inherit domain models from `TimeStampedModel`. Add a `company` FK and `TenantAwareQuerySetMixin`; never take `company_id` from the client.
 6. Use `ApiClient` on Flutter against `/api/v1/…`. Catch `AppException` shapes that match this envelope.
 
-`apps.employees`, `apps.attendance`, and `apps.leave` are implemented. Remaining planned apps: `devices`, `reports`, `notifications`, `ai`, `subscriptions`.
+`apps.employees`, `apps.attendance`, `apps.leave`, and `apps.devices` are implemented. Remaining planned apps: `reports`, `notifications`, `ai`, `subscriptions`.

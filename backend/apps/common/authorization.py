@@ -65,6 +65,11 @@ class ObjectAuthorization:
         if self._is_leave_employee_owned(obj):
             employee = getattr(obj, "employee", None)
             return employee is not None and self._can_view_employee(ctx, employee)
+        if self._is_device(obj):
+            return self._can_view_device(ctx, obj)
+        if self._is_device_assignment(obj):
+            device = getattr(obj, "device", None)
+            return device is not None and self._can_view_device(ctx, device)
         visibility = getattr(obj, "visibility", "COMPANY")
         owner_id = getattr(obj, "owner_id", None)
         if visibility == "PRIVATE":
@@ -102,6 +107,10 @@ class ObjectAuthorization:
             if ctx.role_code == UserRole.MANAGER:
                 return self._is_direct_report(ctx, employee)
             return False
+        if self._is_device(obj) or self._is_device_assignment(obj):
+            if ctx.role_code == UserRole.MANAGER:
+                return True
+            return False
         owner_id = getattr(obj, "owner_id", None)
         if ctx.role_code == UserRole.MANAGER:
             return owner_id == ctx.user.id or self.team_scope.is_in_team(
@@ -126,6 +135,10 @@ class ObjectAuthorization:
             return self._filter_attendance(queryset, ctx)
         if label == "leave.LeaveType":
             return queryset
+        if label == "devices.Device":
+            return self._filter_devices(queryset, ctx)
+        if label == "devices.DeviceAssignment":
+            return self._filter_device_assignments(queryset, ctx)
         if not hasattr(queryset.model, "visibility"):
             return queryset
         user_id = ctx.user.id
@@ -173,6 +186,66 @@ class ObjectAuthorization:
 
     def _is_leave_employee_owned(self, obj) -> bool:
         return self._is_leave_balance(obj) or self._is_leave_request(obj)
+
+    def _is_device(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "devices.Device"
+
+    def _is_device_assignment(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "devices.DeviceAssignment"
+
+    def _active_device_assignment(self, device):
+        from apps.devices.models import DeviceAssignment
+
+        return (
+            DeviceAssignment.objects.select_related("employee")
+            .filter(device=device, returned_at__isnull=True)
+            .first()
+        )
+
+    def _can_view_device(self, ctx: TenantContext, obj) -> bool:
+        if ctx.role_code == UserRole.COMPANY_ADMIN:
+            return True
+        assignment = self._active_device_assignment(obj)
+        if ctx.role_code == UserRole.MANAGER:
+            if getattr(obj, "status", None) == "AVAILABLE":
+                return True
+            return assignment is not None and self._can_view_employee(
+                ctx, assignment.employee
+            )
+        return (
+            assignment is not None
+            and assignment.employee.user_id == ctx.user.id
+        )
+
+    def _filter_devices(self, queryset, ctx: TenantContext):
+        user_id = ctx.user.id
+        if ctx.role_code == UserRole.MANAGER:
+            my_id = self._actor_employee_id(ctx)
+            query = Q(status="AVAILABLE")
+            query |= Q(
+                assignments__returned_at__isnull=True,
+                assignments__employee__user_id=user_id,
+            )
+            if my_id is not None:
+                query |= Q(
+                    assignments__returned_at__isnull=True,
+                    assignments__employee__manager_id=my_id,
+                )
+            return queryset.filter(query).distinct()
+        return queryset.filter(
+            assignments__returned_at__isnull=True,
+            assignments__employee__user_id=user_id,
+        ).distinct()
+
+    def _filter_device_assignments(self, queryset, ctx: TenantContext):
+        user_id = ctx.user.id
+        if ctx.role_code == UserRole.MANAGER:
+            my_id = self._actor_employee_id(ctx)
+            query = Q(employee__user_id=user_id)
+            if my_id is not None:
+                query |= Q(employee__manager_id=my_id)
+            return queryset.filter(query)
+        return queryset.filter(employee__user_id=user_id)
 
     def _can_view_attendance(self, ctx: TenantContext, obj) -> bool:
         employee = getattr(obj, "employee", None)

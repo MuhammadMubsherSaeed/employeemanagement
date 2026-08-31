@@ -24,6 +24,7 @@ PERMISSION_CODES = (
     "devices.update",
     "devices.assign",
     "devices.return",
+    "devices.delete",
     "reports.view",
     "reports.export",
     "settings.manage",
@@ -49,6 +50,7 @@ PERMISSION_META = {
     "devices.update": ("Update devices", "devices"),
     "devices.assign": ("Assign devices", "devices"),
     "devices.return": ("Return devices", "devices"),
+    "devices.delete": ("Delete devices", "devices"),
     "reports.view": ("View reports", "reports"),
     "reports.export": ("Export reports", "reports"),
     "settings.manage": ("Manage settings", "settings"),
@@ -67,6 +69,8 @@ MANAGER_PERMISSIONS = (
     "leave.reject",
     "leave.manage",
     "devices.view",
+    "devices.assign",
+    "devices.return",
     "reports.view",
 )
 
