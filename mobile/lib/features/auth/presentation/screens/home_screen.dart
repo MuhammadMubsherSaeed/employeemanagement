@@ -12,6 +12,7 @@ import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -167,6 +168,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             if (LeaveAccess(user?.role ?? UserRole.unknown).canView)
+              const SizedBox(height: AppSpacing.md),
+            if (DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
+              AppCard(
+                onTap: () => context.push(AppRoutes.myDevices),
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.phonelink_setup_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'My devices',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            if (DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
+              const SizedBox(height: AppSpacing.md),
+            if (DeviceAccess(user?.role ?? UserRole.unknown).canView &&
+                !DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
+              AppCard(
+                onTap: () => context.push(AppRoutes.devices),
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.devices_other_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'Devices',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            if (DeviceAccess(user?.role ?? UserRole.unknown).canView &&
+                !DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
               const SizedBox(height: AppSpacing.md),
             AppCard(
               child: Text(

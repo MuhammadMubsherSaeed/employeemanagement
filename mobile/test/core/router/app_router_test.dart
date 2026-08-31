@@ -35,6 +35,12 @@ void main() {
     expect(AppRoutes.leavesRequests, '/leaves/requests');
     expect(AppRoutes.leavesHistory, '/leaves/history');
     expect(AppRoutes.devices, '/devices');
+    expect(AppRoutes.devicesAdd, '/devices/add');
+    expect(AppRoutes.myDevices, '/my-devices');
+    expect(AppRoutes.device('dev-1'), '/devices/dev-1');
+    expect(AppRoutes.deviceEdit('dev-1'), '/devices/dev-1/edit');
+    expect(AppRoutes.deviceAssign('dev-1'), '/devices/dev-1/assign');
+    expect(AppRoutes.deviceHistory('dev-1'), '/devices/dev-1/history');
     expect(AppRoutes.reports, '/reports');
     expect(AppRoutes.ai, '/ai');
     expect(AppRoutes.settings, '/settings');

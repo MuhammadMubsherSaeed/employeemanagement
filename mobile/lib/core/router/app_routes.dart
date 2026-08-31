@@ -25,6 +25,8 @@ class AppRoutes {
   static const String leavesTypes = '/leaves/types';
   static const String leavesTypesAdd = '/leaves/types/add';
   static const String devices = '/devices';
+  static const String devicesAdd = '/devices/add';
+  static const String myDevices = '/my-devices';
   static const String reports = '/reports';
   static const String ai = '/ai';
   static const String settings = '/settings';
@@ -40,4 +42,12 @@ class AppRoutes {
   static String leaveApproval(String id) => '/leaves/approval/$id';
 
   static String leaveTypeEdit(String id) => '/leaves/types/$id/edit';
+
+  static String device(String id) => '/devices/$id';
+
+  static String deviceEdit(String id) => '/devices/$id/edit';
+
+  static String deviceAssign(String id) => '/devices/$id/assign';
+
+  static String deviceHistory(String id) => '/devices/$id/history';
 }

@@ -2,6 +2,7 @@ import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/domain/role_route_policy.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 
 class AuthRedirect {
@@ -40,6 +41,11 @@ class AuthRedirect {
                 loc != AppRoutes.employeesMe &&
                 !loc.endsWith('/edit'))) {
           return _nav(AppRoutes.employeesMe, loc);
+        }
+      }
+      if (DeviceAccess(auth.user.role).isSelfService) {
+        if (loc == AppRoutes.devices || loc == AppRoutes.devicesAdd) {
+          return _nav(AppRoutes.myDevices, loc);
         }
       }
       if (onLogin || onForgot || onSplash) {
