@@ -127,7 +127,7 @@ If a date is both a non-working weekday and a holiday, **WEEKEND wins** (working
 
 ## 11. Leave integration point
 
-`apps.attendance.services.leave_covers_date(employee, on_date)` currently returns `False`. A future Leave module should return `True` for approved leave covering that date; `AttendanceStatusService` will then emit `LEAVE`. Attendance must not invent leave rows.
+`apps.attendance.services.leave_covers_date(employee, on_date)` is true when an **approved** `LeaveRequest` in the same company covers that date. Attendance does not insert leave rows. See [`docs/leave-management.md`](leave-management.md).
 
 ---
 
@@ -177,7 +177,7 @@ Employees check in/out (if permitted), list/retrieve/`/me/`/summary for **themse
 
 1. `WEEKEND` — weekday not in `working_days`
 2. `HOLIDAY` — active company holiday
-3. `LEAVE` — `leave_covers_date` (always false today)
+3. `LEAVE` — `leave_covers_date` (approved leave in `apps.leave`)
 4. `ABSENT` — no check-in (helper / future jobs only)
 5. `HALF_DAY` — checkout exists and minutes below minimum
 6. `LATE` — check-in after start + grace
@@ -237,7 +237,7 @@ OpenAPI: `/api/schema/` and `/api/docs/` (tags Attendance, Holidays).
 ## 23. Known limitations
 
 - Overnight shifts are rejected on `CompanySettings`.
-- Leave is a stub (`leave_covers_date` → false).
+- Leave is resolved from approved `LeaveRequest` rows; attendance still does not materialize leave records on approval.
 - Absences are not materialized daily.
 - Overtime is a placeholder field on summaries.
 - Default MANAGER role cannot self check-in/out (catalog).

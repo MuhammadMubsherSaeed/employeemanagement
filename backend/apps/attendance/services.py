@@ -30,13 +30,14 @@ def client_ip(request) -> str | None:
 
 
 def leave_covers_date(*, employee: Employee, on_date: date) -> bool:
-    """Future Leave module hook.
+    """True when an approved leave request covers ``on_date``.
 
-    Must return True only when an approved leave covers ``on_date``.
-    Leave is not implemented; never fabricate LEAVE status.
+    Attendance does not materialize leave rows. Status LEAVE is derived here.
     """
 
-    return False
+    from apps.leave.selectors import approved_leave_covers_date
+
+    return approved_leave_covers_date(employee=employee, on_date=on_date)
 
 
 class CompanyClock:
