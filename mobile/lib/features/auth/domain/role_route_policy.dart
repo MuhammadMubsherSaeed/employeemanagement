@@ -1,6 +1,7 @@
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
+import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 
@@ -48,6 +49,21 @@ class RoleRoutePolicy {
         path == AppRoutes.leavesHistory ||
         path.startsWith('${AppRoutes.leaves}/')) {
       return leave.canView;
+    }
+    final DeviceAccess devices = DeviceAccess(role);
+    if (path == AppRoutes.devicesAdd) {
+      return devices.canCreate;
+    }
+    if (path.startsWith('${AppRoutes.devices}/') && path.endsWith('/edit')) {
+      return devices.canUpdate;
+    }
+    if (path.startsWith('${AppRoutes.devices}/') && path.endsWith('/assign')) {
+      return devices.canAssign;
+    }
+    if (path == AppRoutes.devices ||
+        path == AppRoutes.myDevices ||
+        path.startsWith('${AppRoutes.devices}/')) {
+      return devices.canView;
     }
     return true;
   }

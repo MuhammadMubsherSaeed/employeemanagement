@@ -154,6 +154,51 @@ void main() {
     );
   });
 
+  test('authenticated employees use my-devices instead of company inventory', () {
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.devices,
+      ),
+      AppRoutes.myDevices,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.myDevices,
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.device('dev-1'),
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.devicesAdd,
+      ),
+      AppRoutes.home,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.deviceAssign('dev-1'),
+      ),
+      AppRoutes.home,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.unauthenticated(),
+        location: AppRoutes.devices,
+      ),
+      AppRoutes.login,
+    );
+  });
+
   test('authenticated employees can open their attendance routes', () {
     expect(
       AuthRedirect.resolve(

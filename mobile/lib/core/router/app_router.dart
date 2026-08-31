@@ -13,6 +13,11 @@ import 'package:flutter_base/features/auth/presentation/screens/home_screen.dart
 import 'package:flutter_base/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter_base/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:flutter_base/features/auth/presentation/screens/splash_screen.dart';
+import 'package:flutter_base/features/devices/presentation/screens/assign_device_screen.dart';
+import 'package:flutter_base/features/devices/presentation/screens/device_details_screen.dart';
+import 'package:flutter_base/features/devices/presentation/screens/device_form_screen.dart';
+import 'package:flutter_base/features/devices/presentation/screens/device_history_screen.dart';
+import 'package:flutter_base/features/devices/presentation/screens/devices_screen.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employee_details_screen.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employee_form_screens.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employees_screen.dart';
@@ -236,6 +241,63 @@ GoRouter createAppRouter({
           return LeaveRequestDetailsScreen(
             requestId: state.pathParameters['id'] ?? '',
           );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.myDevices,
+        name: 'my-devices',
+        builder: (BuildContext context, GoRouterState state) {
+          return const MyDeviceScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.devicesAdd,
+        name: 'devices-add',
+        builder: (BuildContext context, GoRouterState state) {
+          return const AddDeviceScreen();
+        },
+      ),
+      GoRoute(
+        path: '/devices/:id/edit',
+        name: 'device-edit',
+        builder: (BuildContext context, GoRouterState state) {
+          return EditDeviceScreen(
+            deviceId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/devices/:id/assign',
+        name: 'device-assign',
+        builder: (BuildContext context, GoRouterState state) {
+          return AssignDeviceScreen(
+            deviceId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/devices/:id/history',
+        name: 'device-history',
+        builder: (BuildContext context, GoRouterState state) {
+          return DeviceHistoryScreen(
+            deviceId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/devices/:id',
+        name: 'device-detail',
+        builder: (BuildContext context, GoRouterState state) {
+          return DeviceDetailsScreen(
+            deviceId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.devices,
+        name: 'devices',
+        builder: (BuildContext context, GoRouterState state) {
+          return const DevicesScreen();
         },
       ),
       GoRoute(
