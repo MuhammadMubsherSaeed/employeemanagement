@@ -123,6 +123,37 @@ void main() {
     );
   });
 
+  test('authenticated employees can open leave routes they are allowed to use', () {
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.leaves,
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.leavesApply,
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.leavesTypes,
+      ),
+      AppRoutes.home,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.unauthenticated(),
+        location: AppRoutes.leaves,
+      ),
+      AppRoutes.login,
+    );
+  });
+
   test('authenticated employees can open their attendance routes', () {
     expect(
       AuthRedirect.resolve(

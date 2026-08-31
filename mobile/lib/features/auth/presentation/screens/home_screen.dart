@@ -13,6 +13,7 @@ import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
+import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -147,6 +148,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             if (AttendanceAccess(user?.role ?? UserRole.unknown).canView)
+              const SizedBox(height: AppSpacing.md),
+            if (LeaveAccess(user?.role ?? UserRole.unknown).canView)
+              AppCard(
+                onTap: () => context.push(AppRoutes.leaves),
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.event_available_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'Leave',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            if (LeaveAccess(user?.role ?? UserRole.unknown).canView)
               const SizedBox(height: AppSpacing.md),
             AppCard(
               child: Text(

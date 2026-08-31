@@ -14,5 +14,9 @@ void main() {
       ),
       '5 min ago',
     );
+    expect(
+      AppDateFormatter.dateRange(value, DateTime(2026, 8, 31, 9)),
+      contains('2026'),
+    );
   });
 }
