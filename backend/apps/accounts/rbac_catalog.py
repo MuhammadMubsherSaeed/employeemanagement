@@ -25,6 +25,11 @@ PERMISSION_CODES = (
     "devices.assign",
     "devices.return",
     "devices.delete",
+    "documents.view",
+    "documents.create",
+    "documents.update",
+    "documents.delete",
+    "documents.download",
     "reports.view",
     "reports.export",
     "settings.manage",
@@ -51,6 +56,11 @@ PERMISSION_META = {
     "devices.assign": ("Assign devices", "devices"),
     "devices.return": ("Return devices", "devices"),
     "devices.delete": ("Delete devices", "devices"),
+    "documents.view": ("View documents", "documents"),
+    "documents.create": ("Create documents", "documents"),
+    "documents.update": ("Update documents", "documents"),
+    "documents.delete": ("Delete documents", "documents"),
+    "documents.download": ("Download documents", "documents"),
     "reports.view": ("View reports", "reports"),
     "reports.export": ("Export reports", "reports"),
     "settings.manage": ("Manage settings", "settings"),
@@ -71,6 +81,10 @@ MANAGER_PERMISSIONS = (
     "devices.view",
     "devices.assign",
     "devices.return",
+    "documents.view",
+    "documents.create",
+    "documents.update",
+    "documents.download",
     "reports.view",
 )
 
@@ -82,6 +96,9 @@ EMPLOYEE_PERMISSIONS = (
     "leave.view",
     "leave.create",
     "devices.view",
+    "documents.view",
+    "documents.create",
+    "documents.download",
 )
 
 ROLE_DEFINITIONS = (

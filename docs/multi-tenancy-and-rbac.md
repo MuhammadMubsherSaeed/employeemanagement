@@ -123,8 +123,8 @@ Default bindings are seeded by `python manage.py seed_rbac` (`apps.accounts.rbac
 | Role | Default permissions |
 | --- | --- |
 | `COMPANY_ADMIN` | All company permission codes currently defined |
-| `MANAGER` | `employees.view`, `employees.update`, `attendance.view`, `attendance.manage`, `leave.view`, `leave.approve`, `leave.reject`, `leave.manage`, `devices.view`, `devices.assign`, `devices.return`, `reports.view`. **Not** `settings.manage` |
-| `EMPLOYEE` | `employees.view`, `attendance.view`, `attendance.check_in`, `attendance.check_out`, `leave.view`, `leave.create`, `devices.view` |
+| `MANAGER` | `employees.view`, `employees.update`, `attendance.view`, `attendance.manage`, `leave.view`, `leave.approve`, `leave.reject`, `leave.manage`, `devices.view`, `devices.assign`, `devices.return`, `documents.view`, `documents.create`, `documents.update`, `documents.download`, `reports.view`. **Not** `settings.manage` or `documents.delete` |
+| `EMPLOYEE` | `employees.view`, `attendance.view`, `attendance.check_in`, `attendance.check_out`, `leave.view`, `leave.create`, `devices.view`, `documents.view`, `documents.create`, `documents.download` |
 | `SUPER_ADMIN` | Platform bypass in `TenantContext`. The role row has **no** company permission M2M rows |
 
 `employees.view` on EMPLOYEE does **not** mean every employee row. Object-level rules further restrict private data.
