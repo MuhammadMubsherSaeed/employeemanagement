@@ -32,6 +32,7 @@ LOCAL_APPS = [
     "apps.attendance",
     "apps.leave",
     "apps.devices",
+    "apps.documents",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -130,6 +131,12 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 LEAVE_ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
+MAX_DOCUMENT_UPLOAD_SIZE = env.int(
+    "MAX_DOCUMENT_UPLOAD_SIZE",
+    default=10 * 1024 * 1024,
+)
+DOCUMENT_EXPIRING_SOON_DAYS = env.int("DOCUMENT_EXPIRING_SOON_DAYS", default=30)
+DOCUMENT_ALLOWED_EXTENSIONS = ("pdf", "doc", "docx", "jpg", "jpeg", "png")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

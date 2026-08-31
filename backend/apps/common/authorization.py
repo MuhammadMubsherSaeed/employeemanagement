@@ -65,6 +65,9 @@ class ObjectAuthorization:
         if self._is_leave_employee_owned(obj):
             employee = getattr(obj, "employee", None)
             return employee is not None and self._can_view_employee(ctx, employee)
+        if self._is_document(obj):
+            employee = getattr(obj, "employee", None)
+            return employee is not None and self._can_view_employee(ctx, employee)
         if self._is_device(obj):
             return self._can_view_device(ctx, obj)
         if self._is_device_assignment(obj):
@@ -107,6 +110,13 @@ class ObjectAuthorization:
             if ctx.role_code == UserRole.MANAGER:
                 return self._is_direct_report(ctx, employee)
             return False
+        if self._is_document(obj):
+            employee = getattr(obj, "employee", None)
+            if employee is None:
+                return False
+            if ctx.role_code == UserRole.MANAGER:
+                return self._can_view_employee(ctx, employee)
+            return False
         if self._is_device(obj) or self._is_device_assignment(obj):
             if ctx.role_code == UserRole.MANAGER:
                 return True
@@ -132,6 +142,8 @@ class ObjectAuthorization:
         if label == "attendance.Attendance":
             return self._filter_attendance(queryset, ctx)
         if label in ("leave.LeaveBalance", "leave.LeaveRequest"):
+            return self._filter_attendance(queryset, ctx)
+        if label == "documents.EmployeeDocument":
             return self._filter_attendance(queryset, ctx)
         if label == "leave.LeaveType":
             return queryset
@@ -183,6 +195,9 @@ class ObjectAuthorization:
 
     def _is_leave_request(self, obj) -> bool:
         return getattr(obj._meta, "label", "") == "leave.LeaveRequest"
+
+    def _is_document(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "documents.EmployeeDocument"
 
     def _is_leave_employee_owned(self, obj) -> bool:
         return self._is_leave_balance(obj) or self._is_leave_request(obj)

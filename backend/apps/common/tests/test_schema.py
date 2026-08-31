@@ -39,6 +39,8 @@ class SchemaAPITests(TestCase):
         self.assertIn("devices/", joined)
         self.assertIn("assign/", joined)
         self.assertIn("history/", joined)
+        self.assertIn("documents/", joined)
+        self.assertIn("download/", joined)
         device_return = next(
             p for p in paths if "devices/" in p and p.rstrip("/").endswith("return")
         )

@@ -18,6 +18,8 @@ env = environ.Env(
     EMAIL_PORT=(int, 587),
     EMAIL_USE_TLS=(bool, True),
     PASSWORD_RESET_TIMEOUT=(int, 60 * 60 * 24),
+    MAX_DOCUMENT_UPLOAD_SIZE=(int, 10 * 1024 * 1024),
+    DOCUMENT_EXPIRING_SOON_DAYS=(int, 30),
 )
 
 _env_file = BASE_DIR / ".env"
