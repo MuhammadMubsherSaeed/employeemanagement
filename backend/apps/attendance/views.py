@@ -1,7 +1,12 @@
 from calendar import monthrange
 from datetime import date
 
-from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+)
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -124,7 +129,15 @@ class AttendanceViewSet(
 
     @extend_schema(
         tags=["Attendance"],
-        description="Attendance rows for the authenticated employee. Ignores employee_id.",
+        description=(
+            "Attendance rows for the authenticated employee. Ignores employee_id. "
+            "Requires attendance.view."
+        ),
+        responses={
+            200: AttendanceListSerializer,
+            401: OpenApiResponse(description="Unauthenticated."),
+            404: OpenApiResponse(description="No employee profile."),
+        },
     )
     @action(detail=False, methods=["get"], url_path="me")
     def me(self, request, **_kwargs):
@@ -146,10 +159,18 @@ class AttendanceViewSet(
     @extend_schema(
         tags=["Attendance"],
         request=CheckInSerializer,
-        responses={200: AttendanceDetailSerializer},
+        responses={
+            200: AttendanceDetailSerializer,
+            400: OpenApiResponse(
+                description="Validation or business rule error (duplicate check-in)."
+            ),
+            401: OpenApiResponse(description="Unauthenticated."),
+            403: OpenApiResponse(description="Missing attendance.check_in."),
+        },
         description=(
             "Check in for the company-local date. Employee is taken from "
-            "request.user. Client timestamps are ignored."
+            "request.user. Client timestamps are ignored. Requires "
+            "attendance.check_in."
         ),
     )
     @action(detail=False, methods=["post"], url_path="check-in")
@@ -169,8 +190,18 @@ class AttendanceViewSet(
     @extend_schema(
         tags=["Attendance"],
         request=CheckOutSerializer,
-        responses={200: AttendanceDetailSerializer},
-        description="Check out against today's company-local attendance row.",
+        responses={
+            200: AttendanceDetailSerializer,
+            400: OpenApiResponse(
+                description="No check-in, duplicate check-out, or check-out before check-in."
+            ),
+            401: OpenApiResponse(description="Unauthenticated."),
+            403: OpenApiResponse(description="Missing attendance.check_out."),
+        },
+        description=(
+            "Check out against today's company-local attendance row. "
+            "Requires attendance.check_out. Client timestamps are ignored."
+        ),
     )
     @action(detail=False, methods=["post"], url_path="check-out")
     def check_out(self, request, **_kwargs):
@@ -193,11 +224,18 @@ class AttendanceViewSet(
             OpenApiParameter("end_date", type=str, required=False),
             OpenApiParameter("employee_id", type=str, required=False),
         ],
-        responses={200: AttendanceSummarySerializer},
+        responses={
+            200: AttendanceSummarySerializer,
+            400: OpenApiResponse(description="Invalid or unbounded date range."),
+            401: OpenApiResponse(description="Unauthenticated."),
+            403: OpenApiResponse(description="Missing attendance.view."),
+            404: OpenApiResponse(description="Unauthorized employee_id."),
+        },
         description=(
             "Date-range summary. Employees are scoped to self; managers to "
             "self and direct reports; company admins to the company. "
-            "Maximum range is 366 days."
+            "Requires attendance.view. Maximum range is 366 days. "
+            "Omitting both dates uses the current company-local month."
         ),
     )
     @action(detail=False, methods=["get"], url_path="summary")

@@ -123,7 +123,18 @@ class CheckInTests(AttendanceFixtureMixin, TestCase):
         response = check_in(client, payload={"latitude": 31.5})
         self.assertEqual(response.status_code, 400)
 
-    def test_valid_location_and_server_ip(self) -> None:
+    def test_does_not_trust_x_forwarded_for(self) -> None:
+        client = self.authenticate(self.employee_a)
+        response = check_in(
+            client,
+            payload={},
+            REMOTE_ADDR="203.0.113.10",
+            HTTP_X_FORWARDED_FOR="198.51.100.1",
+        )
+        self.assertEqual(response.status_code, 200)
+        row = Attendance.objects.get(pk=response.json()["data"]["id"])
+        self.assertEqual(str(row.check_in_ip), "203.0.113.10")
+
         client = self.authenticate(self.employee_a)
         response = check_in(
             client,

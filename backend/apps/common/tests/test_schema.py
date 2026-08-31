@@ -17,3 +17,28 @@ class SchemaAPITests(TestCase):
         )
         self.assertEqual(settings.SIMPLE_JWT["AUTH_HEADER_TYPES"], ("Bearer",))
         self.assertTrue(settings.SIMPLE_JWT["ROTATE_REFRESH_TOKENS"])
+
+    def test_attendance_and_holiday_paths_are_documented(self) -> None:
+        client = APIClient()
+        response = client.get("/api/schema/", HTTP_ACCEPT="application/json")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        paths = payload["paths"]
+        joined = " ".join(paths)
+        self.assertIn("attendance/check-in/", joined)
+        self.assertIn("attendance/check-out/", joined)
+        self.assertIn("attendance/me/", joined)
+        self.assertIn("attendance/summary/", joined)
+        self.assertIn("holidays/", joined)
+        attendance_item = next(p for p in paths if "attendance/" in p and "{id}" in p)
+        self.assertNotIn("put", paths[attendance_item])
+        self.assertNotIn("patch", paths[attendance_item])
+        list_path = next(
+            p
+            for p in paths
+            if p.rstrip("/").endswith("attendance") or p.endswith("attendance/")
+        )
+        self.assertIn("get", paths[list_path])
+        check_in_path = next(p for p in paths if p.rstrip("/").endswith("check-in"))
+        self.assertIn("post", paths[check_in_path])
+

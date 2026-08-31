@@ -191,7 +191,7 @@ Employees check in/out (if permitted), list/retrieve/`/me/`/summary for **themse
 
 Both dates required unless both omitted (defaults to the current company-local month). `start_date <= end_date`. Maximum **366** days.
 
-Counts `present_days` / `late_days` / … from stored statuses. `absent_days` uses `is_absent_on` over the range (not invented DB rows). `overtime_minutes` is always `0` for now.
+Counts `present_days` / `late_days` / … from stored statuses. `absent_days` applies the same `ABSENT` rules as `is_absent_on` over the range (not invented DB rows), using one attendance query and one holiday query rather than per-day lookups. `overtime_minutes` is always `0` for now.
 
 Employees: own summary. Managers: self + reports (or one authorized `employee_id`). Admins: company (or one employee in the company).
 

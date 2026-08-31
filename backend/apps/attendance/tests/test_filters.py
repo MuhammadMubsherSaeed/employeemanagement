@@ -93,3 +93,10 @@ class FilterTests(AttendanceFixtureMixin, TestCase):
         self.assertEqual(payload["count"], 2)
         self.assertEqual(len(payload["results"]), 1)
         self.assertIsNotNone(payload["next"])
+
+    def test_date_range_too_large(self) -> None:
+        client = self.authenticate(self.admin_a)
+        response = client.get(
+            f"{ATTENDANCE}/?start_date=2024-01-01&end_date=2026-12-31"
+        )
+        self.assertEqual(response.status_code, 400)

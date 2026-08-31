@@ -1,8 +1,11 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, time, timezone as dt_timezone
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.test import TestCase
+from django.db import IntegrityError, connections
+from django.test import TestCase, TransactionTestCase
+from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.attendance.models import Attendance, AttendanceStatus, Holiday
 from apps.attendance.services import AttendanceStatusService, CompanyClock
@@ -12,6 +15,7 @@ from apps.attendance.tests.fixtures import (
     ON_TIME,
     AttendanceFixtureMixin,
     check_in,
+    freeze_now,
 )
 from apps.companies.models import CompanySettings
 
@@ -186,3 +190,33 @@ class CompanySettingsTests(AttendanceFixtureMixin, TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 403)
+
+
+class ConcurrentCheckInTests(AttendanceFixtureMixin, TransactionTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        type(self).setUpTestData()
+
+    def test_parallel_check_ins_cannot_create_duplicates(self) -> None:
+        token = str(AccessToken.for_user(self.employee_a))
+
+        def attempt():
+            connections.close_all()
+            client = APIClient()
+            client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+            with freeze_now(ON_TIME):
+                return client.post(f"{ATTENDANCE}/check-in/", {}, format="json")
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(lambda _: attempt(), range(2)))
+
+        codes = [response.status_code for response in results]
+        self.assertEqual(
+            Attendance.objects.filter(
+                employee=self.emp_a1, date="2026-03-16"
+            ).count(),
+            1,
+        )
+        self.assertIn(200, codes)
+        self.assertTrue(all(code in (200, 400) for code in codes))
+

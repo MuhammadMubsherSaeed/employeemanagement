@@ -3,11 +3,12 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
-from apps.attendance.models import Attendance, AttendanceStatus
+from apps.attendance.models import Attendance, AttendanceStatus, Holiday
 from apps.attendance.selectors import (
     attendance_for_employee_date,
     attendance_queryset,
@@ -162,9 +163,11 @@ class AttendanceService:
                     check_in_longitude=longitude,
                 )
         except IntegrityError as exc:
-            raise ValidationError(
-                {"non_field_errors": ["Already checked in for this date."]}
-            ) from exc
+            raise _duplicate_check_in_error(exc) from exc
+        except DjangoValidationError as exc:
+            if _is_unique_attendance_violation(exc):
+                raise _duplicate_check_in_error(exc) from exc
+            raise
 
     def check_out(
         self,
@@ -252,32 +255,49 @@ class AttendanceService:
         end: date,
         settings: CompanySettings,
     ) -> dict:
+        employee_ids = [employee.id for employee in employees]
         rows = list(
             attendance_queryset().filter(
                 company=company,
-                employee_id__in=[employee.id for employee in employees],
+                employee_id__in=employee_ids,
                 date__gte=start,
                 date__lte=end,
             )
         )
         counts = {status: 0 for status in AttendanceStatus.values}
         total_working_minutes = 0
+        by_employee_date = {}
         for row in rows:
             counts[row.status] = counts.get(row.status, 0) + 1
             if row.total_minutes:
                 total_working_minutes += row.total_minutes
+            by_employee_date[(row.employee_id, row.date)] = row
+
+        holidays = set(
+            Holiday.objects.filter(
+                company=company,
+                is_active=True,
+                date__gte=start,
+                date__lte=end,
+            ).values_list("date", flat=True)
+        )
 
         absent_days = 0
         cursor = start
         while cursor <= end:
+            is_weekend = not settings.is_working_weekday(cursor.weekday())
+            is_holiday = cursor in holidays
             for employee in employees:
-                if self.is_absent_on(
-                    employee=employee, on_date=cursor, settings=settings
-                ):
+                if is_weekend or is_holiday:
+                    continue
+                if leave_covers_date(employee=employee, on_date=cursor):
+                    continue
+                row = by_employee_date.get((employee.id, cursor))
+                if row is None or row.check_in is None:
                     absent_days += 1
             cursor += timedelta(days=1)
 
-        payload = {
+        return {
             "start_date": start,
             "end_date": end,
             "employee_id": (
@@ -292,12 +312,8 @@ class AttendanceService:
             "holiday_days": counts[AttendanceStatus.HOLIDAY],
             "weekend_days": counts[AttendanceStatus.WEEKEND],
             "total_working_minutes": total_working_minutes,
+            "overtime_minutes": 0,
         }
-        if settings.overtime_enabled:
-            payload["overtime_minutes"] = 0
-        else:
-            payload["overtime_minutes"] = 0
-        return payload
 
     def _require_employee_context(self, request):
         from apps.common.tenancy import get_tenant_context
@@ -316,6 +332,17 @@ class AttendanceService:
             )
         settings = get_company_settings(ctx.company)
         return ctx.company, employee, settings, CompanyClock(settings)
+
+
+def _duplicate_check_in_error(exc: BaseException) -> ValidationError:
+    return ValidationError(
+        {"non_field_errors": ["Already checked in for this date."]}
+    )
+
+
+def _is_unique_attendance_violation(exc: DjangoValidationError) -> bool:
+    text = " ".join(exc.messages).lower()
+    return "already exists" in text or "uniq_attendance" in text
 
 
 def working_minutes(check_in: datetime, check_out: datetime) -> int:

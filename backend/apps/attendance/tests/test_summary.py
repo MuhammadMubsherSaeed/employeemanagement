@@ -5,8 +5,7 @@ from apps.attendance.tests.fixtures import (
     ATTENDANCE,
     ON_TIME,
     AttendanceFixtureMixin,
-    check_in,
-    check_out,
+    freeze_now,
 )
 from datetime import datetime, timezone as dt_timezone
 
@@ -109,3 +108,12 @@ class SummaryTests(AttendanceFixtureMixin, TestCase):
             f"{ATTENDANCE}/summary/?start_date=2026-03-16&end_date=2026-03-16"
         ).json()["data"]
         self.assertEqual(data["overtime_minutes"], 0)
+
+    def test_default_range_is_company_local_month(self) -> None:
+        client = self.authenticate(self.employee_a)
+        with freeze_now(ON_TIME):
+            data = client.get(f"{ATTENDANCE}/summary/").json()["data"]
+        self.assertEqual(data["start_date"], "2026-03-01")
+        self.assertEqual(data["end_date"], "2026-03-31")
+        self.assertEqual(data["employee_id"], str(self.emp_a1.id))
+
