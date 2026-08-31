@@ -18,6 +18,12 @@ class AppRoutes {
   static const String attendanceHistory = '/attendance/history';
   static const String attendanceCalendar = '/attendance/calendar';
   static const String leaves = '/leaves';
+  static const String leavesBalances = '/leaves/balances';
+  static const String leavesApply = '/leaves/apply';
+  static const String leavesRequests = '/leaves/requests';
+  static const String leavesHistory = '/leaves/history';
+  static const String leavesTypes = '/leaves/types';
+  static const String leavesTypesAdd = '/leaves/types/add';
   static const String devices = '/devices';
   static const String reports = '/reports';
   static const String ai = '/ai';
@@ -28,4 +34,10 @@ class AppRoutes {
   static String employeeEdit(String id) => '/employees/$id/edit';
 
   static String attendanceDetail(String id) => '/attendance/$id';
+
+  static String leaveRequest(String id) => '/leaves/requests/$id';
+
+  static String leaveApproval(String id) => '/leaves/approval/$id';
+
+  static String leaveTypeEdit(String id) => '/leaves/types/$id/edit';
 }

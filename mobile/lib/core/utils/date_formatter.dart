@@ -9,6 +9,19 @@ class AppDateFormatter {
     return DateFormat.yMMMd(_resolvedLocale(locale)).format(value);
   }
 
+  static String dateRange(
+    DateTime start,
+    DateTime end, {
+    String? locale,
+  }) {
+    final DateTime a = DateTime(start.year, start.month, start.day);
+    final DateTime b = DateTime(end.year, end.month, end.day);
+    if (a == b) {
+      return date(a, locale: locale);
+    }
+    return '${date(a, locale: locale)} – ${date(b, locale: locale)}';
+  }
+
   static String time(DateTime value, {String? locale, String? timeZoneName}) {
     return DateFormat.jm(_resolvedLocale(locale)).format(value);
   }

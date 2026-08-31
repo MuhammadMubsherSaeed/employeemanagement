@@ -30,6 +30,10 @@ void main() {
     expect(AppRoutes.attendanceHistory, '/attendance/history');
     expect(AppRoutes.attendanceCalendar, '/attendance/calendar');
     expect(AppRoutes.leaves, '/leaves');
+    expect(AppRoutes.leavesBalances, '/leaves/balances');
+    expect(AppRoutes.leavesApply, '/leaves/apply');
+    expect(AppRoutes.leavesRequests, '/leaves/requests');
+    expect(AppRoutes.leavesHistory, '/leaves/history');
     expect(AppRoutes.devices, '/devices');
     expect(AppRoutes.reports, '/reports');
     expect(AppRoutes.ai, '/ai');

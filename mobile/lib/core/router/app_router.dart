@@ -16,6 +16,13 @@ import 'package:flutter_base/features/auth/presentation/screens/splash_screen.da
 import 'package:flutter_base/features/employees/presentation/screens/employee_details_screen.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employee_form_screens.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employees_screen.dart';
+import 'package:flutter_base/features/leaves/presentation/screens/apply_leave_screen.dart';
+import 'package:flutter_base/features/leaves/presentation/screens/leave_balance_screen.dart';
+import 'package:flutter_base/features/leaves/presentation/screens/leave_dashboard_screen.dart';
+import 'package:flutter_base/features/leaves/presentation/screens/leave_request_details_screen.dart';
+import 'package:flutter_base/features/leaves/presentation/screens/leave_requests_screen.dart';
+import 'package:flutter_base/features/leaves/presentation/screens/leave_type_form_screen.dart';
+import 'package:flutter_base/features/leaves/presentation/screens/leave_types_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -152,6 +159,82 @@ GoRouter createAppRouter({
         builder: (BuildContext context, GoRouterState state) {
           return AttendanceDetailsScreen(
             attendanceId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leaves,
+        name: 'leaves',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LeaveDashboardScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leavesBalances,
+        name: 'leave-balances',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LeaveBalanceScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leavesApply,
+        name: 'leave-apply',
+        builder: (BuildContext context, GoRouterState state) {
+          return const ApplyLeaveScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leavesRequests,
+        name: 'leave-requests',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LeaveRequestsScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leavesHistory,
+        name: 'leave-history',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LeaveHistoryScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leavesTypesAdd,
+        name: 'leave-types-add',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LeaveTypeFormScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.leavesTypes,
+        name: 'leave-types',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LeaveTypesScreen();
+        },
+      ),
+      GoRoute(
+        path: '/leaves/types/:id/edit',
+        name: 'leave-type-edit',
+        builder: (BuildContext context, GoRouterState state) {
+          return LeaveTypeFormScreen(
+            leaveTypeId: state.pathParameters['id'],
+          );
+        },
+      ),
+      GoRoute(
+        path: '/leaves/approval/:id',
+        name: 'leave-approval',
+        builder: (BuildContext context, GoRouterState state) {
+          return LeaveApprovalScreen(
+            requestId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/leaves/requests/:id',
+        name: 'leave-request-detail',
+        builder: (BuildContext context, GoRouterState state) {
+          return LeaveRequestDetailsScreen(
+            requestId: state.pathParameters['id'] ?? '',
           );
         },
       ),

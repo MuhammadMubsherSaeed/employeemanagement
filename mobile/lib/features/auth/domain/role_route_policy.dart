@@ -2,6 +2,7 @@ import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
+import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 
 /// Role → route access. Backend authorization remains mandatory.
 class RoleRoutePolicy {
@@ -15,7 +16,7 @@ class RoleRoutePolicy {
     if (path == AppRoutes.employeesAdd) {
       return access.canCreate;
     }
-    if (path.endsWith('/edit')) {
+    if (path.startsWith('${AppRoutes.employees}/') && path.endsWith('/edit')) {
       return access.canUpdate;
     }
     if (path == AppRoutes.employees ||
@@ -28,6 +29,25 @@ class RoleRoutePolicy {
         path == AppRoutes.attendanceCalendar ||
         path.startsWith('${AppRoutes.attendance}/')) {
       return AttendanceAccess(role).canView;
+    }
+    final LeaveAccess leave = LeaveAccess(role);
+    if (path == AppRoutes.leavesApply) {
+      return leave.canCreate;
+    }
+    if (path == AppRoutes.leavesTypes ||
+        path == AppRoutes.leavesTypesAdd ||
+        path.startsWith('${AppRoutes.leavesTypes}/')) {
+      return leave.canManage;
+    }
+    if (path.startsWith('${AppRoutes.leaves}/approval/')) {
+      return leave.canApprove;
+    }
+    if (path == AppRoutes.leaves ||
+        path == AppRoutes.leavesBalances ||
+        path == AppRoutes.leavesRequests ||
+        path == AppRoutes.leavesHistory ||
+        path.startsWith('${AppRoutes.leaves}/')) {
+      return leave.canView;
     }
     return true;
   }
