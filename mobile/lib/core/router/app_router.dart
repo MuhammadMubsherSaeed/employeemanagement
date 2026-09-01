@@ -36,6 +36,9 @@ import 'package:flutter_base/features/reports/presentation/screens/device_report
 import 'package:flutter_base/features/reports/presentation/screens/employee_report_screen.dart';
 import 'package:flutter_base/features/reports/presentation/screens/leave_report_screen.dart';
 import 'package:flutter_base/features/reports/presentation/screens/reports_screen.dart';
+import 'package:flutter_base/features/settings/presentation/screens/attendance_settings_screen.dart';
+import 'package:flutter_base/features/settings/presentation/screens/company_settings_screen.dart';
+import 'package:flutter_base/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -364,6 +367,29 @@ GoRouter createAppRouter({
             name: 'reports-devices',
             builder: (BuildContext context, GoRouterState state) {
               return const DeviceReportScreen();
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        name: 'settings',
+        builder: (BuildContext context, GoRouterState state) {
+          return const SettingsScreen();
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'company',
+            name: 'settings-company',
+            builder: (BuildContext context, GoRouterState state) {
+              return const CompanySettingsScreen();
+            },
+          ),
+          GoRoute(
+            path: 'attendance',
+            name: 'settings-attendance',
+            builder: (BuildContext context, GoRouterState state) {
+              return const AttendanceSettingsScreen();
             },
           ),
         ],

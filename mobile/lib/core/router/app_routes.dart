@@ -35,6 +35,8 @@ class AppRoutes {
   static const String reportsDevices = '/reports/devices';
   static const String ai = '/ai';
   static const String settings = '/settings';
+  static const String settingsCompany = '/settings/company';
+  static const String settingsAttendance = '/settings/attendance';
 
   static String employee(String id) => '/employees/$id';
 

@@ -267,11 +267,17 @@ class AttendanceService:
         )
         counts = {status: 0 for status in AttendanceStatus.values}
         total_working_minutes = 0
+        overtime_total = 0
         by_employee_date = {}
         for row in rows:
             counts[row.status] = counts.get(row.status, 0) + 1
             if row.total_minutes:
                 total_working_minutes += row.total_minutes
+            overtime_total += overtime_minutes(
+                settings=settings,
+                local_date=row.date,
+                check_out=row.check_out,
+            )
             by_employee_date[(row.employee_id, row.date)] = row
 
         holidays = set(
@@ -313,7 +319,7 @@ class AttendanceService:
             "holiday_days": counts[AttendanceStatus.HOLIDAY],
             "weekend_days": counts[AttendanceStatus.WEEKEND],
             "total_working_minutes": total_working_minutes,
-            "overtime_minutes": 0,
+            "overtime_minutes": overtime_total,
         }
 
     def _require_employee_context(self, request):
@@ -349,6 +355,24 @@ def _is_unique_attendance_violation(exc: DjangoValidationError) -> bool:
 def working_minutes(check_in: datetime, check_out: datetime) -> int:
     delta = check_out - check_in
     return max(0, int(delta.total_seconds() // 60))
+
+
+def overtime_minutes(
+    *,
+    settings: CompanySettings,
+    local_date: date,
+    check_out: datetime | None,
+) -> int:
+    """Minutes after work_end_time. Zero when overtime is disabled or there is no checkout."""
+
+    if not settings.overtime_enabled or check_out is None:
+        return 0
+    tz = settings.zoneinfo()
+    end = datetime.combine(local_date, settings.work_end_time, tzinfo=tz)
+    local_out = check_out.astimezone(tz)
+    if local_out <= end:
+        return 0
+    return int((local_out - end).total_seconds() // 60)
 
 
 def validate_date_range(start: date, end: date) -> None:

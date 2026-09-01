@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError as APIValidationError
 from apps.accounts.models import RoleScope, UserRole
 from apps.audit_logs.constants import AuditAction, AuditEntityType
 from apps.audit_logs.services import AuditService, changed_fields
+from apps.companies.constants import working_day_names
 from apps.companies.models import Company, CompanyMembership, CompanySettings
 
 _SETTINGS_FIELDS = (
@@ -15,6 +16,7 @@ _SETTINGS_FIELDS = (
     "minimum_working_minutes",
     "overtime_enabled",
     "working_days",
+    "logo",
 )
 
 
@@ -98,18 +100,24 @@ def get_company_settings(company: Company) -> CompanySettings:
 
 
 def settings_snapshot(row: CompanySettings) -> dict:
+    logo_name = row.logo.name if row.logo else None
     return {
+        "company_name": row.company.name,
+        "logo": logo_name,
         "timezone": row.timezone,
         "work_start_time": row.work_start_time.isoformat(),
         "work_end_time": row.work_end_time.isoformat(),
         "grace_period_minutes": row.grace_period_minutes,
         "minimum_working_minutes": row.minimum_working_minutes,
         "overtime_enabled": row.overtime_enabled,
-        "working_days": list(row.working_days),
+        "working_days": working_day_names(row.working_days),
     }
 
 
 class CompanySettingsService:
+    def get(self, company: Company) -> CompanySettings:
+        return get_company_settings(company)
+
     @transaction.atomic
     def update(self, *, company: Company, validated: dict, actor=None, request=None):
         row, _created = (
@@ -118,6 +126,12 @@ class CompanySettingsService:
             .get_or_create(company=company)
         )
         previous = settings_snapshot(row)
+        previous_logo = row.logo.name if row.logo else None
+        company_name = validated.pop("company_name", None)
+        if company_name is not None and company_name != company.name:
+            company.name = company_name
+            company.save(update_fields=["name", "updated_at"])
+            row.company = company
         for field in _SETTINGS_FIELDS:
             if field in validated:
                 setattr(row, field, validated[field])
@@ -127,6 +141,9 @@ class CompanySettingsService:
             raise APIValidationError(
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
+        new_logo = row.logo.name if row.logo else None
+        if previous_logo and previous_logo != new_logo:
+            row.logo.storage.delete(previous_logo)
         old_value, new_value = changed_fields(previous, settings_snapshot(row))
         if old_value or new_value:
             AuditService.log(

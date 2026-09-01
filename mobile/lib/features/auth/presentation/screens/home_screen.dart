@@ -17,6 +17,7 @@ import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/notifications/domain/notification_access.dart';
 import 'package:flutter_base/features/reports/domain/report_access.dart';
+import 'package:flutter_base/features/settings/domain/settings_access.dart';
 import 'package:flutter_base/features/notifications/presentation/widgets/unread_notification_badge.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -276,6 +277,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             if (ReportAccess(user?.role ?? UserRole.unknown).canView)
+              const SizedBox(height: AppSpacing.md),
+            if (SettingsAccess(user?.role ?? UserRole.unknown).canView)
+              AppCard(
+                onTap: () => context.push(AppRoutes.settings),
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.settings_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'Settings',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            if (SettingsAccess(user?.role ?? UserRole.unknown).canView)
               const SizedBox(height: AppSpacing.md),
             AppCard(
               child: Text(

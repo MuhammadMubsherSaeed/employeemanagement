@@ -268,6 +268,30 @@ void main() {
     );
   });
 
+  test('company members can open settings; unknown roles cannot', () {
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.settings,
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.settingsAttendance,
+      ),
+      isNull,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.unauthenticated(),
+        location: AppRoutes.settings,
+      ),
+      AppRoutes.login,
+    );
+  });
+
   test('redirect never returns the current location', () {
     expect(
       AuthRedirect.resolve(
