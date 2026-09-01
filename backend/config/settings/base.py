@@ -35,6 +35,7 @@ LOCAL_APPS = [
     "apps.documents",
     "apps.notifications",
     "apps.dashboard",
+    "apps.reports",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -174,6 +175,7 @@ REST_FRAMEWORK = {
         "auth_login": "10/min",
         "auth_refresh": "30/min",
         "auth_password": "5/min",
+        "reports_export": "20/min",
     },
 }
 
@@ -197,8 +199,9 @@ SPECTACULAR_SETTINGS = {
         "Multi-tenant SaaS HRMS API. JWT authenticates the user; company "
         "context is resolved from CompanyMembership, never from the payload. "
         "Employees, departments, positions, attendance, holidays, leave, "
-        "and devices are company-scoped. CompanySettings hold timezone and "
-        "work-hour rules for attendance and leave. "
+        "devices, and reports are company-scoped. CompanySettings hold "
+        "timezone and work-hour rules for attendance and leave. "
+        "Reports require reports.view; exports require reports.export. "
         "Authorization uses Role ↔ Permission codes (not Django ContentTypes)."
     ),
     "VERSION": "1.0.0",

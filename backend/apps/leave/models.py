@@ -270,6 +270,7 @@ class LeaveRequest(TimeStampedModel):
             models.Index(fields=("leave_type",)),
             models.Index(fields=("start_date", "end_date")),
             models.Index(fields=("company", "employee", "status")),
+            models.Index(fields=("company", "start_date")),
         ]
 
     def __str__(self) -> str:
