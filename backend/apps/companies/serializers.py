@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.common.authorization import ObjectAuthorization
 from apps.common.tenancy import get_tenant_context
-from apps.companies.models import TenantOwnedRecord
+from apps.companies.models import CompanySettings, TenantOwnedRecord
 
 
 class TenantOwnedRecordSerializer(serializers.ModelSerializer):
@@ -33,3 +33,25 @@ class TenantOwnedRecordSerializer(serializers.ModelSerializer):
                 "Cannot assign a user from another company."
             )
         return value
+
+
+class CompanySettingsWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanySettings
+        fields = (
+            "timezone",
+            "work_start_time",
+            "work_end_time",
+            "grace_period_minutes",
+            "minimum_working_minutes",
+            "overtime_enabled",
+            "working_days",
+        )
+
+    def to_internal_value(self, data):
+        if hasattr(data, "copy"):
+            data = data.copy()
+            for key in ("company", "company_id", "tenant_id", "membership_id"):
+                data.pop(key, None)
+        return super().to_internal_value(data)
+

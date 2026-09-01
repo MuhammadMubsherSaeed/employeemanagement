@@ -6,6 +6,8 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
+from apps.audit_logs.constants import AuditAction, AuditEntityType
+from apps.audit_logs.services import AuditService
 from apps.common.authorization import ObjectAuthorization
 from apps.common.events import emit
 from apps.common.tenancy import TenantContext
@@ -81,6 +83,15 @@ class LeaveService:
                 status=LeaveRequestStatus.PENDING,
             )
             row.save()
+            AuditService.log(
+                company=ctx.company,
+                user=ctx.user,
+                action=AuditAction.LEAVE_SUBMITTED,
+                entity_type=AuditEntityType.LEAVE_REQUEST,
+                entity_id=row.id,
+                new_value=_leave_snapshot(row),
+                request=request,
+            )
         emit(
             "leave.request.created",
             actor=ctx.user,
@@ -142,6 +153,7 @@ class LeaveService:
                         ]
                     }
                 )
+            previous = _leave_snapshot(row)
             balance.used_days += row.total_days
             balance.save()
             row.status = LeaveRequestStatus.APPROVED
@@ -149,6 +161,16 @@ class LeaveService:
             row.approved_at = timezone.now()
             row.rejection_reason = ""
             row.save()
+            AuditService.log(
+                company=ctx.company,
+                user=ctx.user,
+                action=AuditAction.LEAVE_APPROVED,
+                entity_type=AuditEntityType.LEAVE_REQUEST,
+                entity_id=row.id,
+                old_value=previous,
+                new_value=_leave_snapshot(row),
+                request=request,
+            )
         emit(
             "leave.request.approved",
             actor=ctx.user,
@@ -197,11 +219,22 @@ class LeaveService:
                         ]
                     }
                 )
+            previous = _leave_snapshot(row)
             row.status = LeaveRequestStatus.REJECTED
             row.approved_by = ctx.user
             row.approved_at = timezone.now()
             row.rejection_reason = reason
             row.save()
+            AuditService.log(
+                company=ctx.company,
+                user=ctx.user,
+                action=AuditAction.LEAVE_REJECTED,
+                entity_type=AuditEntityType.LEAVE_REQUEST,
+                entity_id=row.id,
+                old_value=previous,
+                new_value=_leave_snapshot(row),
+                request=request,
+            )
         emit(
             "leave.request.rejected",
             actor=ctx.user,
@@ -245,8 +278,19 @@ class LeaveService:
             restored = 0
             if previous == LeaveRequestStatus.APPROVED:
                 restored = self._restore_balance(ctx, row)
+            old_value = _leave_snapshot(row)
             row.status = LeaveRequestStatus.CANCELLED
             row.save(update_fields=["status", "updated_at"])
+            AuditService.log(
+                company=ctx.company,
+                user=ctx.user,
+                action=AuditAction.LEAVE_CANCELLED,
+                entity_type=AuditEntityType.LEAVE_REQUEST,
+                entity_id=row.id,
+                old_value=old_value,
+                new_value=_leave_snapshot(row),
+                request=request,
+            )
         emit(
             "leave.request.cancelled",
             actor=ctx.user,
@@ -404,6 +448,22 @@ class LeaveService:
     def _assert_same_company(self, ctx: TenantContext, row: LeaveRequest) -> None:
         if ctx.company is None or row.company_id != ctx.company.id:
             raise NotFound()
+
+
+def _leave_snapshot(row: LeaveRequest, *, status: str | None = None) -> dict:
+    employee = getattr(row, "employee", None)
+    leave_type = getattr(row, "leave_type", None)
+    return {
+        "employee_id": str(row.employee_id),
+        "employee_code": getattr(employee, "employee_code", None),
+        "leave_type_id": str(row.leave_type_id),
+        "leave_type": getattr(leave_type, "code", None),
+        "start_date": row.start_date.isoformat(),
+        "end_date": row.end_date.isoformat(),
+        "total_days": row.total_days,
+        "status": status or row.status,
+        "approved_by": row.approved_by_id,
+    }
 
 
 def _require_company(request) -> TenantContext:
