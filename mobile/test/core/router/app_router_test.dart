@@ -44,8 +44,9 @@ void main() {
     expect(AppRoutes.notifications, '/notifications');
     expect(AppRoutes.notification('n-1'), '/notifications/n-1');
     expect(AppRoutes.reports, '/reports');
-    expect(AppRoutes.ai, '/ai');
     expect(AppRoutes.settings, '/settings');
+    expect(AppRoutes.settingsCompany, '/settings/company');
+    expect(AppRoutes.settingsAttendance, '/settings/attendance');
   });
 
   test('authenticated readAuth is accepted by the factory', () {

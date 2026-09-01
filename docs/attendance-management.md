@@ -48,14 +48,15 @@ Reads: `attendance.view`. Writes: `settings.manage` (company calendar, same as d
 | `work_start_time` / `work_end_time` | Expected day bounds. |
 | `grace_period_minutes` | Lateness allowed before `LATE`. |
 | `minimum_working_minutes` | Below this after checkout → `HALF_DAY`. |
-| `overtime_enabled` | Reserved. Summary returns `overtime_minutes: 0`. |
+| `overtime_enabled` | When false, summary overtime is `0`. When true, overtime is minutes after `work_end_time` in the company timezone. |
 | `working_days` | JSON list of weekday integers. **0 = Monday … 6 = Sunday.** Not hardcoded Mon–Fri. |
+| `logo` | Optional media file on settings (not stored in Postgres). |
 
 `work_end_time` must be **after** `work_start_time`. Overnight shifts are **not supported**; that configuration is rejected so minutes cannot be calculated incorrectly.
 
-Missing settings are created with defaults (`UTC`, 09:00–18:00, 15-minute grace, 480-minute day, Monday–Friday) via `get_company_settings`.
+Missing settings are created with defaults (`DJANGO_TIME_ZONE`, 09:00–17:00, 15-minute grace, 480-minute day, Monday–Friday) via `get_company_settings`. Attendance tests may override these per tenant.
 
-`GET /api/v1/tenancy/settings/` (still `settings.manage`) now includes these fields for the current company.
+Product API: `GET` / `PATCH` `/api/v1/settings/`. Company members may read. `PATCH` requires `settings.manage`. The tenancy probe `GET` / `PATCH` `/api/v1/tenancy/settings/` is the same view.
 
 ---
 

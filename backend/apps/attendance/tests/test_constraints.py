@@ -11,10 +11,13 @@ from apps.attendance.models import Attendance, AttendanceStatus, Holiday
 from apps.attendance.services import AttendanceStatusService, CompanyClock
 from apps.attendance.tests.fixtures import (
     ATTENDANCE,
+    LATE,
     NEXT_LOCAL_DAY,
     ON_TIME,
+    WEEKEND,
     AttendanceFixtureMixin,
     check_in,
+    check_out,
     freeze_now,
 )
 from apps.companies.models import CompanySettings
@@ -143,6 +146,46 @@ class CompanySettingsTests(AttendanceFixtureMixin, TestCase):
         self.settings_a.working_days = [9]
         with self.assertRaises(ValidationError):
             self.settings_a.save()
+
+    def test_grace_period_changes_late_threshold(self) -> None:
+        self.settings_a.grace_period_minutes = 30
+        self.settings_a.save()
+        client = self.authenticate(self.employee_a)
+        data = check_in(client, LATE).json()["data"]
+        self.assertEqual(data["status"], AttendanceStatus.PRESENT)
+
+    def test_working_days_control_weekend_status(self) -> None:
+        self.settings_a.working_days = [0, 1, 2, 3, 4, 5]
+        self.settings_a.save()
+        client = self.authenticate(self.employee_a)
+        data = check_in(client, WEEKEND).json()["data"]
+        self.assertNotEqual(data["status"], AttendanceStatus.WEEKEND)
+
+    def test_minimum_working_minutes_drives_half_day(self) -> None:
+        from datetime import datetime, timezone as dt_timezone
+
+        self.settings_a.minimum_working_minutes = 600
+        self.settings_a.save()
+        client = self.authenticate(self.employee_a)
+        self.assertEqual(check_in(client, ON_TIME).status_code, 200)
+        # 04:10–09:00 UTC ≈ 290 minutes: above the fixture minimum (240), below 600.
+        mid_day = datetime(2026, 3, 16, 9, 0, tzinfo=dt_timezone.utc)
+        data = check_out(client, mid_day).json()["data"]
+        self.assertEqual(data["status"], AttendanceStatus.HALF_DAY)
+
+    def test_timezone_changes_late_threshold(self) -> None:
+        self.settings_a.timezone = "UTC"
+        self.settings_a.save()
+        client = self.authenticate(self.employee_a)
+        data = check_in(client, LATE).json()["data"]
+        self.assertEqual(data["status"], AttendanceStatus.PRESENT)
+
+    def test_work_start_time_changes_late_threshold(self) -> None:
+        self.settings_a.work_start_time = time(9, 30)
+        self.settings_a.save()
+        client = self.authenticate(self.employee_a)
+        data = check_in(client, LATE).json()["data"]
+        self.assertEqual(data["status"], AttendanceStatus.PRESENT)
 
     def test_holiday_unique_per_company(self) -> None:
         Holiday.objects.create(company=self.company_a, name="A", date="2026-03-23")

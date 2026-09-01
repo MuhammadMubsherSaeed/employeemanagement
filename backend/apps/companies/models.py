@@ -1,21 +1,37 @@
 import uuid
-from datetime import time
+from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import (
+    FileExtensionValidator,
+    MaxValueValidator,
+    MinValueValidator,
+)
 from django.db import models
 
 from apps.accounts.models import Role, RoleScope, UserRole
 from apps.common.models import TimeStampedModel
+from apps.companies.constants import (
+    BLOCKED_LOGO_EXTENSIONS,
+    DEFAULT_GRACE_MINUTES,
+    DEFAULT_MINIMUM_WORKING_MINUTES,
+    DEFAULT_WORK_END,
+    DEFAULT_WORK_START,
+    LOGO_ALLOWED_EXTENSIONS,
+    LOGO_MAX_BYTES,
+    MAX_GRACE_MINUTES,
+    MAX_MINIMUM_WORKING_MINUTES,
+    WEEKDAY_MONDAY,
+    default_timezone,
+    default_working_days,
+    normalize_working_days,
+    settings_logo_path,
+)
 
-WEEKDAY_MONDAY = 0
-WEEKDAY_SUNDAY = 6
-DEFAULT_WORKING_DAYS = [0, 1, 2, 3, 4]
-
-
-def default_working_days() -> list[int]:
-    return list(DEFAULT_WORKING_DAYS)
+# Re-exported so existing imports of WEEKDAY_* from models keep working.
+DEFAULT_WORKING_DAYS = [WEEKDAY_MONDAY, 1, 2, 3, 4]
 
 
 class Company(TimeStampedModel):
@@ -37,6 +53,13 @@ class Company(TimeStampedModel):
 
     def __str__(self) -> str:
         return self.name
+
+    def save(self, *args, **kwargs):
+        created = self._state.adding
+        result = super().save(*args, **kwargs)
+        if created:
+            CompanySettings.objects.get_or_create(company=self)
+        return result
 
 
 class CompanyMembership(TimeStampedModel):
@@ -144,7 +167,7 @@ class TenantOwnedRecord(TimeStampedModel):
 
 
 class CompanySettings(TimeStampedModel):
-    """Tenant-wide HR settings. Owned by Company, consumed by Attendance and later modules."""
+    """Tenant-wide HR settings owned by Company and consumed by Attendance."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.OneToOneField(
@@ -152,15 +175,33 @@ class CompanySettings(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="settings",
     )
+    logo = models.FileField(
+        upload_to=settings_logo_path,
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(LOGO_ALLOWED_EXTENSIONS)],
+    )
     timezone = models.CharField(
         max_length=64,
-        default="UTC",
+        default=default_timezone,
         help_text="IANA timezone used for attendance dates and work-hour rules.",
     )
-    work_start_time = models.TimeField(default=time(9, 0))
-    work_end_time = models.TimeField(default=time(18, 0))
-    grace_period_minutes = models.PositiveIntegerField(default=15)
-    minimum_working_minutes = models.PositiveIntegerField(default=480)
+    work_start_time = models.TimeField(default=DEFAULT_WORK_START)
+    work_end_time = models.TimeField(default=DEFAULT_WORK_END)
+    grace_period_minutes = models.PositiveIntegerField(
+        default=DEFAULT_GRACE_MINUTES,
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(MAX_GRACE_MINUTES),
+        ],
+    )
+    minimum_working_minutes = models.PositiveIntegerField(
+        default=DEFAULT_MINIMUM_WORKING_MINUTES,
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(MAX_MINIMUM_WORKING_MINUTES),
+        ],
+    )
     overtime_enabled = models.BooleanField(default=False)
     working_days = models.JSONField(default=default_working_days)
 
@@ -182,21 +223,33 @@ class CompanySettings(TimeStampedModel):
                 "Overnight shifts are not supported. "
                 "work_end_time must be after work_start_time."
             )
-        days = self.working_days
-        if not isinstance(days, list) or not days:
-            errors["working_days"] = "Select at least one working day."
-        else:
-            invalid = [
-                day
-                for day in days
-                if not isinstance(day, int) or day < WEEKDAY_MONDAY or day > WEEKDAY_SUNDAY
-            ]
-            if invalid:
-                errors["working_days"] = (
-                    "Days must be integers 0 (Monday) through 6 (Sunday)."
-                )
-            else:
-                self.working_days = sorted(set(days))
+        if self.grace_period_minutes is not None and (
+            self.grace_period_minutes < 0
+            or self.grace_period_minutes > MAX_GRACE_MINUTES
+        ):
+            errors["grace_period_minutes"] = (
+                f"Grace period must be between 0 and {MAX_GRACE_MINUTES} minutes."
+            )
+        if self.minimum_working_minutes is not None and (
+            self.minimum_working_minutes < 1
+            or self.minimum_working_minutes > MAX_MINIMUM_WORKING_MINUTES
+        ):
+            errors["minimum_working_minutes"] = (
+                "Minimum working minutes must be between 1 and "
+                f"{MAX_MINIMUM_WORKING_MINUTES}."
+            )
+        try:
+            self.working_days = normalize_working_days(self.working_days)
+        except ValueError as exc:
+            errors["working_days"] = str(exc)
+        if self.logo:
+            name = getattr(self.logo, "name", "") or ""
+            suffix = Path(name).suffix.lower()
+            if suffix in BLOCKED_LOGO_EXTENSIONS:
+                errors["logo"] = "This file type is not allowed."
+            size = getattr(self.logo, "size", None)
+            if size is not None and size > LOGO_MAX_BYTES:
+                errors["logo"] = "Logo must be 2 MB or smaller."
         if errors:
             raise ValidationError(errors)
 

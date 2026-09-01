@@ -41,6 +41,7 @@ class CompanySettingsAdmin(admin.ModelAdmin):
         "work_start_time",
         "work_end_time",
         "grace_period_minutes",
+        "minimum_working_minutes",
         "overtime_enabled",
     )
     list_filter = ("timezone", "overtime_enabled")

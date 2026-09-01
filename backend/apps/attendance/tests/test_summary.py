@@ -109,6 +109,36 @@ class SummaryTests(AttendanceFixtureMixin, TestCase):
         ).json()["data"]
         self.assertEqual(data["overtime_minutes"], 0)
 
+    def test_overtime_minutes_after_work_end_when_enabled(self) -> None:
+        from apps.attendance.tests.fixtures import check_in, check_out
+
+        self.settings_a.overtime_enabled = True
+        self.settings_a.save()
+        check_in_at = datetime(2026, 3, 18, 4, 10, tzinfo=dt_timezone.utc)
+        after_end = datetime(2026, 3, 18, 14, 0, tzinfo=dt_timezone.utc)
+        client = self.authenticate(self.employee_a)
+        self.assertEqual(check_in(client, check_in_at).status_code, 200)
+        self.assertEqual(check_out(client, after_end).status_code, 200)
+        data = client.get(
+            f"{ATTENDANCE}/summary/?start_date=2026-03-18&end_date=2026-03-18"
+        ).json()["data"]
+        self.assertEqual(data["overtime_minutes"], 60)
+
+    def test_overtime_stays_zero_when_disabled(self) -> None:
+        from apps.attendance.tests.fixtures import check_in, check_out
+
+        self.settings_a.overtime_enabled = False
+        self.settings_a.save()
+        check_in_at = datetime(2026, 3, 18, 4, 10, tzinfo=dt_timezone.utc)
+        after_end = datetime(2026, 3, 18, 14, 0, tzinfo=dt_timezone.utc)
+        client = self.authenticate(self.employee_a)
+        self.assertEqual(check_in(client, check_in_at).status_code, 200)
+        self.assertEqual(check_out(client, after_end).status_code, 200)
+        data = client.get(
+            f"{ATTENDANCE}/summary/?start_date=2026-03-18&end_date=2026-03-18"
+        ).json()["data"]
+        self.assertEqual(data["overtime_minutes"], 0)
+
     def test_default_range_is_company_local_month(self) -> None:
         client = self.authenticate(self.employee_a)
         with freeze_now(ON_TIME):

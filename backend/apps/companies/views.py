@@ -1,14 +1,21 @@
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from apps.common.mixins import TenantAwareQuerySetMixin
-from apps.common.permissions import HasPermission, IsAuthenticatedUser, IsSuperAdmin
+from apps.common.permissions import (
+    HasPermission,
+    IsAuthenticatedUser,
+    IsCompanyMember,
+    IsSuperAdmin,
+)
 from apps.common.responses import success_response
 from apps.common.tenancy import get_tenant_context
 from apps.companies.models import TenantOwnedRecord
 from apps.companies.serializers import (
+    CompanySettingsSerializer,
     CompanySettingsWriteSerializer,
     TenantOwnedRecordSerializer,
 )
@@ -93,14 +100,25 @@ class TenantOwnedRecordViewSet(TenantAwareQuerySetMixin, ModelViewSet):
 
 
 class CompanySettingsView(APIView):
-    permission_classes = (IsAuthenticatedUser, HasPermission("settings.manage"))
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
     http_method_names = ["get", "patch", "head", "options"]
 
+    def get_permissions(self):
+        if self.request.method in ("PATCH", "PUT"):
+            return [IsAuthenticatedUser(), HasPermission("settings.manage")()]
+        return [IsAuthenticatedUser(), IsCompanyMember()]
+
     @extend_schema(
-        tags=["Tenancy"],
+        tags=["Settings"],
+        responses={
+            200: CompanySettingsSerializer,
+            401: OpenApiResponse(description="Unauthenticated."),
+            403: OpenApiResponse(description="No company membership."),
+        },
         description=(
-            "Company settings probe. Requires settings.manage. "
-            "Managers and employees are denied. SUPER_ADMIN sees platform scope."
+            "Company attendance and identity settings for the authenticated "
+            "company. Company members may read. company_id is ignored. "
+            "SUPER_ADMIN without a company sees platform scope on the tenancy probe."
         ),
     )
     def get(self, request, **_kwargs):
@@ -110,26 +128,27 @@ class CompanySettingsView(APIView):
                 data={"scope": "PLATFORM", "company": None},
                 message="Platform settings.",
             )
+        if ctx.company is None:
+            raise PermissionDenied("You do not have access to this company.")
+        row = get_company_settings(ctx.company)
         return success_response(
-            data={
-                "scope": "COMPANY",
-                "company": {
-                    "id": str(ctx.company.id),
-                    "name": ctx.company.name,
-                    "slug": ctx.company.slug,
-                },
-                **_settings_payload(get_company_settings(ctx.company)),
-            },
+            data=_settings_response(request, row),
             message="Company settings.",
         )
 
     @extend_schema(
-        tags=["Tenancy"],
+        tags=["Settings"],
         request=CompanySettingsWriteSerializer,
+        responses={
+            200: CompanySettingsSerializer,
+            400: OpenApiResponse(description="Validation error."),
+            401: OpenApiResponse(description="Unauthenticated."),
+            403: OpenApiResponse(description="Missing settings.manage."),
+        },
         description=(
-            "Update company settings for the authenticated company. "
-            "Requires settings.manage. company_id in the body is ignored. "
-            "SUPER_ADMIN has no company settings to change."
+            "Partial update of company settings. Requires settings.manage. "
+            "Supports JSON or multipart (logo upload). company_id in the body "
+            "is ignored. Overnight work times are rejected."
         ),
     )
     def patch(self, request, **_kwargs):
@@ -142,34 +161,27 @@ class CompanySettingsView(APIView):
         serializer.is_valid(raise_exception=True)
         row = CompanySettingsService().update(
             company=ctx.company,
-            validated=serializer.validated_data,
+            validated=dict(serializer.validated_data),
             actor=ctx.user,
             request=request,
         )
         return success_response(
-            data={
-                "scope": "COMPANY",
-                "company": {
-                    "id": str(ctx.company.id),
-                    "name": ctx.company.name,
-                    "slug": ctx.company.slug,
-                },
-                **_settings_payload(row),
-            },
+            data=_settings_response(request, row),
             message="Company settings updated.",
         )
 
 
-
-def _settings_payload(row) -> dict:
+def _settings_response(request, row) -> dict:
+    ctx = get_tenant_context(request)
+    payload = CompanySettingsSerializer(row, context={"request": request}).data
     return {
-        "timezone": row.timezone,
-        "work_start_time": row.work_start_time.isoformat(),
-        "work_end_time": row.work_end_time.isoformat(),
-        "grace_period_minutes": row.grace_period_minutes,
-        "minimum_working_minutes": row.minimum_working_minutes,
-        "overtime_enabled": row.overtime_enabled,
-        "working_days": row.working_days,
+        "scope": "COMPANY",
+        "company": {
+            "id": str(ctx.company.id),
+            "name": ctx.company.name,
+            "slug": ctx.company.slug,
+        },
+        **payload,
     }
 
 

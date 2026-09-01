@@ -19,6 +19,11 @@ class RoleAuthorizationTests(TenancyAPITestCase):
     def test_manager_cannot_manage_settings_or_other_private_data(self) -> None:
         client = self.authenticate(self.manager_a)
         settings = client.get(f"{TENANCY}/settings/")
+        patch = client.patch(
+            f"{TENANCY}/settings/",
+            {"timezone": "UTC"},
+            format="json",
+        )
         private = client.get(f"{TENANCY}/records/{self.private_a.id}/")
         company_row = client.get(f"{TENANCY}/records/{self.record_a.id}/")
         create = client.post(
@@ -26,7 +31,8 @@ class RoleAuthorizationTests(TenancyAPITestCase):
             {"title": "nope", "visibility": RecordVisibility.COMPANY},
             format="json",
         )
-        self.assertEqual(settings.status_code, 403)
+        self.assertEqual(settings.status_code, 200)
+        self.assertEqual(patch.status_code, 403)
         self.assertEqual(private.status_code, 404)
         self.assertEqual(company_row.status_code, 200)
         self.assertEqual(create.status_code, 403)

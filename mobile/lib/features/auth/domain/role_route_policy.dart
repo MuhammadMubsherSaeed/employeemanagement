@@ -6,6 +6,7 @@ import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/notifications/domain/notification_access.dart';
 import 'package:flutter_base/features/reports/domain/report_access.dart';
+import 'package:flutter_base/features/settings/domain/settings_access.dart';
 
 /// Role → route access. Backend authorization remains mandatory.
 class RoleRoutePolicy {
@@ -74,6 +75,10 @@ class RoleRoutePolicy {
     if (path == AppRoutes.reports ||
         path.startsWith('${AppRoutes.reports}/')) {
       return ReportAccess(role).canView;
+    }
+    if (path == AppRoutes.settings ||
+        path.startsWith('${AppRoutes.settings}/')) {
+      return SettingsAccess(role).canView;
     }
     return true;
   }

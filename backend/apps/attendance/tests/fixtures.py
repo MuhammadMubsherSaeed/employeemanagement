@@ -25,24 +25,28 @@ class AttendanceFixtureMixin(EmployeeFixtureMixin):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.settings_a = CompanySettings.objects.create(
+        cls.settings_a, _created = CompanySettings.objects.update_or_create(
             company=cls.company_a,
-            timezone="Asia/Karachi",
-            work_start_time=time(9, 0),
-            work_end_time=time(18, 0),
-            grace_period_minutes=15,
-            minimum_working_minutes=240,
-            overtime_enabled=False,
-            working_days=[0, 1, 2, 3, 4],
+            defaults={
+                "timezone": "Asia/Karachi",
+                "work_start_time": time(9, 0),
+                "work_end_time": time(18, 0),
+                "grace_period_minutes": 15,
+                "minimum_working_minutes": 240,
+                "overtime_enabled": False,
+                "working_days": [0, 1, 2, 3, 4],
+            },
         )
-        cls.settings_b = CompanySettings.objects.create(
+        cls.settings_b, _created = CompanySettings.objects.update_or_create(
             company=cls.company_b,
-            timezone="UTC",
-            work_start_time=time(9, 0),
-            work_end_time=time(18, 0),
-            grace_period_minutes=15,
-            minimum_working_minutes=240,
-            working_days=[0, 1, 2, 3, 4],
+            defaults={
+                "timezone": "UTC",
+                "work_start_time": time(9, 0),
+                "work_end_time": time(18, 0),
+                "grace_period_minutes": 15,
+                "minimum_working_minutes": 240,
+                "working_days": [0, 1, 2, 3, 4],
+            },
         )
 
 

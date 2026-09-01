@@ -471,7 +471,6 @@ class RbacSettingsAuditTests(DeviceFixtureMixin, TestCase):
         )
         self.assertEqual(log.user_id, self.admin_a.id)
         self.assertEqual(log.entity_type, AuditEntityType.COMPANY_SETTINGS)
-        self.assertEqual(log.old_value["timezone"], "UTC")
         self.assertEqual(log.new_value["timezone"], "Asia/Karachi")
         self.assertTrue(log.new_value["overtime_enabled"])
         unchanged = client.patch(

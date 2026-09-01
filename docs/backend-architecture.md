@@ -199,7 +199,7 @@ Console logging at DEBUG/INFO/WARNING/ERROR/CRITICAL. Development is more verbos
 
 Implemented. See [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 
-`apps.companies` owns `Company` and `CompanyMembership`. Company-scoped APIs live under `/api/v1/tenancy/` as a reference isolation surface (not HR product modules). Future apps should use `TenantAwareQuerySetMixin` and `HasPermission("…")`.
+`apps.companies` owns `Company`, `CompanyMembership`, and `CompanySettings` (one row per company). Product settings: `GET` / `PATCH` `/api/v1/settings/`. Company-scoped isolation probes also live under `/api/v1/tenancy/`. Future apps should use `TenantAwareQuerySetMixin` and `HasPermission("…")`.
 
 `TimeStampedModel` remains the shared abstract base. Put `company` on membership and resource models, not on `User`.
 
