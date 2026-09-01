@@ -33,6 +33,9 @@ PERMISSION_CODES = (
     "notifications.view",
     "notifications.mark_read",
     "notifications.manage",
+    "dashboard.admin.view",
+    "dashboard.manager.view",
+    "dashboard.employee.view",
     "reports.view",
     "reports.export",
     "settings.manage",
@@ -67,6 +70,9 @@ PERMISSION_META = {
     "notifications.view": ("View own notifications", "notifications"),
     "notifications.mark_read": ("Mark own notifications as read", "notifications"),
     "notifications.manage": ("Manage notifications", "notifications"),
+    "dashboard.admin.view": ("View admin dashboard", "dashboard"),
+    "dashboard.manager.view": ("View manager dashboard", "dashboard"),
+    "dashboard.employee.view": ("View employee dashboard", "dashboard"),
     "reports.view": ("View reports", "reports"),
     "reports.export": ("Export reports", "reports"),
     "settings.manage": ("Manage settings", "settings"),
@@ -93,6 +99,8 @@ MANAGER_PERMISSIONS = (
     "documents.download",
     "notifications.view",
     "notifications.mark_read",
+    "dashboard.manager.view",
+    "dashboard.employee.view",
     "reports.view",
 )
 
@@ -109,6 +117,7 @@ EMPLOYEE_PERMISSIONS = (
     "documents.download",
     "notifications.view",
     "notifications.mark_read",
+    "dashboard.employee.view",
 )
 
 ROLE_DEFINITIONS = (
