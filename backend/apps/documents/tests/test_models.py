@@ -23,6 +23,8 @@ class DocumentModelTests(DocumentFixtureMixin, TestCase):
         self.assertIsNotNone(document.created_at)
         self.assertIsNotNone(document.updated_at)
         self.assertFalse(document.file.name.startswith("cnic"))
+        self.assertTrue(document.file.name.startswith("companies/"))
+        self.assertIn("/documents/", document.file.name)
         self.assertIn(str(self.company_a.id), document.file.name)
         self.assertIn(str(self.emp_a1.id), document.file.name)
 
@@ -76,6 +78,8 @@ class DocumentModelTests(DocumentFixtureMixin, TestCase):
             )
 
     def test_document_type_and_status_choices(self) -> None:
+        self.assertIn(DocumentType.CERTIFICATE, DocumentType.values)
+        self.assertIn(DocumentType.SALARY_DOCUMENT, DocumentType.values)
         self.assertIn(DocumentType.CNIC, DocumentType.values)
         self.assertIn(DocumentType.OTHER, DocumentType.values)
         self.assertEqual(

@@ -134,14 +134,78 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-LEAVE_ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
+LEAVE_ATTACHMENT_MAX_BYTES = env.int(
+    "LEAVE_ATTACHMENT_MAX_BYTES",
+    default=5 * 1024 * 1024,
+)
 MAX_DOCUMENT_UPLOAD_SIZE = env.int(
     "MAX_DOCUMENT_UPLOAD_SIZE",
     default=10 * 1024 * 1024,
 )
+MAX_PROFILE_IMAGE_UPLOAD_SIZE = env.int(
+    "MAX_PROFILE_IMAGE_UPLOAD_SIZE",
+    default=2 * 1024 * 1024,
+)
 DOCUMENT_EXPIRING_SOON_DAYS = env.int("DOCUMENT_EXPIRING_SOON_DAYS", default=30)
-DOCUMENT_ALLOWED_EXTENSIONS = ("pdf", "doc", "docx", "jpg", "jpeg", "png")
+DOCUMENT_ALLOWED_EXTENSIONS = (
+    "pdf",
+    "doc",
+    "docx",
+    "xls",
+    "xlsx",
+    "jpg",
+    "jpeg",
+    "png",
+)
 FIREBASE_CREDENTIALS_PATH = env("FIREBASE_CREDENTIALS_PATH", default="")
+
+# Private object storage. ``local`` uses MEDIA_ROOT. ``s3`` is any
+# S3-compatible provider (AWS, Cloudflare R2, MinIO, DigitalOcean Spaces).
+STORAGE_BACKEND = env("STORAGE_BACKEND", default="local").strip().lower()
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default="")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default="")
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
+AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default="") or None
+AWS_QUERYSTRING_AUTH = True
+AWS_QUERYSTRING_EXPIRE = env.int("AWS_QUERYSTRING_EXPIRE", default=300)
+AWS_DEFAULT_ACL = "private"
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+
+if STORAGE_BACKEND == "s3":
+    INSTALLED_APPS = [*INSTALLED_APPS, "storages"]
+    _s3_options = {
+        "access_key": AWS_ACCESS_KEY_ID,
+        "secret_key": AWS_SECRET_ACCESS_KEY,
+        "bucket_name": AWS_STORAGE_BUCKET_NAME,
+        "region_name": AWS_S3_REGION_NAME,
+        "default_acl": "private",
+        "querystring_auth": True,
+        "querystring_expire": AWS_QUERYSTRING_EXPIRE,
+        "file_overwrite": False,
+        "signature_version": "s3v4",
+    }
+    if AWS_S3_ENDPOINT_URL:
+        _s3_options["endpoint_url"] = AWS_S3_ENDPOINT_URL
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": _s3_options,
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "apps.common.storage.PrivateFileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

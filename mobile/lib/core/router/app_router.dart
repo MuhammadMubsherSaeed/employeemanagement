@@ -19,6 +19,10 @@ import 'package:flutter_base/features/devices/presentation/screens/device_detail
 import 'package:flutter_base/features/devices/presentation/screens/device_form_screen.dart';
 import 'package:flutter_base/features/devices/presentation/screens/device_history_screen.dart';
 import 'package:flutter_base/features/devices/presentation/screens/devices_screen.dart';
+import 'package:flutter_base/features/documents/presentation/screens/document_details_screen.dart';
+import 'package:flutter_base/features/documents/presentation/screens/document_preview_screen.dart';
+import 'package:flutter_base/features/documents/presentation/screens/employee_documents_screen.dart';
+import 'package:flutter_base/features/documents/presentation/screens/upload_document_screen.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employee_details_screen.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employee_form_screens.dart';
 import 'package:flutter_base/features/employees/presentation/screens/employees_screen.dart';
@@ -142,6 +146,44 @@ GoRouter createAppRouter({
         name: 'employee-edit',
         builder: (BuildContext context, GoRouterState state) {
           return EditEmployeeScreen(
+            employeeId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/employees/:id/documents/upload',
+        name: 'employee-document-upload',
+        builder: (BuildContext context, GoRouterState state) {
+          return UploadDocumentScreen(
+            employeeId: state.pathParameters['id'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/employees/:id/documents/:documentId/preview',
+        name: 'employee-document-preview',
+        builder: (BuildContext context, GoRouterState state) {
+          return DocumentPreviewScreen(
+            employeeId: state.pathParameters['id'] ?? '',
+            documentId: state.pathParameters['documentId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/employees/:id/documents/:documentId',
+        name: 'employee-document-detail',
+        builder: (BuildContext context, GoRouterState state) {
+          return DocumentDetailsScreen(
+            employeeId: state.pathParameters['id'] ?? '',
+            documentId: state.pathParameters['documentId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/employees/:id/documents',
+        name: 'employee-documents',
+        builder: (BuildContext context, GoRouterState state) {
+          return EmployeeDocumentsScreen(
             employeeId: state.pathParameters['id'] ?? '',
           );
         },

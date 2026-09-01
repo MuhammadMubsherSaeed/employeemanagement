@@ -93,7 +93,10 @@ class DocumentFixtureMixin(EmployeeFixtureMixin):
             "file": upload,
         }
         defaults.update(kwargs)
-        return EmployeeDocument.objects.create(**defaults)
+        document = EmployeeDocument.objects.create(**defaults)
+        if document.file:
+            document.file.close()
+        return document
 
     def upload(self, client, employee, **extra):
         body = {

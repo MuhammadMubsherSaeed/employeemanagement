@@ -3,7 +3,6 @@ import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/utils/date_formatter.dart';
-import 'package:flutter_base/core/widgets/app_avatar.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
@@ -12,11 +11,14 @@ import 'package:flutter_base/features/attendance/presentation/widgets/attendance
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/documents/domain/document_access.dart';
+import 'package:flutter_base/features/documents/presentation/screens/employee_documents_screen.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
 import 'package:flutter_base/features/employees/presentation/providers/employee_error_mapper.dart';
 import 'package:flutter_base/features/employees/presentation/providers/employee_list_controller.dart';
 import 'package:flutter_base/features/employees/presentation/providers/employee_providers.dart';
+import 'package:flutter_base/features/employees/presentation/widgets/employee_profile_photo.dart';
 import 'package:flutter_base/features/employees/presentation/widgets/employee_status_badge.dart';
 import 'package:flutter_base/features/employees/presentation/widgets/upcoming_module_placeholder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,14 +86,20 @@ class EmployeeDetailsScreen extends ConsumerWidget {
             ),
             body: TabBarView(
               children: <Widget>[
-                _OverviewTab(employee: employee),
+                _OverviewTab(
+                  employee: employee,
+                  access: DocumentAccess(access.role),
+                ),
                 AttendanceProfileLink(
                   role: access.role,
                   isSelf: isSelf,
                 ),
                 const UpcomingModulePlaceholder(title: 'Leaves'),
                 const UpcomingModulePlaceholder(title: 'Devices'),
-                const UpcomingModulePlaceholder(title: 'Documents'),
+                EmployeeDocumentsScreen(
+                  employeeId: employee.id,
+                  embedded: true,
+                ),
               ],
             ),
           ),
@@ -132,9 +140,10 @@ class EmployeeDetailsScreen extends ConsumerWidget {
 }
 
 class _OverviewTab extends StatelessWidget {
-  const _OverviewTab({required this.employee});
+  const _OverviewTab({required this.employee, required this.access});
 
   final Employee employee;
+  final DocumentAccess access;
 
   @override
   Widget build(BuildContext context) {
@@ -144,10 +153,9 @@ class _OverviewTab extends StatelessWidget {
         AppCard(
           child: Row(
             children: <Widget>[
-              AppAvatar(
-                name: employee.fullName,
-                imageUrl:
-                    employee.profileImage.isEmpty ? null : employee.profileImage,
+              EmployeeProfilePhoto(
+                employee: employee,
+                access: access,
                 size: 64,
               ),
               const SizedBox(width: AppSpacing.md),

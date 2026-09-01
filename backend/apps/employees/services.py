@@ -31,6 +31,146 @@ def employee_snapshot(employee) -> dict:
     }
 
 
+def _is_public_profile_image(value: str) -> bool:
+    text = (value or "").strip()
+    return text.startswith("http://") or text.startswith("https://")
+
+
+def public_profile_image_value(employee) -> str:
+    value = (getattr(employee, "profile_image", None) or "").strip()
+    if _is_public_profile_image(value):
+        return value
+    return ""
+
+
+def set_profile_image(*, request, employee, upload) -> None:
+    from apps.common.authorization import ObjectAuthorization
+    from apps.common.storage import StorageDeleteError, StorageUnavailable, get_object_storage
+    from apps.common.tenancy import get_tenant_context
+    from apps.documents.models import (
+        detected_mime_type,
+        profile_image_upload_path,
+        sanitize_file_name,
+        validate_profile_image_file,
+    )
+    from rest_framework.exceptions import NotFound, PermissionDenied
+
+    ctx = get_tenant_context(request)
+    authz = ObjectAuthorization()
+    if ctx.company is None or employee.company_id != ctx.company.id:
+        raise NotFound()
+    if not authz.can_view(ctx, employee):
+        raise NotFound()
+    is_self = employee.user_id == ctx.user.id
+    if not is_self:
+        if not ctx.has_permission("employees.update"):
+            raise PermissionDenied(
+                "You do not have permission to perform this action."
+            )
+        if not authz.can_change(ctx, employee):
+            raise PermissionDenied(
+                "You do not have permission to perform this action."
+            )
+    validate_profile_image_file(upload)
+    key = profile_image_upload_path(employee, getattr(upload, "name", "photo.jpg"))
+    storage = get_object_storage()
+    saved = storage.save(key, upload)
+    previous = (employee.profile_image or "").strip()
+    employee.profile_image = saved
+    employee.save(update_fields=["profile_image", "updated_at"])
+    if previous and previous != saved and not _is_public_profile_image(previous):
+        try:
+            storage.delete(previous, missing_ok=True)
+        except StorageDeleteError as exc:
+            raise StorageUnavailable(detail=str(exc)) from exc
+    AuditService.log(
+        company=ctx.company,
+        user=ctx.user,
+        action=AuditAction.PROFILE_IMAGE_UPDATED,
+        entity_type=AuditEntityType.EMPLOYEE,
+        entity_id=employee.id,
+        new_value={
+            "file_name": sanitize_file_name(getattr(upload, "name", "photo")),
+            "file_size": int(getattr(upload, "size", 0) or 0),
+            "mime_type": detected_mime_type(upload),
+        },
+        request=request,
+    )
+
+
+def clear_profile_image(*, request, employee) -> None:
+    from apps.common.authorization import ObjectAuthorization
+    from apps.common.storage import StorageDeleteError, StorageUnavailable, get_object_storage
+    from apps.common.tenancy import get_tenant_context
+    from rest_framework.exceptions import NotFound, PermissionDenied
+
+    ctx = get_tenant_context(request)
+    authz = ObjectAuthorization()
+    if ctx.company is None or employee.company_id != ctx.company.id:
+        raise NotFound()
+    if not authz.can_view(ctx, employee):
+        raise NotFound()
+    is_self = employee.user_id == ctx.user.id
+    if not is_self:
+        if not ctx.has_permission("employees.update"):
+            raise PermissionDenied(
+                "You do not have permission to perform this action."
+            )
+        if not authz.can_change(ctx, employee):
+            raise PermissionDenied(
+                "You do not have permission to perform this action."
+            )
+    previous = (employee.profile_image or "").strip()
+    employee.profile_image = ""
+    employee.save(update_fields=["profile_image", "updated_at"])
+    if previous and not _is_public_profile_image(previous):
+        try:
+            get_object_storage().delete(previous, missing_ok=True)
+        except StorageDeleteError as exc:
+            raise StorageUnavailable(detail=str(exc)) from exc
+    AuditService.log(
+        company=ctx.company,
+        user=ctx.user,
+        action=AuditAction.PROFILE_IMAGE_UPDATED,
+        entity_type=AuditEntityType.EMPLOYEE,
+        entity_id=employee.id,
+        new_value={"cleared": True},
+        request=request,
+    )
+
+
+def open_profile_image(*, request, employee):
+    from io import BytesIO
+
+    from apps.common.authorization import ObjectAuthorization
+    from apps.common.storage import StorageError, get_object_storage
+    from apps.common.tenancy import get_tenant_context
+    from apps.documents.models import MIME_BY_KIND, sniff_document_kind
+    from django.http import FileResponse
+    from rest_framework.exceptions import NotFound
+
+    ctx = get_tenant_context(request)
+    authz = ObjectAuthorization()
+    if ctx.company is None or employee.company_id != ctx.company.id:
+        raise NotFound()
+    if not authz.can_view(ctx, employee):
+        raise NotFound()
+    key = (employee.profile_image or "").strip()
+    if not key or _is_public_profile_image(key):
+        raise NotFound()
+    try:
+        payload = get_object_storage().read(key)
+    except StorageError:
+        raise NotFound()
+    content_type = "application/octet-stream"
+    try:
+        kind = sniff_document_kind(BytesIO(payload))
+        content_type = MIME_BY_KIND.get(kind, content_type)
+    except Exception:
+        pass
+    return FileResponse(BytesIO(payload), content_type=content_type)
+
+
 def department_snapshot(department) -> dict:
     return {
         "name": department.name,

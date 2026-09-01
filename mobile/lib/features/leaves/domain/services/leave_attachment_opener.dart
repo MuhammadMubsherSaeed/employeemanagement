@@ -1,21 +1,20 @@
 import 'package:url_launcher/url_launcher.dart';
 
+bool leaveRequestHasAttachment(String? raw) {
+  return raw != null && raw.trim().isNotEmpty;
+}
+
+/// Public http(s) URLs only. Relative/media paths are private and must be
+/// downloaded through the authenticated leave attachment endpoint.
 String? resolveLeaveAttachmentUrl(String? raw, String apiBaseUrl) {
   if (raw == null) {
     return null;
   }
   final String value = raw.trim();
-  if (value.isEmpty) {
-    return null;
-  }
   if (value.startsWith('http://') || value.startsWith('https://')) {
     return value;
   }
-  final String origin = apiBaseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-  if (value.startsWith('/')) {
-    return '$origin$value';
-  }
-  return '$origin/$value';
+  return null;
 }
 
 Future<bool> openLeaveAttachment(String url) async {

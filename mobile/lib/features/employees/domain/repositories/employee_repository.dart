@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee_query.dart';
 
@@ -13,6 +15,16 @@ abstract class EmployeeRepository {
   Future<Employee> updateEmployee(String id, EmployeeWrite body);
 
   Future<void> deleteEmployee(String id);
+
+  Future<Uint8List?> getProfileImage(String id);
+
+  Future<Employee> uploadProfileImage({
+    required String id,
+    required String path,
+    required String filename,
+  });
+
+  Future<Employee> deleteProfileImage(String id);
 }
 
 abstract class DepartmentRepository {

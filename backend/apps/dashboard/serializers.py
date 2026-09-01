@@ -19,6 +19,7 @@ class DashboardLeaveTypeSerializer(serializers.ModelSerializer):
 class DashboardRecentEmployeeSerializer(serializers.ModelSerializer):
     department = DepartmentSummarySerializer(read_only=True)
     position = PositionSummarySerializer(read_only=True)
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Employee
@@ -35,6 +36,11 @@ class DashboardRecentEmployeeSerializer(serializers.ModelSerializer):
             "created_at",
         )
         read_only_fields = fields
+
+    def get_profile_image(self, obj) -> str:
+        from apps.employees.services import public_profile_image_value
+
+        return public_profile_image_value(obj)
 
 
 class DashboardAuditActorSerializer(serializers.Serializer):

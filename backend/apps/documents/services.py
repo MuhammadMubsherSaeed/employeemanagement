@@ -1,13 +1,23 @@
 from __future__ import annotations
 
+from io import BytesIO
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.base import File
 from django.db import transaction
 from django.http import FileResponse
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
+from apps.audit_logs.constants import AuditAction, AuditEntityType
+from apps.audit_logs.services import AuditService
 from apps.common.authorization import ObjectAuthorization
 from apps.common.events import emit
+from apps.common.storage import (
+    StorageDeleteError,
+    StorageError,
+    StorageUnavailable,
+    get_object_storage,
+)
 from apps.common.tenancy import TenantContext, get_tenant_context
 from apps.documents.models import (
     STATUS_TRANSITIONS,
@@ -46,6 +56,13 @@ class DocumentService:
         try:
             with transaction.atomic():
                 document.save()
+                _audit_log(
+                    request=request,
+                    ctx=ctx,
+                    action=AuditAction.DOCUMENT_UPLOADED,
+                    document=document,
+                    extra={"document_type": document.document_type},
+                )
         except DjangoValidationError as exc:
             raise ValidationError(_django_errors(exc))
         emit(
@@ -76,12 +93,15 @@ class DocumentService:
         status = validated.pop("status", None)
         replaced = False
         old_name = document.file.name if document.file else ""
-        storage = document.file.storage if document.file else None
         with transaction.atomic():
-            row = EmployeeDocument.objects.select_for_update().select_related(
-                "employee",
-                "company",
-            ).get(pk=document.pk)
+            row = (
+                EmployeeDocument.objects.select_for_update()
+                .select_related(
+                    "employee",
+                    "company",
+                )
+                .get(pk=document.pk)
+            )
             self._assert_same_company(ctx, row)
             if not _authz.can_view(ctx, row):
                 raise NotFound()
@@ -100,8 +120,8 @@ class DocumentService:
                 row.save()
             except DjangoValidationError as exc:
                 raise ValidationError(_django_errors(exc))
-            if replaced and storage and old_name and old_name != row.file.name:
-                transaction.on_commit(lambda: _delete_storage(storage, old_name))
+            if replaced and old_name and old_name != row.file.name:
+                transaction.on_commit(lambda: _delete_storage(old_name))
         action = "document.replaced" if replaced else "document.updated"
         if status == DocumentStatus.ARCHIVED and not replaced:
             action = "document.archived"
@@ -124,12 +144,29 @@ class DocumentService:
             row = EmployeeDocument.objects.select_for_update().get(pk=document.pk)
             self._assert_same_company(ctx, row)
             path = row.file.name if row.file else ""
-            storage = row.file.storage if row.file else None
             pk = row.id
             title = row.title
+            meta = _document_meta(row)
+            for holder in (document, row):
+                if holder.file:
+                    try:
+                        holder.file.close()
+                    except Exception:
+                        pass
+            if path:
+                try:
+                    get_object_storage().delete(path, missing_ok=True)
+                except StorageDeleteError as exc:
+                    raise StorageUnavailable(detail=str(exc)) from exc
+            row.file = None
             row.delete()
-        if storage and path:
-            transaction.on_commit(lambda: _delete_storage(storage, path))
+            _audit_log(
+                request=request,
+                ctx=ctx,
+                action=AuditAction.DOCUMENT_DELETED,
+                document_id=pk,
+                extra={"title": title, **meta},
+            )
         emit(
             "document.deleted",
             actor=ctx.user,
@@ -147,8 +184,8 @@ class DocumentService:
         if not document.file:
             raise NotFound()
         try:
-            handle = document.file.open("rb")
-        except (FileNotFoundError, OSError, ValueError):
+            payload = get_object_storage().read(document.file.name)
+        except StorageError:
             raise NotFound()
         emit(
             "document.downloaded",
@@ -158,14 +195,42 @@ class DocumentService:
             resource_id=document.id,
             metadata={"file_name": document.file_name},
         )
+        _audit_log(
+            request=request,
+            ctx=ctx,
+            action=AuditAction.DOCUMENT_DOWNLOADED,
+            document=document,
+        )
         response = FileResponse(
-            handle,
+            BytesIO(payload),
             as_attachment=True,
             filename=document.file_name or "document",
         )
         if document.mime_type:
             response["Content-Type"] = document.mime_type
         return response
+
+    def access_document(self, *, request, document: EmployeeDocument) -> dict:
+        ctx = _require_company(request)
+        self._assert_same_company(ctx, document)
+        if not _authz.can_view(ctx, document):
+            raise NotFound()
+        if not document.file:
+            raise NotFound()
+        if not get_object_storage().exists(document.file.name):
+            raise NotFound()
+        url = get_object_storage().signed_url(document.file.name)
+        from django.conf import settings
+
+        return {
+            "mode": "signed" if url else "stream",
+            "url": url,
+            "file_name": document.file_name,
+            "mime_type": document.mime_type,
+            "expires_in": (
+                int(getattr(settings, "AWS_QUERYSTRING_EXPIRE", 300)) if url else None
+            ),
+        }
 
     def _apply_status(self, document: EmployeeDocument, status: str) -> None:
         allowed = STATUS_TRANSITIONS.get(document.status, frozenset())
@@ -213,6 +278,21 @@ def resolve_employee(*, company, employee_id) -> Employee:
     return employee
 
 
+def resolve_visible_employee(*, request, employee_id) -> Employee:
+    from django.core.exceptions import ValidationError as DjangoValidationError
+
+    ctx = _require_company(request)
+    try:
+        employee = (
+            employee_queryset().filter(company=ctx.company, pk=employee_id).first()
+        )
+    except (DjangoValidationError, ValueError, TypeError):
+        raise NotFound()
+    if employee is None or not _authz.can_view(ctx, employee):
+        raise NotFound()
+    return employee
+
+
 def _file_metadata(upload: File) -> dict:
     validate_employee_document_file(upload)
     return {
@@ -222,12 +302,46 @@ def _file_metadata(upload: File) -> dict:
     }
 
 
-def _delete_storage(storage, path: str) -> None:
+def _delete_storage(path: str) -> None:
     try:
-        if path and storage.exists(path):
-            storage.delete(path)
-    except OSError:
+        get_object_storage().delete(path, missing_ok=True)
+    except StorageDeleteError:
         return
+
+
+def _document_meta(document: EmployeeDocument | None) -> dict:
+    if document is None:
+        return {}
+    return {
+        "file_name": document.file_name,
+        "file_size": document.file_size,
+        "mime_type": document.mime_type,
+        "document_type": document.document_type,
+    }
+
+
+def _audit_log(
+    *,
+    request,
+    ctx: TenantContext,
+    action: str,
+    document: EmployeeDocument | None = None,
+    document_id=None,
+    extra: dict | None = None,
+) -> None:
+    payload = {**(extra or {})}
+    if document is not None:
+        payload.update(_document_meta(document))
+        document_id = document.id
+    AuditService.log(
+        company=ctx.company,
+        user=ctx.user,
+        action=action,
+        entity_type=AuditEntityType.EMPLOYEE_DOCUMENT,
+        entity_id=document_id,
+        new_value=payload,
+        request=request,
+    )
 
 
 def _require_company(request) -> TenantContext:

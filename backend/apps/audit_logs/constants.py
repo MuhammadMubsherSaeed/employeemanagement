@@ -16,6 +16,12 @@ class AuditAction(models.TextChoices):
     ROLE_CHANGED = "ROLE_CHANGED", "Role changed"
     PERMISSION_CHANGED = "PERMISSION_CHANGED", "Permission changed"
     SETTINGS_CHANGED = "SETTINGS_CHANGED", "Settings changed"
+    DOCUMENT_UPLOADED = "DOCUMENT_UPLOADED", "Document uploaded"
+    DOCUMENT_DOWNLOADED = "DOCUMENT_DOWNLOADED", "Document downloaded"
+    DOCUMENT_DELETED = "DOCUMENT_DELETED", "Document deleted"
+    PROFILE_IMAGE_UPDATED = "PROFILE_IMAGE_UPDATED", "Profile image updated"
+    LEAVE_ATTACHMENT_UPLOADED = "LEAVE_ATTACHMENT_UPLOADED", "Leave attachment uploaded"
+    LEAVE_ATTACHMENT_DELETED = "LEAVE_ATTACHMENT_DELETED", "Leave attachment deleted"
 
 
 class AuditEntityType(models.TextChoices):
@@ -26,3 +32,4 @@ class AuditEntityType(models.TextChoices):
     USER = "USER", "User"
     ROLE = "ROLE", "Role"
     COMPANY_SETTINGS = "COMPANY_SETTINGS", "Company settings"
+    EMPLOYEE_DOCUMENT = "EMPLOYEE_DOCUMENT", "Employee document"

@@ -42,6 +42,17 @@ class AppRoutes {
 
   static String employeeEdit(String id) => '/employees/$id/edit';
 
+  static String employeeDocuments(String id) => '/employees/$id/documents';
+
+  static String employeeDocumentUpload(String id) =>
+      '/employees/$id/documents/upload';
+
+  static String employeeDocument(String employeeId, String documentId) =>
+      '/employees/$employeeId/documents/$documentId';
+
+  static String employeeDocumentPreview(String employeeId, String documentId) =>
+      '/employees/$employeeId/documents/$documentId/preview';
+
   static String attendanceDetail(String id) => '/attendance/$id';
 
   static String leaveRequest(String id) => '/leaves/requests/$id';

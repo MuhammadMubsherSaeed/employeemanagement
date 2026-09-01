@@ -1,6 +1,7 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.viewsets import ModelViewSet
 
 from apps.common.mixins import EnvelopeMixin, TenantAwareQuerySetMixin
@@ -23,6 +24,12 @@ from apps.employees.serializers import (
     EmployeeSelfSerializer,
     EmployeeUpdateSerializer,
     PositionSerializer,
+    ProfileImageUploadSerializer,
+)
+from apps.employees.services import (
+    clear_profile_image,
+    open_profile_image,
+    set_profile_image,
 )
 
 _EMPLOYEE_PERMISSIONS = {
@@ -33,6 +40,7 @@ _EMPLOYEE_PERMISSIONS = {
     "update": "employees.update",
     "partial_update": "employees.update",
     "destroy": "employees.delete",
+    "profile_image": "employees.view",
 }
 
 _ORG_WRITE = {
@@ -63,6 +71,7 @@ _ORG_WRITE = {
 class EmployeeViewSet(EnvelopeMixin, TenantAwareQuerySetMixin, ModelViewSet):
     queryset = employee_queryset()
     permission_classes = (IsAuthenticatedUser,)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
     filterset_class = EmployeeFilter
     search_fields = (
         "employee_code",
@@ -113,6 +122,59 @@ class EmployeeViewSet(EnvelopeMixin, TenantAwareQuerySetMixin, ModelViewSet):
             employee, context=self.get_serializer_context()
         )
         return success_response(data=serializer.data)
+
+    def check_object_permissions(self, request, obj):
+        if self.action == "profile_image" and request.method not in (
+            "GET",
+            "HEAD",
+            "OPTIONS",
+        ):
+            super(TenantAwareQuerySetMixin, self).check_object_permissions(
+                request, obj
+            )
+            ctx = get_tenant_context(request)
+            from apps.common.authorization import ObjectAuthorization
+
+            if not ObjectAuthorization().can_view(ctx, obj):
+                raise NotFound()
+            return
+        super().check_object_permissions(request, obj)
+
+    @extend_schema(
+        tags=["Employees"],
+        request={"multipart/form-data": ProfileImageUploadSerializer},
+        description=(
+            "GET streams a private profile image after authorization. "
+            "POST uploads a JPEG/PNG/WebP (multipart field ``file``) and replaces "
+            "the previous object. DELETE removes the stored image. "
+            "Employees may update their own photo; managers/admins follow "
+            "existing employee update scope. Does not return a public URL."
+        ),
+        responses={200: bytes},
+    )
+    @action(detail=True, methods=["get", "post", "delete"], url_path="profile-image")
+    def profile_image(self, request, pk=None, **_kwargs):
+        employee = self.get_object()
+        if request.method == "GET":
+            return open_profile_image(request=request, employee=employee)
+        if request.method == "DELETE":
+            clear_profile_image(request=request, employee=employee)
+            return success_response(
+                data=self.get_read_serializer(employee).data,
+                message="Deleted.",
+            )
+        serializer = ProfileImageUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        set_profile_image(
+            request=request,
+            employee=employee,
+            upload=serializer.validated_data["file"],
+        )
+        employee.refresh_from_db()
+        return success_response(
+            data=self.get_read_serializer(employee).data,
+            message="Updated.",
+        )
 
 
 @extend_schema_view(

@@ -8,4 +8,6 @@ class EmployeeEndpoints {
   static const String positions = 'positions/';
 
   static String employee(String id) => 'employees/$id/';
+
+  static String profileImage(String id) => 'employees/$id/profile-image/';
 }

@@ -11,8 +11,12 @@ class EmployeeDocumentAdmin(admin.ModelAdmin):
         "status",
         "employee",
         "file_name",
+        "mime_type",
+        "file_size",
+        "uploaded_by",
         "expiry_date",
         "company",
+        "created_at",
     )
     list_filter = ("status", "document_type", "company")
     search_fields = (
@@ -24,6 +28,7 @@ class EmployeeDocumentAdmin(admin.ModelAdmin):
         "company__slug",
     )
     raw_id_fields = ("company", "employee", "uploaded_by")
+    exclude = ("file",)
     readonly_fields = (
         "file_name",
         "file_size",

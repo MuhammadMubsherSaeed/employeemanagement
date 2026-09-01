@@ -63,6 +63,7 @@ _REQUEST_PERMISSIONS = {
     "create": LEAVE_CREATE,
     "approve": LEAVE_APPROVE,
     "reject": LEAVE_REJECT,
+    "attachment": LEAVE_VIEW,
 }
 
 
@@ -210,7 +211,7 @@ class LeaveRequestViewSet(
     )
     ordering_fields = ("start_date", "end_date", "created_at", "status")
     ordering = ("-start_date", "-created_at")
-    http_method_names = ["get", "post", "head", "options"]
+    http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_permissions(self):
         if self.action == "cancel":
@@ -297,4 +298,27 @@ class LeaveRequestViewSet(
         row = LeaveService().cancel(request=request, leave_request=self.get_object())
         return success_response(
             data=self.get_read_serializer(row).data, message="Cancelled."
+        )
+
+    @extend_schema(
+        tags=["Leave"],
+        description=(
+            "GET streams the leave attachment after leave-request authorization. "
+            "DELETE removes the stored file. Does not return a public URL."
+        ),
+        responses={200: bytes},
+    )
+    @action(detail=True, methods=["get", "delete"], url_path="attachment")
+    def attachment(self, request, pk=None, **_kwargs):
+        row = self.get_object()
+        if request.method == "DELETE":
+            updated = LeaveService().delete_attachment(
+                request=request, leave_request=row
+            )
+            return success_response(
+                data=self.get_read_serializer(updated).data,
+                message="Deleted.",
+            )
+        return LeaveService().download_attachment(
+            request=request, leave_request=row
         )

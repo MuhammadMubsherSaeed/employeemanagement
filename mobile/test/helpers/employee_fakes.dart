@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
@@ -235,6 +237,23 @@ class FakeEmployeeRepository implements EmployeeRepository {
     }
     deletedId = id;
   }
+
+  @override
+  Future<Uint8List?> getProfileImage(String id) async => null;
+
+  @override
+  Future<Employee> uploadProfileImage({
+    required String id,
+    required String path,
+    required String filename,
+  }) async {
+    return sampleEmployee(id: id);
+  }
+
+  @override
+  Future<Employee> deleteProfileImage(String id) async {
+    return sampleEmployee(id: id);
+  }
 }
 
 class FakeEmployeeRemote implements EmployeeRemoteDataSource {
@@ -309,6 +328,25 @@ class FakeEmployeeRemote implements EmployeeRemoteDataSource {
   @override
   Future<void> deleteEmployee(String id) async {
     lastId = id;
+  }
+
+  @override
+  Future<Uint8List?> getProfileImage(String id) async => null;
+
+  @override
+  Future<Employee> uploadProfileImage({
+    required String id,
+    required String path,
+    required String filename,
+  }) async {
+    lastId = id;
+    return employee ?? sampleEmployee(id: id);
+  }
+
+  @override
+  Future<Employee> deleteProfileImage(String id) async {
+    lastId = id;
+    return employee ?? sampleEmployee(id: id);
   }
 
   @override

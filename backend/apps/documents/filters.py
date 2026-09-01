@@ -21,6 +21,9 @@ class DocumentFilter(filters.FilterSet):
         field_name="expiry_date",
         lookup_expr="lte",
     )
+    uploaded_by = filters.NumberFilter(field_name="uploaded_by_id")
+    date_from = filters.DateFilter(method="filter_date_from")
+    date_to = filters.DateFilter(method="filter_date_to")
 
     class Meta:
         model = EmployeeDocument
@@ -32,6 +35,9 @@ class DocumentFilter(filters.FilterSet):
             "expiring_soon",
             "expiry_date_from",
             "expiry_date_to",
+            "uploaded_by",
+            "date_from",
+            "date_to",
         )
 
     def filter_employee(self, queryset, name, value):
@@ -55,3 +61,9 @@ class DocumentFilter(filters.FilterSet):
             expiry_date__gte=today,
             expiry_date__lte=until,
         )
+
+    def filter_date_from(self, queryset, name, value):
+        return queryset.filter(created_at__date__gte=value)
+
+    def filter_date_to(self, queryset, name, value):
+        return queryset.filter(created_at__date__lte=value)

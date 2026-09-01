@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_base/core/config/app_config_provider.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/utils/date_formatter.dart';
@@ -11,6 +10,7 @@ import 'package:flutter_base/core/widgets/app_loader.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/documents/presentation/providers/document_providers.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/leaves/domain/services/leave_attachment_opener.dart';
@@ -113,7 +113,6 @@ class LeaveRequestDetailsScreen extends ConsumerWidget {
     final LeaveActionState action = ref.watch(leaveActionControllerProvider);
     final AsyncValue<LeaveRequest> async =
         ref.watch(leaveRequestDetailProvider(requestId));
-    final String apiBaseUrl = ref.watch(appConfigProvider).apiBaseUrl;
 
     return Scaffold(
       appBar: AppBar(
@@ -126,8 +125,10 @@ class LeaveRequestDetailsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(leaveRequestDetailProvider(requestId)),
         ),
         data: (LeaveRequest request) {
-          final String? attachmentUrl =
-              resolveLeaveAttachmentUrl(request.attachment, apiBaseUrl);
+          final bool hasAttachment =
+              leaveRequestHasAttachment(request.attachment);
+          final String? publicUrl =
+              resolveLeaveAttachmentUrl(request.attachment, '');
           final bool showApprove =
               access.canApprove && request.isPending;
           final bool showReject = access.canReject && request.isPending;
@@ -209,18 +210,45 @@ class LeaveRequestDetailsScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                if (attachmentUrl != null) ...<Widget>[
+                if (hasAttachment) ...<Widget>[
                   const SizedBox(height: AppSpacing.md),
                   AppButton(
                     label: 'Open attachment',
                     variant: AppButtonVariant.outlined,
                     onPressed: () async {
-                      final bool ok = await openLeaveAttachment(attachmentUrl);
-                      if (!context.mounted) {
+                      if (publicUrl != null) {
+                        final bool ok = await openLeaveAttachment(publicUrl);
+                        if (!context.mounted) {
+                          return;
+                        }
+                        if (!ok) {
+                          context.showSnack('Unable to open the attachment.');
+                        }
                         return;
                       }
-                      if (!ok) {
-                        context.showSnack('Unable to open the attachment.');
+                      try {
+                        final file = await ref.read(
+                          downloadLeaveAttachmentUseCaseProvider,
+                        )(requestId);
+                        final String path = await ref
+                            .read(secureDocumentFileServiceProvider)
+                            .writeTemporary(file);
+                        final bool ok = await ref
+                            .read(secureDocumentFileServiceProvider)
+                            .openPath(path);
+                        await ref
+                            .read(secureDocumentFileServiceProvider)
+                            .deletePath(path);
+                        if (!context.mounted) {
+                          return;
+                        }
+                        if (!ok) {
+                          context.showSnack('Unable to open the attachment.');
+                        }
+                      } catch (_) {
+                        if (context.mounted) {
+                          context.showSnack('Unable to download the attachment.');
+                        }
                       }
                     },
                   ),

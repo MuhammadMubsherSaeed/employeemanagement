@@ -8,6 +8,7 @@ from apps.employees.models import Department, Employee, Position
 from apps.employees.services import (
     department_snapshot,
     employee_snapshot,
+    public_profile_image_value,
     record_department_created,
     record_department_updated,
     record_employee_created,
@@ -62,6 +63,7 @@ class EmployeeListSerializer(serializers.ModelSerializer):
     position = PositionSummarySerializer(read_only=True)
     manager = ManagerSummarySerializer(read_only=True)
     user = LinkedUserSerializer(read_only=True)
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Employee
@@ -81,6 +83,9 @@ class EmployeeListSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
         )
+
+    def get_profile_image(self, obj) -> str:
+        return public_profile_image_value(obj)
 
 
 class EmployeeDetailSerializer(EmployeeListSerializer):
@@ -160,6 +165,16 @@ class EmployeeWriteSerializer(TenantPayloadMixin, serializers.ModelSerializer):
 
     def validate_manager(self, value):
         return self._same_company(value, "Manager")
+
+    def validate_profile_image(self, value: str) -> str:
+        text = (value or "").strip()
+        if not text:
+            return ""
+        if text.startswith("http://") or text.startswith("https://"):
+            return text[:512]
+        raise serializers.ValidationError(
+            "Use the profile-image endpoint to upload a photo."
+        )
 
     def validate(self, attrs):
         instance = self.instance
@@ -324,3 +339,13 @@ class PositionSerializer(TenantPayloadMixin, serializers.ModelSerializer):
                     {"title": "A position with this title already exists."}
                 )
         return attrs
+
+
+class ProfileImageUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
+    def validate_file(self, value):
+        from apps.documents.models import validate_profile_image_file
+
+        validate_profile_image_file(value)
+        return value

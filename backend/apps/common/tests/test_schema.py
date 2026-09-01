@@ -41,6 +41,8 @@ class SchemaAPITests(TestCase):
         self.assertIn("history/", joined)
         self.assertIn("documents/", joined)
         self.assertIn("download/", joined)
+        self.assertIn("profile-image/", joined)
+        self.assertIn("/attachment/", joined)
         self.assertIn("notifications/", joined)
         self.assertIn("unread-count/", joined)
         self.assertIn("mark-read/", joined)

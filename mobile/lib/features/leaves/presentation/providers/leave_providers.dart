@@ -62,6 +62,11 @@ final cancelLeaveRequestUseCaseProvider =
   return CancelLeaveRequest(ref.watch(leaveRepositoryProvider));
 });
 
+final downloadLeaveAttachmentUseCaseProvider =
+    Provider<DownloadLeaveAttachment>((Ref ref) {
+  return DownloadLeaveAttachment(ref.watch(leaveRepositoryProvider));
+});
+
 final createLeaveTypeUseCaseProvider = Provider<CreateLeaveType>((Ref ref) {
   return CreateLeaveType(ref.watch(leaveRepositoryProvider));
 });

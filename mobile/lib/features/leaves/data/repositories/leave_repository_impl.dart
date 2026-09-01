@@ -1,3 +1,4 @@
+import 'package:flutter_base/features/documents/domain/entities/document.dart';
 import 'package:flutter_base/features/leaves/data/datasources/leave_remote_datasource.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_query.dart';
@@ -75,5 +76,10 @@ class LeaveRepositoryImpl implements LeaveRepository {
   @override
   Future<LeaveRequest> cancelLeaveRequest(String id) {
     return _remote.cancelLeaveRequest(id);
+  }
+
+  @override
+  Future<DownloadedBytes> downloadLeaveAttachment(String id) {
+    return _remote.downloadLeaveAttachment(id);
   }
 }

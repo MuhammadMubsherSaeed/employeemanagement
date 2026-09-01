@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
+import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/network/api_client.dart';
 import 'package:flutter_base/core/network/models/api_envelope.dart';
+import 'package:flutter_base/features/documents/domain/entities/document.dart';
 import 'package:flutter_base/features/leaves/data/leave_endpoints.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_query.dart';
@@ -36,6 +40,8 @@ abstract class LeaveRemoteDataSource {
   });
 
   Future<LeaveRequest> cancelLeaveRequest(String id);
+
+  Future<DownloadedBytes> downloadLeaveAttachment(String id);
 }
 
 class LeaveRemoteDataSourceImpl implements LeaveRemoteDataSource {
@@ -165,6 +171,40 @@ class LeaveRemoteDataSourceImpl implements LeaveRemoteDataSource {
       data: <String, dynamic>{},
     );
     return LeaveRequest.fromJson(_data(_envelope(response.data)));
+  }
+
+  @override
+  Future<DownloadedBytes> downloadLeaveAttachment(String id) async {
+    final Response<List<int>> response = await _client.get<List<int>>(
+      LeaveEndpoints.attachment(id),
+      options: Options(
+        responseType: ResponseType.bytes,
+        headers: <String, dynamic>{ApiHeaders.accept: '*/*'},
+      ),
+    );
+    final List<int>? data = response.data;
+    if (data == null || data.isEmpty) {
+      throw const UnknownException('The attachment was empty.');
+    }
+    final Uint8List bytes =
+        data is Uint8List ? data : Uint8List.fromList(data);
+    final String contentType =
+        response.headers.value(Headers.contentTypeHeader) ??
+            'application/octet-stream';
+    return DownloadedBytes(
+      bytes: bytes,
+      filename: _filename(response.headers) ?? 'attachment',
+      mimeType: contentType.split(';').first.trim(),
+    );
+  }
+
+  String? _filename(Headers headers) {
+    final String? header = headers.value('content-disposition');
+    if (header == null || header.isEmpty) {
+      return null;
+    }
+    final RegExp named = RegExp('filename="?([^";]+)"?', caseSensitive: false);
+    return named.firstMatch(header)?.group(1)?.trim();
   }
 
   LeavePage<T> _page<T>(
