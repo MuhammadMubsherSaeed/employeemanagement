@@ -29,6 +29,10 @@ class AppRoutes {
   static const String myDevices = '/my-devices';
   static const String notifications = '/notifications';
   static const String reports = '/reports';
+  static const String reportsAttendance = '/reports/attendance';
+  static const String reportsLeaves = '/reports/leaves';
+  static const String reportsEmployees = '/reports/employees';
+  static const String reportsDevices = '/reports/devices';
   static const String ai = '/ai';
   static const String settings = '/settings';
 

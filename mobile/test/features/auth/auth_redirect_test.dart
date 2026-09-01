@@ -237,6 +237,37 @@ void main() {
     );
   });
 
+  test('employees cannot open company reports', () {
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.reports,
+      ),
+      AppRoutes.dashboard,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.reportsAttendance,
+      ),
+      AppRoutes.dashboard,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.reportsEmployees,
+      ),
+      AppRoutes.dashboard,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.unauthenticated(),
+        location: AppRoutes.reports,
+      ),
+      AppRoutes.login,
+    );
+  });
+
   test('redirect never returns the current location', () {
     expect(
       AuthRedirect.resolve(

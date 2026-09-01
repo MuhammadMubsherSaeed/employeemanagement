@@ -31,6 +31,11 @@ import 'package:flutter_base/features/leaves/presentation/screens/leave_type_for
 import 'package:flutter_base/features/leaves/presentation/screens/leave_types_screen.dart';
 import 'package:flutter_base/features/notifications/presentation/screens/notification_details_screen.dart';
 import 'package:flutter_base/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:flutter_base/features/reports/presentation/screens/attendance_report_screen.dart';
+import 'package:flutter_base/features/reports/presentation/screens/device_report_screen.dart';
+import 'package:flutter_base/features/reports/presentation/screens/employee_report_screen.dart';
+import 'package:flutter_base/features/reports/presentation/screens/leave_report_screen.dart';
+import 'package:flutter_base/features/reports/presentation/screens/reports_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -325,6 +330,43 @@ GoRouter createAppRouter({
             notificationId: state.pathParameters['id'] ?? '',
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.reports,
+        name: 'reports',
+        builder: (BuildContext context, GoRouterState state) {
+          return const ReportsScreen();
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'attendance',
+            name: 'reports-attendance',
+            builder: (BuildContext context, GoRouterState state) {
+              return const AttendanceReportScreen();
+            },
+          ),
+          GoRoute(
+            path: 'leaves',
+            name: 'reports-leaves',
+            builder: (BuildContext context, GoRouterState state) {
+              return const LeaveReportScreen();
+            },
+          ),
+          GoRoute(
+            path: 'employees',
+            name: 'reports-employees',
+            builder: (BuildContext context, GoRouterState state) {
+              return const EmployeeReportScreen();
+            },
+          ),
+          GoRoute(
+            path: 'devices',
+            name: 'reports-devices',
+            builder: (BuildContext context, GoRouterState state) {
+              return const DeviceReportScreen();
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.error,
