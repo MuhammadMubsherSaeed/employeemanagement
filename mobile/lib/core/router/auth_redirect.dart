@@ -32,7 +32,7 @@ class AuthRedirect {
             loc.startsWith(AppRoutes.employees)) {
           return _nav(AppRoutes.employeesMe, loc);
         }
-        return _nav(AppRoutes.home, loc);
+        return _nav(AppRoutes.dashboard, loc);
       }
       if (EmployeeAccess(auth.user.role).isSelfService) {
         if (loc == AppRoutes.employees ||
@@ -49,7 +49,7 @@ class AuthRedirect {
         }
       }
       if (onLogin || onForgot || onSplash) {
-        return _nav(AppRoutes.home, loc);
+        return _nav(AppRoutes.dashboard, loc);
       }
       return null;
     }

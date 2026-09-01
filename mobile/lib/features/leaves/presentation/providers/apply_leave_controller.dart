@@ -1,5 +1,6 @@
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/dashboard/presentation/providers/dashboard_invalidation.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_query.dart';
 import 'package:flutter_base/features/leaves/domain/services/leave_attachment_picker.dart';
@@ -128,6 +129,7 @@ class ApplyLeaveController extends Notifier<ApplyLeaveState> {
       state = const ApplyLeaveState();
       ref.invalidate(leaveBalancesProvider);
       ref.invalidate(leaveRequestDetailProvider);
+      invalidateDashboardProviders(ref);
       await ref
           .read(leaveRequestsControllerProvider(LeaveListKind.all).notifier)
           .refresh();

@@ -1,3 +1,4 @@
+import 'package:flutter_base/features/dashboard/presentation/providers/dashboard_invalidation.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/presentation/providers/leave_error_mapper.dart';
 import 'package:flutter_base/features/leaves/presentation/providers/leave_providers.dart';
@@ -108,6 +109,7 @@ class LeaveActionController extends Notifier<LeaveActionState> {
       );
       state = const LeaveActionState();
       ref.invalidate(leaveBalancesProvider);
+      invalidateEmployeeDashboard(ref);
       return result;
     } catch (error) {
       state = state.copyWith(
@@ -127,6 +129,7 @@ class LeaveActionController extends Notifier<LeaveActionState> {
           .replaceRequest(result);
       ref.read(leaveRequestsControllerProvider(kind).notifier).refresh();
     }
+    invalidateDashboardProviders(ref);
   }
 }
 

@@ -13,6 +13,7 @@ import 'package:flutter_base/features/auth/presentation/screens/home_screen.dart
 import 'package:flutter_base/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter_base/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:flutter_base/features/auth/presentation/screens/splash_screen.dart';
+import 'package:flutter_base/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:flutter_base/features/devices/presentation/screens/assign_device_screen.dart';
 import 'package:flutter_base/features/devices/presentation/screens/device_details_screen.dart';
 import 'package:flutter_base/features/devices/presentation/screens/device_form_screen.dart';
@@ -95,6 +96,13 @@ GoRouter createAppRouter({
         name: 'home',
         builder: (BuildContext context, GoRouterState state) {
           return const HomeScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.dashboard,
+        name: 'dashboard',
+        builder: (BuildContext context, GoRouterState state) {
+          return const DashboardScreen();
         },
       ),
       GoRoute(

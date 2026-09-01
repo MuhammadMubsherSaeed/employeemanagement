@@ -114,6 +114,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             AppCard(
+              onTap: () => context.push(AppRoutes.dashboard),
+              child: Row(
+                children: <Widget>[
+                  const Icon(Icons.dashboard_outlined),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      'Dashboard',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppCard(
               onTap: () {
                 final EmployeeAccess access = EmployeeAccess(
                   user?.role ?? UserRole.unknown,
