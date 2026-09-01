@@ -27,6 +27,7 @@ class AppRoutes {
   static const String devices = '/devices';
   static const String devicesAdd = '/devices/add';
   static const String myDevices = '/my-devices';
+  static const String notifications = '/notifications';
   static const String reports = '/reports';
   static const String ai = '/ai';
   static const String settings = '/settings';
@@ -50,4 +51,6 @@ class AppRoutes {
   static String deviceAssign(String id) => '/devices/$id/assign';
 
   static String deviceHistory(String id) => '/devices/$id/history';
+
+  static String notification(String id) => '/notifications/$id';
 }

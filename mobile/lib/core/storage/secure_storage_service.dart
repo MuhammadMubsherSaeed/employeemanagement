@@ -41,6 +41,7 @@ class SecureStorageService {
     await _storage.delete(key: StorageKeys.accessToken);
     await _storage.delete(key: StorageKeys.refreshToken);
     await _storage.delete(key: StorageKeys.session);
+    await _storage.delete(key: StorageKeys.fcmDeviceTokenId);
   }
 
   Future<void> write(String key, String value) {

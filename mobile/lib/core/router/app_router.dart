@@ -28,6 +28,8 @@ import 'package:flutter_base/features/leaves/presentation/screens/leave_request_
 import 'package:flutter_base/features/leaves/presentation/screens/leave_requests_screen.dart';
 import 'package:flutter_base/features/leaves/presentation/screens/leave_type_form_screen.dart';
 import 'package:flutter_base/features/leaves/presentation/screens/leave_types_screen.dart';
+import 'package:flutter_base/features/notifications/presentation/screens/notification_details_screen.dart';
+import 'package:flutter_base/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -298,6 +300,22 @@ GoRouter createAppRouter({
         name: 'devices',
         builder: (BuildContext context, GoRouterState state) {
           return const DevicesScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        name: 'notifications',
+        builder: (BuildContext context, GoRouterState state) {
+          return const NotificationsScreen();
+        },
+      ),
+      GoRoute(
+        path: '/notifications/:id',
+        name: 'notification-detail',
+        builder: (BuildContext context, GoRouterState state) {
+          return NotificationDetailsScreen(
+            notificationId: state.pathParameters['id'] ?? '',
+          );
         },
       ),
       GoRoute(

@@ -11,4 +11,5 @@ urlpatterns = [
     path("", include("apps.leave.urls")),
     path("", include("apps.devices.urls")),
     path("", include("apps.documents.urls")),
+    path("", include("apps.notifications.urls")),
 ]

@@ -188,7 +188,7 @@ Skip empty layers. A small feature can be `presentation/` + a single data source
 
 Planned feature names (do not create empty folders now):
 
-`auth` · `dashboard` · `employees` · `attendance` · `leaves` · `devices` · `reports` · `notifications` · `ai` · `subscriptions` · `settings`
+`auth` · `dashboard` · `employees` · `attendance` · `leaves` · `devices` · `notifications` · `reports` · `ai` · `subscriptions` · `settings`
 
 `features/auth/` implements login, session restore, logout, and password reset. `UserSession` / `SessionStore` remain for future tenant context and must not be filled with a fake `companyId`.
 

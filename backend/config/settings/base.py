@@ -33,6 +33,7 @@ LOCAL_APPS = [
     "apps.leave",
     "apps.devices",
     "apps.documents",
+    "apps.notifications",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -137,6 +138,7 @@ MAX_DOCUMENT_UPLOAD_SIZE = env.int(
 )
 DOCUMENT_EXPIRING_SOON_DAYS = env.int("DOCUMENT_EXPIRING_SOON_DAYS", default=30)
 DOCUMENT_ALLOWED_EXTENSIONS = ("pdf", "doc", "docx", "jpg", "jpeg", "png")
+FIREBASE_CREDENTIALS_PATH = env("FIREBASE_CREDENTIALS_PATH", default="")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

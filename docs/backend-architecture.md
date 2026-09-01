@@ -1,6 +1,6 @@
 # Backend architecture — HRMS foundation
 
-This document describes the Django REST backend under `backend/`. Employees, attendance, leave, devices, and employee documents are implemented; billing and AI are not.
+This document describes the Django REST backend under `backend/`. Employees, attendance, leave, devices, employee documents, and notifications are implemented; billing and AI are not.
 
 Python 3.12 · Django 5.2 · DRF 3.16 · PostgreSQL 16.
 
@@ -27,7 +27,8 @@ backend/
 │   ├── attendance/           # Attendance, Holiday
 │   ├── leave/                # LeaveType, LeaveBalance, LeaveRequest
 │   ├── devices/              # Device, DeviceAssignment
-│   └── documents/            # EmployeeDocument
+│   ├── documents/            # EmployeeDocument
+│   └── notifications/        # Notification, DeviceToken
 ├── requirements/
 │   ├── base.txt
 │   ├── development.txt
@@ -36,7 +37,7 @@ backend/
 └── .env.example
 ```
 
-`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, and `apps.documents` are implemented. Remaining planned apps: `reports`, `notifications`, `ai`, `subscriptions`. Leave details: [`docs/leave-management.md`](leave-management.md). Device details: [`docs/device-management.md`](device-management.md). Document details: [`docs/employee-documents.md`](employee-documents.md).
+`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, `apps.documents`, and `apps.notifications` are implemented. Remaining planned apps: `reports`, `ai`, `subscriptions`. Leave details: [`docs/leave-management.md`](leave-management.md). Device details: [`docs/device-management.md`](device-management.md). Document details: [`docs/employee-documents.md`](employee-documents.md). Notification details: [`docs/notification-management.md`](notification-management.md).
 
 ---
 
@@ -209,4 +210,4 @@ Implemented. See [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 5. Inherit domain models from `TimeStampedModel`. Add a `company` FK and `TenantAwareQuerySetMixin`; never take `company_id` from the client.
 6. Use `ApiClient` on Flutter against `/api/v1/…`. Catch `AppException` shapes that match this envelope.
 
-`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, and `apps.documents` are implemented. Remaining planned apps: `reports`, `notifications`, `ai`, `subscriptions`. Document details: [`docs/employee-documents.md`](employee-documents.md).
+`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, `apps.documents`, and `apps.notifications` are implemented. Remaining planned apps: `reports`, `ai`, `subscriptions`. Notification details: [`docs/notification-management.md`](notification-management.md).

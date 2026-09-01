@@ -30,6 +30,9 @@ PERMISSION_CODES = (
     "documents.update",
     "documents.delete",
     "documents.download",
+    "notifications.view",
+    "notifications.mark_read",
+    "notifications.manage",
     "reports.view",
     "reports.export",
     "settings.manage",
@@ -61,6 +64,9 @@ PERMISSION_META = {
     "documents.update": ("Update documents", "documents"),
     "documents.delete": ("Delete documents", "documents"),
     "documents.download": ("Download documents", "documents"),
+    "notifications.view": ("View own notifications", "notifications"),
+    "notifications.mark_read": ("Mark own notifications as read", "notifications"),
+    "notifications.manage": ("Manage notifications", "notifications"),
     "reports.view": ("View reports", "reports"),
     "reports.export": ("Export reports", "reports"),
     "settings.manage": ("Manage settings", "settings"),
@@ -85,6 +91,8 @@ MANAGER_PERMISSIONS = (
     "documents.create",
     "documents.update",
     "documents.download",
+    "notifications.view",
+    "notifications.mark_read",
     "reports.view",
 )
 
@@ -99,6 +107,8 @@ EMPLOYEE_PERMISSIONS = (
     "documents.view",
     "documents.create",
     "documents.download",
+    "notifications.view",
+    "notifications.mark_read",
 )
 
 ROLE_DEFINITIONS = (

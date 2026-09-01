@@ -41,6 +41,8 @@ void main() {
     expect(AppRoutes.deviceEdit('dev-1'), '/devices/dev-1/edit');
     expect(AppRoutes.deviceAssign('dev-1'), '/devices/dev-1/assign');
     expect(AppRoutes.deviceHistory('dev-1'), '/devices/dev-1/history');
+    expect(AppRoutes.notifications, '/notifications');
+    expect(AppRoutes.notification('n-1'), '/notifications/n-1');
     expect(AppRoutes.reports, '/reports');
     expect(AppRoutes.ai, '/ai');
     expect(AppRoutes.settings, '/settings');

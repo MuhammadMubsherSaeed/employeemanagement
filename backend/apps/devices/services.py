@@ -178,6 +178,9 @@ class DeviceService:
                 "employee_id": str(employee.id),
             },
         )
+        from apps.notifications.integration import notify_device_assigned
+
+        notify_device_assigned(row, employee, actor=ctx.user)
         return row
 
     def return_device(
@@ -240,6 +243,9 @@ class DeviceService:
             resource_id=row.id,
             metadata={"assignment_id": str(assignment.id)},
         )
+        from apps.notifications.integration import notify_device_returned
+
+        notify_device_returned(row, assignment.employee, actor=ctx.user)
         return row
 
     def _change_status_locked(

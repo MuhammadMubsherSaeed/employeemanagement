@@ -42,4 +42,5 @@ class StorageKeys {
   static const String session = 'user_session';
   static const String themeMode = 'theme_mode';
   static const String onboardingComplete = 'onboarding_complete';
+  static const String fcmDeviceTokenId = 'fcm_device_token_id';
 }

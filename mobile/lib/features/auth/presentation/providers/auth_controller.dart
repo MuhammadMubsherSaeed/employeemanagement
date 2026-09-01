@@ -1,5 +1,6 @@
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/errors/error_mapper.dart';
+import 'package:flutter_base/core/session/logout_side_effects.dart';
 import 'package:flutter_base/core/session/session_invalidator.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/domain/usecases/login_usecase.dart';
@@ -48,6 +49,11 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
+    try {
+      await ref.read(logoutSideEffectsProvider).run();
+    } catch (_) {
+      // Device-token cleanup must not block sign-out.
+    }
     final LogoutUseCase logout = ref.read(logoutUseCaseProvider);
     try {
       await logout();

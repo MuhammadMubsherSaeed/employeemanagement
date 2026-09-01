@@ -15,6 +15,8 @@ import 'package:flutter_base/features/auth/presentation/providers/auth_state.dar
 import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
+import 'package:flutter_base/features/notifications/domain/notification_access.dart';
+import 'package:flutter_base/features/notifications/presentation/widgets/unread_notification_badge.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -58,6 +60,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text(AppConstants.appName),
         actions: <Widget>[
+          if (NotificationAccess(user?.role ?? UserRole.unknown).canView)
+            IconButton(
+              tooltip: 'Notifications',
+              onPressed: () => context.push(AppRoutes.notifications),
+              icon: const UnreadNotificationBadge(
+                child: Icon(Icons.notifications_outlined),
+              ),
+            ),
           IconButton(
             tooltip: 'Toggle theme',
             onPressed: () =>
@@ -208,6 +218,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             if (DeviceAccess(user?.role ?? UserRole.unknown).canView &&
                 !DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
+              const SizedBox(height: AppSpacing.md),
+            if (NotificationAccess(user?.role ?? UserRole.unknown).canView)
+              AppCard(
+                onTap: () => context.push(AppRoutes.notifications),
+                child: Row(
+                  children: <Widget>[
+                    const UnreadNotificationBadge(
+                      child: Icon(Icons.notifications_outlined),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'Notifications',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            if (NotificationAccess(user?.role ?? UserRole.unknown).canView)
               const SizedBox(height: AppSpacing.md),
             AppCard(
               child: Text(
