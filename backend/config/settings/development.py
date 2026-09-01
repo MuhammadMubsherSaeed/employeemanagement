@@ -38,9 +38,11 @@ SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = [
 ]
 
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    **REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
     "auth_login": "120/min",
     "auth_refresh": "120/min",
     "auth_password": "60/min",
+    "reports_export": "120/min",
 }
 
 EMAIL_BACKEND = env(
