@@ -41,6 +41,11 @@ class SchemaAPITests(TestCase):
         self.assertIn("history/", joined)
         self.assertIn("documents/", joined)
         self.assertIn("download/", joined)
+        self.assertIn("notifications/", joined)
+        self.assertIn("unread-count/", joined)
+        self.assertIn("mark-read/", joined)
+        self.assertIn("mark-all-read/", joined)
+        self.assertIn("device-tokens/", joined)
         device_return = next(
             p for p in paths if "devices/" in p and p.rstrip("/").endswith("return")
         )

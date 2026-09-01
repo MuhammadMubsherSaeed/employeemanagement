@@ -1,7 +1,8 @@
-from datetime import date, timedelta
+from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.documents.models import DocumentStatus, DocumentType, EmployeeDocument
 from apps.documents.tests.fixtures import DocumentFixtureMixin, pdf_file
@@ -32,10 +33,12 @@ class DocumentModelTests(DocumentFixtureMixin, TestCase):
             self.emp_a1,
             title="Visa",
             document_type=DocumentType.PASSPORT,
-            expiry_date=date.today() + timedelta(days=30),
+            expiry_date=timezone.localdate() + timedelta(days=30),
             file=pdf_file("visa.pdf"),
         )
-        self.assertEqual(dated.expiry_date, date.today() + timedelta(days=30))
+        self.assertEqual(
+            dated.expiry_date, timezone.localdate() + timedelta(days=30)
+        )
 
     def test_expired_status_requires_past_expiry_date(self) -> None:
         with self.assertRaises(ValidationError):
@@ -49,14 +52,14 @@ class DocumentModelTests(DocumentFixtureMixin, TestCase):
                 self.emp_a1,
                 title="Expired future",
                 status=DocumentStatus.EXPIRED,
-                expiry_date=date.today() + timedelta(days=1),
+                expiry_date=timezone.localdate() + timedelta(days=1),
                 file=pdf_file("future.pdf"),
             )
         document = self.make_document(
             self.emp_a1,
             title="Expired ok",
             status=DocumentStatus.EXPIRED,
-            expiry_date=date.today() - timedelta(days=1),
+            expiry_date=timezone.localdate() - timedelta(days=1),
             file=pdf_file("old.pdf"),
         )
         self.assertEqual(document.status, DocumentStatus.EXPIRED)

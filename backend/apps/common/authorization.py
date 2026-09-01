@@ -52,6 +52,8 @@ class ObjectAuthorization:
         return company_id == ctx.company.id
 
     def can_view(self, ctx: TenantContext, obj) -> bool:
+        if self._is_notification(obj) or self._is_device_token(obj):
+            return self._can_view_own_inbox_resource(ctx, obj)
         if not self.belongs_to_tenant(ctx, obj):
             return False
         if ctx.is_super_admin:
@@ -82,6 +84,8 @@ class ObjectAuthorization:
     def can_change(self, ctx: TenantContext, obj) -> bool:
         if not self.can_view(ctx, obj):
             return False
+        if self._is_notification(obj) or self._is_device_token(obj):
+            return True
         if ctx.is_super_admin or ctx.role_code == UserRole.COMPANY_ADMIN:
             return True
         if self._is_employee(obj):
@@ -129,6 +133,14 @@ class ObjectAuthorization:
         return owner_id == ctx.user.id
 
     def filter_queryset(self, queryset, ctx: TenantContext):
+        label = queryset.model._meta.label
+        if label in ("notifications.Notification", "notifications.DeviceToken"):
+            if ctx.company is None or ctx.user is None:
+                return queryset.none()
+            queryset = queryset.filter(company_id=ctx.company.id)
+            if label == "notifications.Notification":
+                return queryset.filter(recipient_id=ctx.user.id)
+            return queryset.filter(user_id=ctx.user.id)
         if ctx.is_super_admin:
             return queryset
         if ctx.company is None:
@@ -207,6 +219,21 @@ class ObjectAuthorization:
 
     def _is_device_assignment(self, obj) -> bool:
         return getattr(obj._meta, "label", "") == "devices.DeviceAssignment"
+
+    def _is_notification(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "notifications.Notification"
+
+    def _is_device_token(self, obj) -> bool:
+        return getattr(obj._meta, "label", "") == "notifications.DeviceToken"
+
+    def _can_view_own_inbox_resource(self, ctx: TenantContext, obj) -> bool:
+        if ctx.company is None or ctx.user is None:
+            return False
+        if getattr(obj, "company_id", None) != ctx.company.id:
+            return False
+        if self._is_notification(obj):
+            return obj.recipient_id == ctx.user.id
+        return obj.user_id == ctx.user.id
 
     def _active_device_assignment(self, device):
         from apps.devices.models import DeviceAssignment

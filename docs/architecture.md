@@ -240,7 +240,7 @@ Modular apps (initialized, domain logic not implemented except identity foundati
 
 **Why a custom user now:** Django cannot swap `AUTH_USER_MODEL` after the first migration without a painful rebuild. `accounts.User` extends `AbstractUser` and adds `role`. **No login, register, or token views** are exposed yet.
 
-Future apps (not created): `notifications`, `payroll`. Employee documents live in `apps.documents`.
+Future apps (not created): `payroll`. Employee documents live in `apps.documents`. In-app notifications live in `apps.notifications`.
 
 HTTP:
 

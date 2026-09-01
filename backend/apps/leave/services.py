@@ -89,6 +89,9 @@ class LeaveService:
             resource_id=row.id,
             metadata={"total_days": total_days},
         )
+        from apps.notifications.integration import notify_leave_submitted
+
+        notify_leave_submitted(row, actor=ctx.user)
         return row
 
     def approve(self, *, request, leave_request: LeaveRequest) -> LeaveRequest:
@@ -162,6 +165,9 @@ class LeaveService:
             resource_id=balance.id,
             metadata={"used_days": balance.used_days, "delta": row.total_days},
         )
+        from apps.notifications.integration import notify_leave_approved
+
+        notify_leave_approved(row, actor=ctx.user)
         return row
 
     def reject(
@@ -204,6 +210,9 @@ class LeaveService:
             resource_id=row.id,
             metadata={"rejection_reason": reason},
         )
+        from apps.notifications.integration import notify_leave_rejected
+
+        notify_leave_rejected(row, actor=ctx.user)
         return row
 
     def cancel(self, *, request, leave_request: LeaveRequest) -> LeaveRequest:
@@ -246,6 +255,9 @@ class LeaveService:
             resource_id=row.id,
             metadata={"previous_status": previous, "restored_days": restored},
         )
+        from apps.notifications.integration import notify_leave_cancelled
+
+        notify_leave_cancelled(row, actor=ctx.user)
         return row
 
     def allocate_balance(

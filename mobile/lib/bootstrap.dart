@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_base/app.dart';
@@ -8,6 +10,8 @@ import 'package:flutter_base/core/storage/shared_prefs_service.dart';
 import 'package:flutter_base/core/utils/app_logger.dart';
 import 'package:flutter_base/core/utils/app_provider_observer.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
+import 'package:flutter_base/features/notifications/data/firebase_background_handler.dart';
+import 'package:flutter_base/firebase_options.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +28,17 @@ Future<void> bootstrap() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  } catch (error, stack) {
+    AppLogger.error('Firebase initialization failed', error, stack);
+  }
 
   try {
     final AppConfig config = AppConfig.fromEnvironment();

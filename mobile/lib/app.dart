@@ -6,6 +6,7 @@ import 'package:flutter_base/core/theme/app_theme.dart';
 import 'package:flutter_base/core/theme/theme_mode_controller.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
+import 'package:flutter_base/features/notifications/presentation/widgets/notification_host.dart';
 import 'package:flutter_base/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +41,9 @@ class HrmsApp extends ConsumerWidget {
           darkTheme: AppTheme.dark,
           themeMode: themeMode,
           routerConfig: router,
+          builder: (BuildContext context, Widget? child) {
+            return NotificationHost(child: child ?? const SizedBox.shrink());
+          },
           localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
