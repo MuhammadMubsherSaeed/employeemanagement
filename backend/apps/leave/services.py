@@ -92,6 +92,21 @@ class LeaveService:
                 new_value=_leave_snapshot(row),
                 request=request,
             )
+            if row.attachment:
+                from pathlib import Path
+
+                AuditService.log(
+                    company=ctx.company,
+                    user=ctx.user,
+                    action=AuditAction.LEAVE_ATTACHMENT_UPLOADED,
+                    entity_type=AuditEntityType.LEAVE_REQUEST,
+                    entity_id=row.id,
+                    new_value={
+                        "file_name": Path(row.attachment.name).name,
+                        "file_size": int(getattr(row.attachment, "size", 0) or 0),
+                    },
+                    request=request,
+                )
         emit(
             "leave.request.created",
             actor=ctx.user,
@@ -302,6 +317,88 @@ class LeaveService:
         from apps.notifications.integration import notify_leave_cancelled
 
         notify_leave_cancelled(row, actor=ctx.user)
+        return row
+
+    def download_attachment(self, *, request, leave_request: LeaveRequest):
+        from io import BytesIO
+        from pathlib import Path
+
+        from django.http import FileResponse
+
+        from apps.common.storage import StorageError, get_object_storage
+        from apps.documents.models import MIME_BY_KIND, sniff_document_kind
+
+        ctx = _require_company(request)
+        self._assert_same_company(ctx, leave_request)
+        if not _authz.can_view(ctx, leave_request):
+            raise NotFound()
+        if not leave_request.attachment:
+            raise NotFound()
+        key = leave_request.attachment.name
+        try:
+            payload = get_object_storage().read(key)
+        except StorageError:
+            raise NotFound()
+        filename = Path(key).name or "attachment"
+        content_type = "application/octet-stream"
+        try:
+            kind = sniff_document_kind(BytesIO(payload))
+            content_type = MIME_BY_KIND.get(kind, content_type)
+        except Exception:
+            pass
+        response = FileResponse(
+            BytesIO(payload), as_attachment=True, filename=filename
+        )
+        response["Content-Type"] = content_type
+        return response
+
+    def delete_attachment(self, *, request, leave_request: LeaveRequest) -> LeaveRequest:
+        from pathlib import Path
+
+        from apps.common.storage import (
+            StorageDeleteError,
+            StorageUnavailable,
+            get_object_storage,
+        )
+
+        ctx = _require_company(request)
+        self._assert_same_company(ctx, leave_request)
+        if not _authz.can_view(ctx, leave_request):
+            raise NotFound()
+        if not _authz.can_change(ctx, leave_request):
+            raise PermissionDenied(
+                "You do not have permission to perform this action."
+            )
+        with transaction.atomic():
+            row = (
+                LeaveRequest.objects.select_for_update()
+                .select_related("company", "employee")
+                .get(pk=leave_request.pk)
+            )
+            self._assert_same_company(ctx, row)
+            if not row.attachment:
+                raise NotFound()
+            path = row.attachment.name
+            filename = Path(path).name
+            try:
+                row.attachment.close()
+            except Exception:
+                pass
+            try:
+                get_object_storage().delete(path, missing_ok=True)
+            except StorageDeleteError as exc:
+                raise StorageUnavailable(detail=str(exc)) from exc
+            row.attachment = None
+            row.save(update_fields=["attachment", "updated_at"])
+            AuditService.log(
+                company=ctx.company,
+                user=ctx.user,
+                action=AuditAction.LEAVE_ATTACHMENT_DELETED,
+                entity_type=AuditEntityType.LEAVE_REQUEST,
+                entity_id=row.id,
+                new_value={"file_name": filename},
+                request=request,
+            )
         return row
 
     def allocate_balance(

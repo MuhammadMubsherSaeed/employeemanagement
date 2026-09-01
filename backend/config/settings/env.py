@@ -20,6 +20,9 @@ env = environ.Env(
     PASSWORD_RESET_TIMEOUT=(int, 60 * 60 * 24),
     MAX_DOCUMENT_UPLOAD_SIZE=(int, 10 * 1024 * 1024),
     DOCUMENT_EXPIRING_SOON_DAYS=(int, 30),
+    LEAVE_ATTACHMENT_MAX_BYTES=(int, 5 * 1024 * 1024),
+    MAX_PROFILE_IMAGE_UPLOAD_SIZE=(int, 2 * 1024 * 1024),
+    AWS_QUERYSTRING_EXPIRE=(int, 300),
 )
 
 _env_file = BASE_DIR / ".env"

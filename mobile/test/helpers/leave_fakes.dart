@@ -1,3 +1,4 @@
+import 'package:flutter_base/features/documents/domain/entities/document.dart';
 import 'package:flutter_base/features/leaves/data/datasources/leave_remote_datasource.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_enums.dart';
@@ -367,6 +368,16 @@ class FakeLeaveRepository implements LeaveRepository {
     }
     return sampleLeaveRequest(id: id, status: LeaveRequestStatus.cancelled);
   }
+
+  @override
+  Future<DownloadedBytes> downloadLeaveAttachment(String id) async {
+    lastId = id;
+    return const DownloadedBytes(
+      bytes: <int>[37, 80, 68, 70],
+      filename: 'note.pdf',
+      mimeType: 'application/pdf',
+    );
+  }
 }
 
 class FakeLeaveRemote implements LeaveRemoteDataSource {
@@ -473,5 +484,15 @@ class FakeLeaveRemote implements LeaveRemoteDataSource {
   Future<LeaveRequest> cancelLeaveRequest(String id) async {
     lastId = id;
     return sampleLeaveRequest(id: id, status: LeaveRequestStatus.cancelled);
+  }
+
+  @override
+  Future<DownloadedBytes> downloadLeaveAttachment(String id) async {
+    lastId = id;
+    return const DownloadedBytes(
+      bytes: <int>[37, 80, 68, 70],
+      filename: 'note.pdf',
+      mimeType: 'application/pdf',
+    );
   }
 }

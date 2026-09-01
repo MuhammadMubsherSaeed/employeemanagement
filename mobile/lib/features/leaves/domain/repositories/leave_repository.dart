@@ -1,3 +1,4 @@
+import 'package:flutter_base/features/documents/domain/entities/document.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_query.dart';
 
@@ -31,4 +32,6 @@ abstract class LeaveRepository {
   });
 
   Future<LeaveRequest> cancelLeaveRequest(String id);
+
+  Future<DownloadedBytes> downloadLeaveAttachment(String id);
 }

@@ -11,6 +11,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.common.models import TimeStampedModel
+from apps.common.storage import STORAGE_OBJECT_KEY_MAX_LENGTH
 from apps.companies.models import Company
 from apps.employees.models import Employee
 
@@ -19,7 +20,16 @@ MAX_DESCRIPTION_LENGTH = 2000
 MAX_FILE_NAME_LENGTH = 255
 MAX_MIME_LENGTH = 128
 
-DEFAULT_ALLOWED_EXTENSIONS = ("pdf", "doc", "docx", "jpg", "jpeg", "png")
+DEFAULT_ALLOWED_EXTENSIONS = (
+    "pdf",
+    "doc",
+    "docx",
+    "xls",
+    "xlsx",
+    "jpg",
+    "jpeg",
+    "png",
+)
 BLOCKED_EXTENSIONS = frozenset(
     {
         ".exe",
@@ -43,16 +53,22 @@ DOC_MIME = "application/msword"
 DOCX_MIME = (
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )
+XLS_MIME = "application/vnd.ms-excel"
+XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 JPEG_MIME = "image/jpeg"
 PNG_MIME = "image/png"
+WEBP_MIME = "image/webp"
 
 MIME_BY_KIND = {
     "pdf": PDF_MIME,
     "doc": DOC_MIME,
     "docx": DOCX_MIME,
+    "xls": XLS_MIME,
+    "xlsx": XLSX_MIME,
     "jpg": JPEG_MIME,
     "jpeg": JPEG_MIME,
     "png": PNG_MIME,
+    "webp": WEBP_MIME,
 }
 
 
@@ -63,7 +79,11 @@ class DocumentType(models.TextChoices):
     OFFER_LETTER = "OFFER_LETTER", "Offer letter"
     RESUME = "RESUME", "Resume"
     EDUCATION_CERTIFICATE = "EDUCATION_CERTIFICATE", "Education certificate"
+    EDUCATION = "EDUCATION", "Education"
     EXPERIENCE_LETTER = "EXPERIENCE_LETTER", "Experience letter"
+    EXPERIENCE = "EXPERIENCE", "Experience"
+    CERTIFICATE = "CERTIFICATE", "Certificate"
+    SALARY_DOCUMENT = "SALARY_DOCUMENT", "Salary document"
     BANK_DOCUMENT = "BANK_DOCUMENT", "Bank document"
     TAX_DOCUMENT = "TAX_DOCUMENT", "Tax document"
     MEDICAL_DOCUMENT = "MEDICAL_DOCUMENT", "Medical document"
@@ -127,7 +147,35 @@ def document_upload_path(instance, filename: str) -> str:
         suffix = ""
     company_id = instance.company_id or "unknown"
     employee_id = instance.employee_id or "unknown"
-    return f"documents/{company_id}/{employee_id}/{uuid.uuid4().hex}{suffix}"
+    document_id = instance.pk or uuid.uuid4()
+    return (
+        f"companies/{company_id}/employees/{employee_id}/documents/"
+        f"{document_id}/{uuid.uuid4().hex}{suffix}"
+    )
+
+
+def profile_image_upload_path(employee, filename: str) -> str:
+    suffix = Path(filename).suffix.lower()
+    allowed = {".jpg", ".jpeg", ".png", ".webp"}
+    if suffix not in allowed:
+        suffix = ""
+    company_id = getattr(employee, "company_id", None) or "unknown"
+    employee_id = getattr(employee, "pk", None) or "unknown"
+    return (
+        f"companies/{company_id}/employees/{employee_id}/profile/"
+        f"{uuid.uuid4().hex}{suffix}"
+    )
+
+
+def leave_attachment_object_path(instance, filename: str) -> str:
+    suffix = Path(filename).suffix.lower()
+    company_id = instance.company_id or "unknown"
+    employee_id = instance.employee_id or "unknown"
+    leave_id = instance.pk or uuid.uuid4()
+    return (
+        f"companies/{company_id}/employees/{employee_id}/leave/"
+        f"{leave_id}/{uuid.uuid4().hex}{suffix}"
+    )
 
 
 def _read_prefix(file, size: int) -> bytes:
@@ -154,7 +202,12 @@ def _kind_from_file(file) -> str | None:
         return "png"
     if header.startswith(b"\xff\xd8\xff"):
         return "jpeg"
+    if len(header) >= 12 and header.startswith(b"RIFF") and header[8:12] == b"WEBP":
+        return "webp"
     if header.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"):
+        suffix = Path(getattr(file, "name", "") or "").suffix.lower()
+        if suffix == ".xls":
+            return "xls"
         return "doc"
     if header.startswith(b"PK"):
         position = file.tell() if hasattr(file, "tell") else 0
@@ -175,9 +228,9 @@ def _kind_from_file(file) -> str | None:
             }
         except zipfile.BadZipFile:
             return None
-        if any(name.startswith("word/") for name in names) or (
-            "[content_types].xml" in names
-        ):
+        if any(name.startswith("xl/") for name in names):
+            return "xlsx"
+        if any(name.startswith("word/") for name in names):
             return "docx"
     return None
 
@@ -192,7 +245,14 @@ def sniff_document_kind(file) -> str:
     return kind
 
 
+def is_committed_storage_file(file) -> bool:
+    """True when Django already stored this FieldFile; do not re-open it."""
+    return bool(getattr(file, "_committed", False))
+
+
 def validate_employee_document_file(file) -> None:
+    if is_committed_storage_file(file):
+        return
     name = getattr(file, "name", "") or ""
     suffix = Path(name).suffix.lower()
     if suffix in BLOCKED_EXTENSIONS:
@@ -200,7 +260,7 @@ def validate_employee_document_file(file) -> None:
     allowed = {f".{ext}" for ext in allowed_document_extensions()}
     if suffix not in allowed:
         raise ValidationError(
-            "Document must be a PDF, Word document, JPEG, or PNG."
+            "Document must be a PDF, Word document, Excel spreadsheet, JPEG, or PNG."
         )
     size = getattr(file, "size", None)
     if size is None:
@@ -215,12 +275,61 @@ def validate_employee_document_file(file) -> None:
         ".pdf": {"pdf"},
         ".doc": {"doc"},
         ".docx": {"docx"},
+        ".xls": {"xls"},
+        ".xlsx": {"xlsx"},
         ".jpg": {"jpeg"},
         ".jpeg": {"jpeg"},
         ".png": {"png"},
     }
     if kind not in expected.get(suffix, set()):
         raise ValidationError("File content does not match the file extension.")
+
+
+PROFILE_IMAGE_EXTENSIONS = ("jpg", "jpeg", "png", "webp")
+LEAVE_SNIFF_EXTENSIONS = {
+    ".pdf": {"pdf"},
+    ".png": {"png"},
+    ".jpg": {"jpeg"},
+    ".jpeg": {"jpeg"},
+    ".webp": {"webp"},
+    ".doc": {"doc"},
+    ".docx": {"docx"},
+}
+
+
+def max_profile_image_bytes() -> int:
+    return int(getattr(settings, "MAX_PROFILE_IMAGE_UPLOAD_SIZE", 2 * 1024 * 1024))
+
+
+def validate_profile_image_file(file) -> None:
+    if is_committed_storage_file(file):
+        return
+    name = getattr(file, "name", "") or ""
+    suffix = Path(name).suffix.lower()
+    if suffix in BLOCKED_EXTENSIONS:
+        raise ValidationError("This file type is not allowed.")
+    allowed = {f".{ext}" for ext in PROFILE_IMAGE_EXTENSIONS}
+    if suffix not in allowed:
+        raise ValidationError("Profile image must be a JPEG, PNG, or WebP.")
+    size = getattr(file, "size", None)
+    if size is None or size <= 0:
+        raise ValidationError("Upload a file.")
+    if size > max_profile_image_bytes():
+        raise ValidationError("This file is too large.")
+    kind = sniff_document_kind(file)
+    expected = {
+        ".jpg": {"jpeg"},
+        ".jpeg": {"jpeg"},
+        ".png": {"png"},
+        ".webp": {"webp"},
+    }
+    if kind not in expected.get(suffix, set()):
+        raise ValidationError("File content does not match the file extension.")
+
+
+def is_http_url(value: str) -> bool:
+    text = (value or "").strip()
+    return text.startswith("http://") or text.startswith("https://")
 
 
 def detected_mime_type(file) -> str:
@@ -251,6 +360,7 @@ class EmployeeDocument(TimeStampedModel):
     description = models.TextField(max_length=MAX_DESCRIPTION_LENGTH, blank=True)
     file = models.FileField(
         upload_to=document_upload_path,
+        max_length=STORAGE_OBJECT_KEY_MAX_LENGTH,
         validators=[
             FileExtensionValidator(DEFAULT_ALLOWED_EXTENSIONS),
             validate_employee_document_file,
@@ -325,4 +435,10 @@ class EmployeeDocument(TimeStampedModel):
         if self.file and not self.mime_type:
             self.mime_type = detected_mime_type(self.file)
         self.full_clean()
-        return super().save(*args, **kwargs)
+        result = super().save(*args, **kwargs)
+        if self.file:
+            try:
+                self.file.close()
+            except Exception:
+                pass
+        return result

@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/network/api_client_provider.dart';
+import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/employees/data/datasources/employee_remote_datasource.dart';
 import 'package:flutter_base/features/employees/data/repositories/employee_repository_impl.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
@@ -49,6 +52,20 @@ final deleteEmployeeProvider = Provider<DeleteEmployee>((Ref ref) {
   return DeleteEmployee(ref.watch(employeeRepositoryProvider));
 });
 
+final getProfileImageUseCaseProvider = Provider<GetProfileImage>((Ref ref) {
+  return GetProfileImage(ref.watch(employeeRepositoryProvider));
+});
+
+final uploadProfileImageUseCaseProvider =
+    Provider<UploadProfileImage>((Ref ref) {
+  return UploadProfileImage(ref.watch(employeeRepositoryProvider));
+});
+
+final deleteProfileImageUseCaseProvider =
+    Provider<DeleteProfileImage>((Ref ref) {
+  return DeleteProfileImage(ref.watch(employeeRepositoryProvider));
+});
+
 final getDepartmentsProvider = Provider<GetDepartments>((Ref ref) {
   return GetDepartments(ref.watch(departmentRepositoryProvider));
 });
@@ -75,8 +92,15 @@ final employeeDirectoryProvider = FutureProvider<List<Employee>>((Ref ref) {
 
 final employeeDetailProvider =
     FutureProvider.autoDispose.family<Employee, String>((Ref ref, String id) {
+  ref.watch(authControllerProvider);
   if (id == 'me') {
     return ref.watch(getMyEmployeeProvider)();
   }
   return ref.watch(getEmployeeProvider)(id);
+});
+
+final employeeProfileImageProvider =
+    FutureProvider.autoDispose.family<Uint8List?, String>((Ref ref, String id) {
+  ref.watch(authControllerProvider);
+  return ref.watch(getProfileImageUseCaseProvider)(id);
 });

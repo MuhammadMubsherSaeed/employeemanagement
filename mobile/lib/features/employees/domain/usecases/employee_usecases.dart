@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee_query.dart';
 import 'package:flutter_base/features/employees/domain/repositories/employee_repository.dart';
@@ -59,6 +61,44 @@ class DeleteEmployee {
 
   Future<void> call(String id) {
     return _repository.deleteEmployee(id);
+  }
+}
+
+class GetProfileImage {
+  const GetProfileImage(this._repository);
+
+  final EmployeeRepository _repository;
+
+  Future<Uint8List?> call(String id) {
+    return _repository.getProfileImage(id);
+  }
+}
+
+class UploadProfileImage {
+  const UploadProfileImage(this._repository);
+
+  final EmployeeRepository _repository;
+
+  Future<Employee> call({
+    required String id,
+    required String path,
+    required String filename,
+  }) {
+    return _repository.uploadProfileImage(
+      id: id,
+      path: path,
+      filename: filename,
+    );
+  }
+}
+
+class DeleteProfileImage {
+  const DeleteProfileImage(this._repository);
+
+  final EmployeeRepository _repository;
+
+  Future<Employee> call(String id) {
+    return _repository.deleteProfileImage(id);
   }
 }
 

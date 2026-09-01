@@ -112,6 +112,16 @@ class AuditServiceTests(TenancyFixtureMixin, TestCase):
         self.assertEqual(cleaned["card_number"], REDACTED)
         self.assertEqual(cleaned["cvv"], REDACTED)
         self.assertEqual(cleaned["credentials"], REDACTED)
+        cleaned_urls = sanitize_audit_value(
+            {
+                "signed_url": "https://bucket.example/key?X-Amz-Signature=secret",
+                "download_url": "https://example/file?token=abc",
+                "file_name": "cnic.pdf",
+            }
+        )
+        self.assertEqual(cleaned_urls["signed_url"], REDACTED)
+        self.assertEqual(cleaned_urls["download_url"], REDACTED)
+        self.assertEqual(cleaned_urls["file_name"], "cnic.pdf")
 
 
 class AuditServiceTransactionTests(TransactionTestCase):

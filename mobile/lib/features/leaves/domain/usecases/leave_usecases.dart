@@ -1,3 +1,4 @@
+import 'package:flutter_base/features/documents/domain/entities/document.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_enums.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_query.dart';
@@ -100,6 +101,16 @@ class CancelLeaveRequest {
 
   Future<LeaveRequest> call(String id) {
     return _repository.cancelLeaveRequest(id);
+  }
+}
+
+class DownloadLeaveAttachment {
+  const DownloadLeaveAttachment(this._repository);
+
+  final LeaveRepository _repository;
+
+  Future<DownloadedBytes> call(String id) {
+    return _repository.downloadLeaveAttachment(id);
   }
 }
 

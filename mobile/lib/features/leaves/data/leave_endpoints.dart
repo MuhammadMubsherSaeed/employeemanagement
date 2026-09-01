@@ -17,4 +17,6 @@ class LeaveEndpoints {
   static String reject(String id) => 'leave/requests/$id/reject/';
 
   static String cancel(String id) => 'leave/requests/$id/cancel/';
+
+  static String attachment(String id) => 'leave/requests/$id/attachment/';
 }

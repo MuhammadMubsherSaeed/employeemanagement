@@ -203,7 +203,9 @@ class _EmployeeFormState extends State<EmployeeForm> {
           lastName: _lastName.text.trim(),
           employmentType: _employmentType,
           status: _status,
-          profileImage: _image.text.trim(),
+          profileImage: _image.text.trim().startsWith('http')
+              ? _image.text.trim()
+              : '',
           gender: _gender,
           dateOfBirth: _dob,
           phone: _phone.text.trim(),
@@ -263,12 +265,6 @@ class _EmployeeFormState extends State<EmployeeForm> {
             label: 'Employee code',
             errorText: errors['employee_code'],
             validator: (String? value) => _required(value, 'Employee code'),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          AppTextField(
-            controller: _image,
-            label: 'Profile image URL',
-            hint: 'Optional path or URL',
           ),
           const SizedBox(height: AppSpacing.sm),
           AppDropdown<EmployeeGender?>(

@@ -47,6 +47,15 @@ _SENSITIVE_KEYS = frozenset(
         "payment_method",
         "account_number",
         "routing_number",
+        "signed_url",
+        "download_url",
+        "file_url",
+        "presigned",
+        "presigned_url",
+        "querystring",
+        "aws_secret_access_key",
+        "aws_access_key_id",
+        "secret_access_key",
     }
 )
 
@@ -59,6 +68,8 @@ _SENSITIVE_FRAGMENTS = (
     "credential",
     "authorization",
     "private_key",
+    "signed_url",
+    "presigned",
 )
 
 

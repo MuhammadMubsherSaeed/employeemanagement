@@ -22,11 +22,17 @@ from apps.documents.permissions import (
 from apps.documents.selectors import document_queryset
 from apps.documents.serializers import (
     CreateDocumentSerializer,
+    DocumentAccessSerializer,
     DocumentDetailSerializer,
     DocumentListSerializer,
+    NestedCreateDocumentSerializer,
     UpdateDocumentSerializer,
 )
-from apps.documents.services import DocumentService, resolve_employee
+from apps.documents.services import (
+    DocumentService,
+    resolve_employee,
+    resolve_visible_employee,
+)
 
 _ACTION_PERMISSIONS = {
     "list": DOCUMENTS_VIEW,
@@ -36,6 +42,7 @@ _ACTION_PERMISSIONS = {
     "partial_update": DOCUMENTS_UPDATE,
     "destroy": DOCUMENTS_DELETE,
     "download": DOCUMENTS_DOWNLOAD,
+    "access": DOCUMENTS_DOWNLOAD,
 }
 
 
@@ -55,6 +62,9 @@ _ACTION_PERMISSIONS = {
             OpenApiParameter("expiring_soon", type=bool),
             OpenApiParameter("expiry_date_from", type=str),
             OpenApiParameter("expiry_date_to", type=str),
+            OpenApiParameter("uploaded_by", type=int),
+            OpenApiParameter("date_from", type=str),
+            OpenApiParameter("date_to", type=str),
             OpenApiParameter("search", type=str),
         ],
     ),
@@ -176,4 +186,77 @@ class DocumentViewSet(EnvelopeMixin, TenantAwareQuerySetMixin, ModelViewSet):
         return DocumentService().download_document(
             request=request,
             document=document,
+        )
+
+    @extend_schema(
+        tags=["Documents"],
+        description=(
+            "Return a short-lived signed URL when private S3-compatible storage "
+            "is configured. Local storage returns mode=stream; clients must use "
+            "the authenticated download action. Never construct object URLs on "
+            "the client."
+        ),
+        responses={200: DocumentAccessSerializer},
+    )
+    @action(detail=True, methods=["get"], url_path="access")
+    def access(self, request, pk=None, **_kwargs):
+        document = self.get_object()
+        payload = DocumentService().access_document(
+            request=request,
+            document=document,
+        )
+        return success_response(data=payload)
+
+
+class EmployeeDocumentViewSet(DocumentViewSet):
+    """Documents nested under ``/employees/{employee_id}/documents/``."""
+
+    http_method_names = ["get", "post", "delete", "head", "options"]
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        self.target_employee = resolve_visible_employee(
+            request=request,
+            employee_id=self.kwargs["employee_id"],
+        )
+
+    def get_queryset(self):
+        return super().get_queryset().filter(employee_id=self.kwargs["employee_id"])
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return NestedCreateDocumentSerializer
+        return super().get_serializer_class()
+
+    @extend_schema(
+        tags=["Documents"],
+        description=(
+            "List documents for one employee in authorization scope. "
+            "Out-of-scope employees return 404."
+        ),
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        tags=["Documents"],
+        request={"multipart/form-data": NestedCreateDocumentSerializer},
+        description=(
+            "Upload a document for the employee in the URL. employee_id and "
+            "company_id in the body are ignored."
+        ),
+    )
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        document = DocumentService().create_document(
+            request=request,
+            validated={
+                **serializer.validated_data,
+                "employee": self.target_employee,
+            },
+        )
+        return success_response(
+            data=self.get_read_serializer(document).data,
+            message="Uploaded.",
         )

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from rest_framework import serializers
 
 from apps.common.tenancy import get_tenant_context
@@ -103,6 +105,8 @@ class LeaveRequestListSerializer(serializers.ModelSerializer):
 
 
 class LeaveRequestDetailSerializer(LeaveRequestListSerializer):
+    attachment = serializers.SerializerMethodField()
+
     class Meta(LeaveRequestListSerializer.Meta):
         fields = (
             *LeaveRequestListSerializer.Meta.fields,
@@ -113,6 +117,12 @@ class LeaveRequestDetailSerializer(LeaveRequestListSerializer):
             "rejection_reason",
             "updated_at",
         )
+
+    def get_attachment(self, obj) -> str | None:
+        if not obj.attachment:
+            return None
+        name = getattr(obj.attachment, "name", "") or ""
+        return Path(name).name or None
 
 
 class CreateLeaveRequestSerializer(TenantPayloadMixin, serializers.Serializer):

@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/network/api_client.dart';
 import 'package:flutter_base/core/network/models/api_envelope.dart';
@@ -17,6 +21,16 @@ abstract class EmployeeRemoteDataSource {
   Future<Employee> updateEmployee(String id, EmployeeWrite body);
 
   Future<void> deleteEmployee(String id);
+
+  Future<Uint8List?> getProfileImage(String id);
+
+  Future<Employee> uploadProfileImage({
+    required String id,
+    required String path,
+    required String filename,
+  });
+
+  Future<Employee> deleteProfileImage(String id);
 
   Future<List<Department>> getDepartments({String? status});
 
@@ -70,6 +84,49 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Future<void> deleteEmployee(String id) async {
     await _client.delete<dynamic>(EmployeeEndpoints.employee(id));
+  }
+
+  @override
+  Future<Uint8List?> getProfileImage(String id) async {
+    try {
+      final Response<List<int>> response = await _client.get<List<int>>(
+        EmployeeEndpoints.profileImage(id),
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: <String, dynamic>{ApiHeaders.accept: '*/*'},
+        ),
+      );
+      final List<int>? data = response.data;
+      if (data == null || data.isEmpty) {
+        return null;
+      }
+      return data is Uint8List ? data : Uint8List.fromList(data);
+    } on NotFoundException {
+      return null;
+    }
+  }
+
+  @override
+  Future<Employee> uploadProfileImage({
+    required String id,
+    required String path,
+    required String filename,
+  }) async {
+    final Response<dynamic> response = await _client.post<dynamic>(
+      EmployeeEndpoints.profileImage(id),
+      data: FormData.fromMap(<String, dynamic>{
+        'file': await MultipartFile.fromFile(path, filename: filename),
+      }),
+    );
+    return Employee.fromJson(_data(_envelope(response.data)));
+  }
+
+  @override
+  Future<Employee> deleteProfileImage(String id) async {
+    final Response<dynamic> response = await _client.delete<dynamic>(
+      EmployeeEndpoints.profileImage(id),
+    );
+    return Employee.fromJson(_data(_envelope(response.data)));
   }
 
   @override

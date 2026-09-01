@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import F, Q
 
 from apps.common.models import TimeStampedModel
+from apps.common.storage import STORAGE_OBJECT_KEY_MAX_LENGTH
 from apps.companies.models import Company
 from apps.employees.models import Employee, OrgStatus
 
@@ -22,13 +23,21 @@ BLOCKED_ATTACHMENT_EXTENSIONS = frozenset(
 )
 
 
+from apps.documents.models import (
+    LEAVE_SNIFF_EXTENSIONS,
+    is_committed_storage_file,
+    leave_attachment_object_path,
+    sniff_document_kind,
+)
+
+
 def leave_attachment_path(instance, filename: str) -> str:
-    suffix = Path(filename).suffix.lower()
-    company_id = instance.company_id or "unknown"
-    return f"leave/{company_id}/{uuid.uuid4().hex}{suffix}"
+    return leave_attachment_object_path(instance, filename)
 
 
 def validate_leave_attachment(file) -> None:
+    if is_committed_storage_file(file):
+        return
     name = getattr(file, "name", "") or ""
     suffix = Path(name).suffix.lower()
     if suffix in BLOCKED_ATTACHMENT_EXTENSIONS:
@@ -38,8 +47,13 @@ def validate_leave_attachment(file) -> None:
         raise ValidationError("Attachment must be a PDF, image, or Word document.")
     max_bytes = int(getattr(settings, "LEAVE_ATTACHMENT_MAX_BYTES", 5 * 1024 * 1024))
     size = getattr(file, "size", None)
-    if size is not None and size > max_bytes:
+    if size is None or size <= 0:
+        raise ValidationError("Upload a file.")
+    if size > max_bytes:
         raise ValidationError("Attachment is too large.")
+    kind = sniff_document_kind(file)
+    if kind not in LEAVE_SNIFF_EXTENSIONS.get(suffix, set()):
+        raise ValidationError("File content does not match the file extension.")
 
 
 class LeaveTypeStatus(models.TextChoices):
@@ -229,6 +243,7 @@ class LeaveRequest(TimeStampedModel):
     reason = models.TextField(max_length=MAX_REASON_LENGTH, blank=True)
     attachment = models.FileField(
         upload_to=leave_attachment_path,
+        max_length=STORAGE_OBJECT_KEY_MAX_LENGTH,
         blank=True,
         null=True,
         validators=[

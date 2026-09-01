@@ -93,13 +93,13 @@ void main() {
     expect(body.toJson()['leave_type'], 'type-1');
   });
 
-  test('resolves relative attachment URLs against the API origin', () {
+  test('does not resolve private relative attachment paths', () {
     expect(
       resolveLeaveAttachmentUrl(
         '/media/leave/a.pdf',
         'http://example.com/api/v1/',
       ),
-      'http://example.com/media/leave/a.pdf',
+      isNull,
     );
     expect(
       resolveLeaveAttachmentUrl(
@@ -109,5 +109,7 @@ void main() {
       'https://cdn.example.com/a.pdf',
     );
     expect(resolveLeaveAttachmentUrl('', 'http://example.com/api/v1/'), isNull);
+    expect(leaveRequestHasAttachment('uuid-name.pdf'), isTrue);
+    expect(leaveRequestHasAttachment(''), isFalse);
   });
 }
