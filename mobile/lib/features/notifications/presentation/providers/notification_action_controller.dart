@@ -1,3 +1,4 @@
+import 'package:flutter_base/features/dashboard/presentation/providers/dashboard_invalidation.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification.dart';
 import 'package:flutter_base/features/notifications/presentation/providers/notification_error_mapper.dart';
 import 'package:flutter_base/features/notifications/presentation/providers/notification_list_controller.dart';
@@ -35,6 +36,7 @@ class NotificationActionController extends Notifier<NotificationActionState> {
       await ref
           .read(unreadNotificationCountControllerProvider.notifier)
           .refresh();
+      invalidateEmployeeDashboard(ref);
       state = state.copyWith(
         markingIds: <String>{
           for (final String id in state.markingIds)
@@ -70,6 +72,7 @@ class NotificationActionController extends Notifier<NotificationActionState> {
       await ref
           .read(unreadNotificationCountControllerProvider.notifier)
           .refresh();
+      invalidateEmployeeDashboard(ref);
       state = const NotificationActionState();
       return updated;
     } catch (error) {

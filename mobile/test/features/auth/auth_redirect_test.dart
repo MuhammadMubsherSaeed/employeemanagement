@@ -34,6 +34,13 @@ void main() {
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.unauthenticated(),
+        location: AppRoutes.dashboard,
+      ),
+      AppRoutes.login,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.unauthenticated(),
         location: AppRoutes.login,
       ),
       isNull,
@@ -54,20 +61,20 @@ void main() {
     );
   });
 
-  test('authenticated users go home and cannot open login', () {
+  test('authenticated users go to the dashboard and cannot open login', () {
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.login,
       ),
-      AppRoutes.home,
+      AppRoutes.dashboard,
     );
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.forgotPassword,
       ),
-      AppRoutes.home,
+      AppRoutes.dashboard,
     );
     expect(
       AuthRedirect.resolve(
@@ -81,7 +88,14 @@ void main() {
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.splash,
       ),
-      AppRoutes.home,
+      AppRoutes.dashboard,
+    );
+    expect(
+      AuthRedirect.resolve(
+        auth: const AuthState.authenticated(sampleUser),
+        location: AppRoutes.dashboard,
+      ),
+      isNull,
     );
   });
 
@@ -143,7 +157,7 @@ void main() {
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.leavesTypes,
       ),
-      AppRoutes.home,
+      AppRoutes.dashboard,
     );
     expect(
       AuthRedirect.resolve(
@@ -181,14 +195,14 @@ void main() {
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.devicesAdd,
       ),
-      AppRoutes.home,
+      AppRoutes.dashboard,
     );
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.deviceAssign('dev-1'),
       ),
-      AppRoutes.home,
+      AppRoutes.dashboard,
     );
     expect(
       AuthRedirect.resolve(
