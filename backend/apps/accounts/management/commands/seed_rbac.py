@@ -2,15 +2,15 @@ from django.core.management.base import BaseCommand
 
 from apps.accounts.models import Permission, Role
 from apps.accounts.rbac_catalog import PERMISSION_META, ROLE_DEFINITIONS
+from apps.accounts.services.permissions import apply_role_permissions
 
 
 class Command(BaseCommand):
     help = "Create or update default roles, permissions, and bindings (idempotent)."
 
     def handle(self, *args, **options):
-        permission_by_code = {}
         for code, (name, module) in PERMISSION_META.items():
-            permission, _created = Permission.objects.update_or_create(
+            Permission.objects.update_or_create(
                 code=code,
                 defaults={
                     "name": name,
@@ -18,7 +18,6 @@ class Command(BaseCommand):
                     "description": name,
                 },
             )
-            permission_by_code[code] = permission
 
         for definition in ROLE_DEFINITIONS:
             role, _created = Role.objects.update_or_create(
@@ -30,11 +29,6 @@ class Command(BaseCommand):
                     "is_system_role": True,
                 },
             )
-            if definition["permissions"]:
-                role.permissions.set(
-                    permission_by_code[code] for code in definition["permissions"]
-                )
-            else:
-                role.permissions.clear()
+            apply_role_permissions(role, definition["permissions"])
 
         self.stdout.write(self.style.SUCCESS("RBAC defaults are up to date."))

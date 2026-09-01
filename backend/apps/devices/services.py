@@ -5,6 +5,8 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
+from apps.audit_logs.constants import AuditAction, AuditEntityType
+from apps.audit_logs.services import AuditService
 from apps.accounts.models import UserRole
 from apps.common.authorization import ObjectAuthorization
 from apps.common.events import emit
@@ -167,6 +169,27 @@ class DeviceService:
                 )
             row.status = DeviceStatus.ASSIGNED
             row.save(update_fields=["status", "updated_at"])
+            AuditService.log(
+                company=ctx.company,
+                user=ctx.user,
+                action=AuditAction.DEVICE_ASSIGNED,
+                entity_type=AuditEntityType.DEVICE,
+                entity_id=row.id,
+                old_value={
+                    "status": DeviceStatus.AVAILABLE,
+                    "employee_id": None,
+                    "assignment_id": None,
+                },
+                new_value={
+                    "status": DeviceStatus.ASSIGNED,
+                    "device_id": str(row.id),
+                    "asset_code": row.asset_code,
+                    "employee_id": str(employee.id),
+                    "employee_code": employee.employee_code,
+                    "assignment_id": str(assignment.id),
+                },
+                request=request,
+            )
         emit(
             "device.assigned",
             actor=ctx.user,
@@ -235,6 +258,30 @@ class DeviceService:
             assignment.save()
             row.status = DeviceStatus.AVAILABLE
             row.save(update_fields=["status", "updated_at"])
+            AuditService.log(
+                company=ctx.company,
+                user=ctx.user,
+                action=AuditAction.DEVICE_RETURNED,
+                entity_type=AuditEntityType.DEVICE,
+                entity_id=row.id,
+                old_value={
+                    "status": DeviceStatus.ASSIGNED,
+                    "employee_id": str(assignment.employee_id),
+                    "employee_code": assignment.employee.employee_code,
+                    "assignment_id": str(assignment.id),
+                    "returned_at": None,
+                },
+                new_value={
+                    "status": DeviceStatus.AVAILABLE,
+                    "device_id": str(row.id),
+                    "asset_code": row.asset_code,
+                    "employee_id": str(assignment.employee_id),
+                    "employee_code": assignment.employee.employee_code,
+                    "assignment_id": str(assignment.id),
+                    "returned_at": now.isoformat(),
+                },
+                request=request,
+            )
         emit(
             "device.returned",
             actor=ctx.user,

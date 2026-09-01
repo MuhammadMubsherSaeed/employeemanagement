@@ -57,6 +57,13 @@ class SchemaAPITests(TestCase):
         self.assertIn("reports/leaves/export/", joined)
         self.assertIn("reports/employees/export/", joined)
         self.assertIn("reports/devices/export/", joined)
+        self.assertIn("audit-logs/", joined)
+        audit_path = next(p for p in paths if p.rstrip("/").endswith("audit-logs"))
+        self.assertIn("get", paths[audit_path])
+        self.assertNotIn("put", paths[audit_path])
+        self.assertNotIn("patch", paths[audit_path])
+        self.assertNotIn("post", paths[audit_path])
+        self.assertNotIn("delete", paths[audit_path])
         device_return = next(
             p for p in paths if "devices/" in p and p.rstrip("/").endswith("return")
         )

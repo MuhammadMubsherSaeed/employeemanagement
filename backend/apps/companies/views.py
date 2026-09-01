@@ -1,4 +1,5 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
@@ -7,8 +8,11 @@ from apps.common.permissions import HasPermission, IsAuthenticatedUser, IsSuperA
 from apps.common.responses import success_response
 from apps.common.tenancy import get_tenant_context
 from apps.companies.models import TenantOwnedRecord
-from apps.companies.serializers import TenantOwnedRecordSerializer
-from apps.companies.services import get_company_settings
+from apps.companies.serializers import (
+    CompanySettingsWriteSerializer,
+    TenantOwnedRecordSerializer,
+)
+from apps.companies.services import CompanySettingsService, get_company_settings
 
 _ACTION_PERMISSIONS = {
     "list": "employees.view",
@@ -90,6 +94,7 @@ class TenantOwnedRecordViewSet(TenantAwareQuerySetMixin, ModelViewSet):
 
 class CompanySettingsView(APIView):
     permission_classes = (IsAuthenticatedUser, HasPermission("settings.manage"))
+    http_method_names = ["get", "patch", "head", "options"]
 
     @extend_schema(
         tags=["Tenancy"],
@@ -117,6 +122,43 @@ class CompanySettingsView(APIView):
             },
             message="Company settings.",
         )
+
+    @extend_schema(
+        tags=["Tenancy"],
+        request=CompanySettingsWriteSerializer,
+        description=(
+            "Update company settings for the authenticated company. "
+            "Requires settings.manage. company_id in the body is ignored. "
+            "SUPER_ADMIN has no company settings to change."
+        ),
+    )
+    def patch(self, request, **_kwargs):
+        ctx = get_tenant_context(request)
+        if ctx.company is None:
+            raise PermissionDenied("You do not have access to this company.")
+        serializer = CompanySettingsWriteSerializer(
+            data=request.data, partial=True, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        row = CompanySettingsService().update(
+            company=ctx.company,
+            validated=serializer.validated_data,
+            actor=ctx.user,
+            request=request,
+        )
+        return success_response(
+            data={
+                "scope": "COMPANY",
+                "company": {
+                    "id": str(ctx.company.id),
+                    "name": ctx.company.name,
+                    "slug": ctx.company.slug,
+                },
+                **_settings_payload(row),
+            },
+            message="Company settings updated.",
+        )
+
 
 
 def _settings_payload(row) -> dict:

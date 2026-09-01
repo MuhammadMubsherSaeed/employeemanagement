@@ -1,9 +1,18 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework import serializers
 
 from apps.common.authorization import ObjectAuthorization
 from apps.common.tenancy import get_tenant_context
 from apps.employees.models import Department, Employee, Position
+from apps.employees.services import (
+    department_snapshot,
+    employee_snapshot,
+    record_department_created,
+    record_department_updated,
+    record_employee_created,
+    record_employee_updated,
+)
 
 User = get_user_model()
 _TENANT_KEYS = ("company", "company_id", "tenant_id", "membership_id")
@@ -199,11 +208,24 @@ class EmployeeWriteSerializer(TenantPayloadMixin, serializers.ModelSerializer):
 
 
 class EmployeeCreateSerializer(EmployeeWriteSerializer):
-    pass
+    def create(self, validated_data):
+        request = self.context.get("request")
+        with transaction.atomic():
+            employee = super().create(validated_data)
+            record_employee_created(employee=employee, request=request)
+            return employee
 
 
 class EmployeeUpdateSerializer(EmployeeWriteSerializer):
-    pass
+    def update(self, instance, validated_data):
+        request = self.context.get("request")
+        previous = employee_snapshot(instance)
+        with transaction.atomic():
+            employee = super().update(instance, validated_data)
+            record_employee_updated(
+                previous=previous, employee=employee, request=request
+            )
+            return employee
 
 
 class DepartmentSerializer(TenantPayloadMixin, serializers.ModelSerializer):
@@ -244,6 +266,23 @@ class DepartmentSerializer(TenantPayloadMixin, serializers.ModelSerializer):
                 "Department manager must belong to the same company."
             )
         return value
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        with transaction.atomic():
+            department = super().create(validated_data)
+            record_department_created(department=department, request=request)
+            return department
+
+    def update(self, instance, validated_data):
+        request = self.context.get("request")
+        previous = department_snapshot(instance)
+        with transaction.atomic():
+            department = super().update(instance, validated_data)
+            record_department_updated(
+                previous=previous, department=department, request=request
+            )
+            return department
 
 
 class PositionSerializer(TenantPayloadMixin, serializers.ModelSerializer):

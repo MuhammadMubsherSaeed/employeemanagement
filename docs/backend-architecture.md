@@ -29,7 +29,10 @@ backend/
 │   ├── devices/              # Device, DeviceAssignment
 │   ├── documents/            # EmployeeDocument
 │   ├── notifications/        # Notification, DeviceToken
-│   └── dashboard/            # Admin / manager / employee dashboard APIs
+│   ├── dashboard/            # Admin / manager / employee dashboard APIs
+│   ├── reports/              # Attendance, leave, employee, and device reports
+│   └── audit_logs/           # Immutable company-scoped AuditLog query API
+
 ├── requirements/
 │   ├── base.txt
 │   ├── development.txt
@@ -38,7 +41,7 @@ backend/
 └── .env.example
 ```
 
-`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, `apps.documents`, `apps.notifications`, and `apps.dashboard` are implemented. Remaining planned apps: `reports`, `ai`, `subscriptions`. Leave details: [`docs/leave-management.md`](leave-management.md). Device details: [`docs/device-management.md`](device-management.md). Document details: [`docs/employee-documents.md`](employee-documents.md). Notification details: [`docs/notification-management.md`](notification-management.md).
+`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, `apps.documents`, `apps.notifications`, `apps.dashboard`, `apps.reports`, and `apps.audit_logs` are implemented. Remaining planned apps: `ai`, `subscriptions`. Leave details: [`docs/leave-management.md`](leave-management.md). Device details: [`docs/device-management.md`](device-management.md). Document details: [`docs/employee-documents.md`](employee-documents.md). Notification details: [`docs/notification-management.md`](notification-management.md).
 
 ---
 
@@ -211,5 +214,5 @@ Implemented. See [`docs/multi-tenancy-and-rbac.md`](multi-tenancy-and-rbac.md).
 5. Inherit domain models from `TimeStampedModel`. Add a `company` FK and `TenantAwareQuerySetMixin`; never take `company_id` from the client.
 6. Use `ApiClient` on Flutter against `/api/v1/…`. Catch `AppException` shapes that match this envelope.
 
-`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, `apps.documents`, `apps.notifications`, and `apps.dashboard` are implemented. Remaining planned apps: `reports`, `ai`, `subscriptions`. Notification details: [`docs/notification-management.md`](notification-management.md).
+`apps.employees`, `apps.attendance`, `apps.leave`, `apps.devices`, `apps.documents`, `apps.notifications`, `apps.dashboard`, `apps.reports`, and `apps.audit_logs` are implemented. Remaining planned apps: `ai`, `subscriptions`. Notification details: [`docs/notification-management.md`](notification-management.md).
  
