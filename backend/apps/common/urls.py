@@ -12,4 +12,5 @@ urlpatterns = [
     path("", include("apps.devices.urls")),
     path("", include("apps.documents.urls")),
     path("", include("apps.notifications.urls")),
+    path("", include("apps.dashboard.urls")),
 ]

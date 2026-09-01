@@ -46,6 +46,9 @@ class SchemaAPITests(TestCase):
         self.assertIn("mark-read/", joined)
         self.assertIn("mark-all-read/", joined)
         self.assertIn("device-tokens/", joined)
+        self.assertIn("dashboard/admin/", joined)
+        self.assertIn("dashboard/manager/", joined)
+        self.assertIn("dashboard/employee/", joined)
         device_return = next(
             p for p in paths if "devices/" in p and p.rstrip("/").endswith("return")
         )

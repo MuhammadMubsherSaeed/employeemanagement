@@ -123,8 +123,8 @@ Default bindings are seeded by `python manage.py seed_rbac` (`apps.accounts.rbac
 | Role | Default permissions |
 | --- | --- |
 | `COMPANY_ADMIN` | All company permission codes currently defined |
-| `MANAGER` | `employees.view`, `employees.update`, `attendance.view`, `attendance.manage`, `leave.view`, `leave.approve`, `leave.reject`, `leave.manage`, `devices.view`, `devices.assign`, `devices.return`, `documents.view`, `documents.create`, `documents.update`, `documents.download`, `notifications.view`, `notifications.mark_read`, `reports.view`. **Not** `settings.manage`, `documents.delete`, or `notifications.manage` |
-| `EMPLOYEE` | `employees.view`, `attendance.view`, `attendance.check_in`, `attendance.check_out`, `leave.view`, `leave.create`, `devices.view`, `documents.view`, `documents.create`, `documents.download`, `notifications.view`, `notifications.mark_read` |
+| `MANAGER` | `employees.view`, `employees.update`, `attendance.view`, `attendance.manage`, `leave.view`, `leave.approve`, `leave.reject`, `leave.manage`, `devices.view`, `devices.assign`, `devices.return`, `documents.view`, `documents.create`, `documents.update`, `documents.download`, `notifications.view`, `notifications.mark_read`, `dashboard.manager.view`, `dashboard.employee.view`, `reports.view`. **Not** `settings.manage`, `documents.delete`, `notifications.manage`, or `dashboard.admin.view` |
+| `EMPLOYEE` | `employees.view`, `attendance.view`, `attendance.check_in`, `attendance.check_out`, `leave.view`, `leave.create`, `devices.view`, `documents.view`, `documents.create`, `documents.download`, `notifications.view`, `notifications.mark_read`, `dashboard.employee.view` |
 | `SUPER_ADMIN` | Platform bypass in `TenantContext`. The role row has **no** company permission M2M rows |
 
 `employees.view` on EMPLOYEE does **not** mean every employee row. Object-level rules further restrict private data.
