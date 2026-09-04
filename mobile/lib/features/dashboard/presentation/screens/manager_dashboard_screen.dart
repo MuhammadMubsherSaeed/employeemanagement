@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
@@ -81,7 +82,7 @@ class ManagerDashboardScreen extends ConsumerWidget {
     final ManagerDashboard data = state.data!;
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: AppSpacing.screen,
+      padding: AppBreakpoints.pagePadding(context),
       children: <Widget>[
         DashboardStatGrid(
           children: <DashboardStatCard>[

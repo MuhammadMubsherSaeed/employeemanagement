@@ -1,27 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/auth/authorization.dart';
 import 'package:flutter_base/core/auth/authorization_providers.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
+import 'package:flutter_base/core/theme/app_colors.dart';
+import 'package:flutter_base/core/theme/app_dimensions.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/theme/theme_mode_controller.dart';
 import 'package:flutter_base/core/widgets/app_avatar.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
+import 'package:flutter_base/core/widgets/app_module_tile.dart';
+import 'package:flutter_base/core/widgets/app_section_header.dart';
 import 'package:flutter_base/core/widgets/app_status_badge.dart';
 import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/dashboard/presentation/widgets/dashboard_layout.dart';
 import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/notifications/domain/notification_access.dart';
+import 'package:flutter_base/features/notifications/presentation/widgets/unread_notification_badge.dart';
 import 'package:flutter_base/features/reports/domain/report_access.dart';
 import 'package:flutter_base/features/settings/domain/settings_access.dart';
-import 'package:flutter_base/core/auth/permissions.dart';
-import 'package:flutter_base/features/notifications/presentation/widgets/unread_notification_badge.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -30,6 +36,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeModule {
+  const _HomeModule({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    required this.color,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color color;
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
@@ -41,6 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       title: 'Sign out',
       message: 'Sign out of this device?',
       confirmLabel: 'Sign out',
+      destructive: true,
     );
     if (confirmed != true || _loggingOut) {
       return;
@@ -71,6 +92,113 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bool canViewAuditLogs =
         authorization.hasPermission(Permissions.auditLogsView) &&
             authorization.hasTenant;
+    final Brightness brightness = Theme.of(context).brightness;
+    final String firstName = (user?.firstName.isNotEmpty == true)
+        ? user!.firstName
+        : (user?.fullName.isNotEmpty == true ? user!.fullName : 'there');
+
+    final List<_HomeModule> modules = <_HomeModule>[
+      _HomeModule(
+        title: 'Dashboard',
+        icon: Icons.dashboard_outlined,
+        color: AppColors.infoOf(brightness),
+        onTap: () => context.push(AppRoutes.dashboard),
+      ),
+      if (employees.canView)
+        _HomeModule(
+          title: employees.isSelfService ? 'My employee profile' : 'Employees',
+          icon: Icons.groups_outlined,
+          color: AppColors.successOf(brightness),
+          onTap: () {
+            context.push(
+              employees.isSelfService
+                  ? AppRoutes.employeesMe
+                  : AppRoutes.employees,
+            );
+          },
+        ),
+      if (attendance.canView)
+        _HomeModule(
+          title: 'Attendance',
+          icon: Icons.schedule_outlined,
+          color: AppColors.warningOf(brightness),
+          onTap: () => context.push(AppRoutes.attendance),
+        ),
+      if (leave.canView)
+        _HomeModule(
+          title: 'Leave',
+          icon: Icons.event_available_outlined,
+          color: AppColors.infoOf(brightness),
+          onTap: () => context.push(AppRoutes.leaves),
+        ),
+      if (devices.isSelfService)
+        _HomeModule(
+          title: 'My devices',
+          icon: Icons.phonelink_setup_outlined,
+          color: Theme.of(context).colorScheme.secondary,
+          onTap: () => context.push(AppRoutes.myDevices),
+        ),
+      if (devices.canView && !devices.isSelfService)
+        _HomeModule(
+          title: 'Devices',
+          icon: Icons.devices_other_outlined,
+          color: Theme.of(context).colorScheme.secondary,
+          onTap: () => context.push(AppRoutes.devices),
+        ),
+      if (notifications.canView)
+        _HomeModule(
+          title: 'Notifications',
+          icon: Icons.notifications_outlined,
+          color: AppColors.warningOf(brightness),
+          onTap: () => context.push(AppRoutes.notifications),
+        ),
+      if (reports.canView)
+        _HomeModule(
+          title: 'Reports',
+          icon: Icons.assessment_outlined,
+          color: AppColors.infoOf(brightness),
+          onTap: () => context.push(AppRoutes.reports),
+        ),
+      if (canViewAuditLogs)
+        _HomeModule(
+          title: 'Audit logs',
+          icon: Icons.policy_outlined,
+          color: AppColors.mutedOf(brightness),
+          onTap: () => context.push(AppRoutes.auditLogs),
+        ),
+      if (settings.canView)
+        _HomeModule(
+          title: 'Settings',
+          icon: Icons.settings_outlined,
+          color: AppColors.mutedOf(brightness),
+          onTap: () => context.push(AppRoutes.settings),
+        ),
+    ];
+
+    final List<NavigationDestination> destinations = <NavigationDestination>[
+      const NavigationDestination(
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home),
+        label: 'Home',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.dashboard_outlined),
+        selectedIcon: Icon(Icons.dashboard),
+        label: 'Dashboard',
+      ),
+      if (attendance.canView)
+        const NavigationDestination(
+          icon: Icon(Icons.schedule_outlined),
+          selectedIcon: Icon(Icons.schedule),
+          label: 'Attendance',
+        ),
+      if (leave.canView)
+        const NavigationDestination(
+          icon: Icon(Icons.event_available_outlined),
+          selectedIcon: Icon(Icons.event_available),
+          label: 'Leave',
+        ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -98,22 +226,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: AppSpacing.screen,
+          padding: AppBreakpoints.pagePadding(context),
           children: <Widget>[
             AppCard(
+              variant: AppCardVariant.elevated,
               child: Row(
                 children: <Widget>[
-                  AppAvatar(name: user?.fullName ?? 'User'),
+                  AppAvatar(
+                    name: user?.fullName ?? 'User',
+                    size: AppDimensions.avatarLg,
+                  ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          user?.fullName.isNotEmpty == true
-                              ? user!.fullName
-                              : 'Signed in',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          '${dashboardGreeting(DateTime.now())}, $firstName',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: AppSpacing.xxs),
                         Text(user?.email ?? ''),
@@ -128,221 +258,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              onTap: () => context.push(AppRoutes.dashboard),
-              child: Row(
-                children: <Widget>[
-                  const Icon(Icons.dashboard_outlined),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(
-                      'Dashboard',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
-            ),
-            if (employees.canView) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () {
-                  context.push(
-                    employees.isSelfService
-                        ? AppRoutes.employeesMe
-                        : AppRoutes.employees,
-                  );
-                },
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.groups_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        employees.isSelfService
-                            ? 'My employee profile'
-                            : 'Employees',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (attendance.canView) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.attendance),
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.schedule_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'Attendance',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (leave.canView) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.leaves),
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.event_available_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'Leave',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (devices.isSelfService) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.myDevices),
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.phonelink_setup_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'My devices',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (devices.canView && !devices.isSelfService) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.devices),
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.devices_other_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'Devices',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (notifications.canView) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.notifications),
-                child: Row(
-                  children: <Widget>[
-                    const UnreadNotificationBadge(
-                      child: Icon(Icons.notifications_outlined),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'Notifications',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (reports.canView) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.reports),
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.assessment_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'Reports',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (canViewAuditLogs) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.auditLogs),
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.policy_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'Audit logs',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            if (settings.canView) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              AppCard(
-                onTap: () => context.push(AppRoutes.settings),
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.settings_outlined),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        'Settings',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              child: Text(
-                'HRMS modules will be added to this home screen over time.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
             const SizedBox(height: AppSpacing.lg),
+            const AppSectionHeader(title: 'Modules'),
+            AppModuleGrid(
+              children: modules
+                  .map(
+                    (_HomeModule module) => AppModuleTile(
+                      title: module.title,
+                      icon: module.icon,
+                      color: module.color,
+                      onTap: module.onTap,
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: AppSpacing.xl),
             AppButton(
               label: 'Sign out',
               variant: AppButtonVariant.outlined,
               isLoading: _loggingOut,
               onPressed: _loggingOut ? null : _logout,
             ),
+            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
+      bottomNavigationBar: destinations.length < 2
+          ? null
+          : NavigationBar(
+              selectedIndex: 0,
+              onDestinationSelected: (int index) {
+                if (index == 0) {
+                  return;
+                }
+                if (index == 1) {
+                  context.push(AppRoutes.dashboard);
+                  return;
+                }
+                final String label = destinations[index].label;
+                if (label == 'Attendance') {
+                  context.push(AppRoutes.attendance);
+                } else if (label == 'Leave') {
+                  context.push(AppRoutes.leaves);
+                }
+              },
+              destinations: destinations,
+            ),
     );
   }
 }

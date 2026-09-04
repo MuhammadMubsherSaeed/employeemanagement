@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_section_header.dart';
 import 'package:flutter_base/features/dashboard/presentation/widgets/dashboard_stat_card.dart';
-
-const double kDashboardTabletBreakpoint = 700;
 
 class DashboardStatGrid extends StatelessWidget {
   const DashboardStatGrid({super.key, required this.children});
@@ -15,9 +15,13 @@ class DashboardStatGrid extends StatelessWidget {
       builder: (BuildContext context, BoxConstraints constraints) {
         final double maxWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
-            : kDashboardTabletBreakpoint;
-        final int columns =
-            maxWidth >= kDashboardTabletBreakpoint ? 4 : 2;
+            : AppBreakpoints.medium;
+        final int columns = AppBreakpoints.columnsFor(
+          maxWidth,
+          compact: 2,
+          mediumColumns: 3,
+          expandedColumns: 4,
+        );
         const double gap = AppSpacing.sm;
         final double width = (maxWidth - gap * (columns - 1)) / columns;
         return Wrap(
@@ -48,8 +52,7 @@ class DashboardSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: AppSpacing.sm),
+        AppSectionHeader(title: title),
         child,
       ],
     );

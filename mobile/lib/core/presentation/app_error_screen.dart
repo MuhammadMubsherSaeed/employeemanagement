@@ -18,6 +18,7 @@ class AppErrorScreen extends StatelessWidget {
     return Scaffold(
       body: AppErrorWidget(
         message: message,
+        retryLabel: showHomeAction ? 'Go to home' : 'Retry',
         onRetry: showHomeAction ? () => context.go(AppRoutes.home) : null,
       ),
     );

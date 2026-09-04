@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
+import 'package:flutter_base/core/theme/app_dimensions.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/utils/date_formatter.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
+import 'package:flutter_base/core/widgets/app_info_row.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
@@ -48,7 +51,10 @@ class EmployeeDetailsScreen extends ConsumerWidget {
     final DocumentAccess documents = DocumentAccess(access.auth);
 
     return async.when(
-      loading: () => const Scaffold(body: AppLoader()),
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Employee')),
+        body: const AppLoader(message: 'Loading profile…'),
+      ),
       error: (Object error, _) => Scaffold(
         appBar: AppBar(title: const Text('Employee')),
         body: AppErrorWidget(
@@ -124,6 +130,7 @@ class EmployeeDetailsScreen extends ConsumerWidget {
       message: 'Delete ${employee.fullName}? This cannot be undone.',
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
+      destructive: true,
     );
     if (confirmed != true) {
       return;
@@ -153,15 +160,16 @@ class _OverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: AppSpacing.screen,
+      padding: AppBreakpoints.pagePadding(context),
       children: <Widget>[
         AppCard(
+          variant: AppCardVariant.elevated,
           child: Row(
             children: <Widget>[
               EmployeeProfilePhoto(
                 employee: employee,
                 access: access,
-                size: 64,
+                size: AppDimensions.avatarXl,
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -170,9 +178,23 @@ class _OverviewTab extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       employee.fullName,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    Text(employee.employeeCode),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      employee.employeeCode,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    if (employee.position?.title.isNotEmpty == true)
+                      Text(
+                        employee.position!.title,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    if (employee.department?.name.isNotEmpty == true)
+                      Text(
+                        employee.department!.name,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     const SizedBox(height: AppSpacing.xs),
                     EmployeeStatusBadge(status: employee.status),
                   ],
@@ -182,51 +204,57 @@ class _OverviewTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        _section(context, 'Employment information', <_Row>[
-          _Row('Employment type', employee.employmentType.label),
-          _Row(
-            'Joining date',
-            employee.joiningDate == null
+        _section(context, 'Employment information', <AppInfoRow>[
+          AppInfoRow(label: 'Employment type', value: employee.employmentType.label),
+          AppInfoRow(
+            label: 'Joining date',
+            value: employee.joiningDate == null
                 ? '—'
                 : AppDateFormatter.date(employee.joiningDate!),
           ),
-          _Row(
-            'Date of birth',
-            employee.dateOfBirth == null
+          AppInfoRow(
+            label: 'Date of birth',
+            value: employee.dateOfBirth == null
                 ? '—'
                 : AppDateFormatter.date(employee.dateOfBirth!),
           ),
-          _Row('Gender', employee.gender.label),
+          AppInfoRow(label: 'Gender', value: employee.gender.label),
         ]),
         const SizedBox(height: AppSpacing.md),
-        _section(context, 'Organization', <_Row>[
-          _Row('Department', employee.department?.name ?? '—'),
-          _Row('Position', employee.position?.title ?? '—'),
-          _Row('Manager', employee.manager?.fullName ?? '—'),
+        _section(context, 'Organization', <AppInfoRow>[
+          AppInfoRow(label: 'Department', value: employee.department?.name ?? '—'),
+          AppInfoRow(label: 'Position', value: employee.position?.title ?? '—'),
+          AppInfoRow(label: 'Manager', value: employee.manager?.fullName ?? '—'),
         ]),
         const SizedBox(height: AppSpacing.md),
-        _section(context, 'Contact information', <_Row>[
-          _Row('Email', employee.user?.email ?? '—'),
-          _Row('Phone', employee.phone.isEmpty ? '—' : employee.phone),
-          _Row('Address', employee.address.isEmpty ? '—' : employee.address),
+        _section(context, 'Contact information', <AppInfoRow>[
+          AppInfoRow(label: 'Email', value: employee.user?.email ?? '—'),
+          AppInfoRow(
+            label: 'Phone',
+            value: employee.phone.isEmpty ? '—' : employee.phone,
+          ),
+          AppInfoRow(
+            label: 'Address',
+            value: employee.address.isEmpty ? '—' : employee.address,
+          ),
         ]),
         const SizedBox(height: AppSpacing.md),
-        _section(context, 'Emergency contact', <_Row>[
-          _Row(
-            'Name',
-            employee.emergencyContactName.isEmpty
+        _section(context, 'Emergency contact', <AppInfoRow>[
+          AppInfoRow(
+            label: 'Name',
+            value: employee.emergencyContactName.isEmpty
                 ? '—'
                 : employee.emergencyContactName,
           ),
-          _Row(
-            'Relationship',
-            employee.emergencyContactRelationship.isEmpty
+          AppInfoRow(
+            label: 'Relationship',
+            value: employee.emergencyContactRelationship.isEmpty
                 ? '—'
                 : employee.emergencyContactRelationship,
           ),
-          _Row(
-            'Phone',
-            employee.emergencyContactPhone.isEmpty
+          AppInfoRow(
+            label: 'Phone',
+            value: employee.emergencyContactPhone.isEmpty
                 ? '—'
                 : employee.emergencyContactPhone,
           ),
@@ -235,39 +263,16 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _section(BuildContext context, String title, List<_Row> rows) {
+  Widget _section(BuildContext context, String title, List<AppInfoRow> rows) {
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.sm),
-          ...rows.map(
-            (_Row row) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(
-                    width: 120,
-                    child: Text(
-                      row.label,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  Expanded(child: Text(row.value)),
-                ],
-              ),
-            ),
-          ),
+          ...rows,
         ],
       ),
     );
   }
-}
-
-class _Row {
-  const _Row(this.label, this.value);
-  final String label;
-  final String value;
 }

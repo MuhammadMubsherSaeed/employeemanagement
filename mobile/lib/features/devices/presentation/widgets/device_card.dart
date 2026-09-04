@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
+import 'package:flutter_base/core/widgets/app_icon_well.dart';
+import 'package:flutter_base/core/widgets/app_status_badge.dart';
 import 'package:flutter_base/features/devices/domain/entities/device.dart';
 import 'package:flutter_base/features/devices/presentation/widgets/device_status_badge.dart';
 
@@ -29,13 +31,26 @@ class DeviceCard extends StatelessWidget {
         onTap: onTap,
         child: Row(
           children: <Widget>[
+            AppIconWell(
+              icon: Icons.devices_other_outlined,
+              color: DeviceStatusBadge.toneOf(device.status) ==
+                      AppBadgeTone.success
+                  ? Theme.of(context).colorScheme.secondary
+                  : Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(device.assetCode, style: text.titleMedium),
                   const SizedBox(height: AppSpacing.xxs),
-                  Text(subtitle, style: text.bodyMedium),
+                  Text(
+                    subtitle,
+                    style: text.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (device.serialNumber != null) ...<Widget>[
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
@@ -46,6 +61,7 @@ class DeviceCard extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(width: AppSpacing.xs),
             DeviceStatusBadge(status: device.status),
           ],
         ),

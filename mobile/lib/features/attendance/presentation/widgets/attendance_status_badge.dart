@@ -21,7 +21,10 @@ class AttendanceStatusBadge extends StatelessWidget {
     };
   }
 
-  static Color colorOf(AttendanceStatus status) {
+  static Color colorOf(AttendanceStatus status, [BuildContext? context]) {
+    if (context != null) {
+      return AppStatusBadge.colorOf(context, toneOf(status));
+    }
     return switch (toneOf(status)) {
       AppBadgeTone.success => AppColors.success,
       AppBadgeTone.warning => AppColors.warning,

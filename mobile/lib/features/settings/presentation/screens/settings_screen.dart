@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_icon_well.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/settings/domain/settings_access.dart';
@@ -23,56 +25,64 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
-        padding: AppSpacing.screen,
+        padding: AppBreakpoints.pagePadding(context),
         children: <Widget>[
           Text(subtitle, style: text.bodyMedium),
           const SizedBox(height: AppSpacing.md),
-          AppCard(
+          _SettingsTile(
+            icon: Icons.apartment_outlined,
+            title: 'Company',
+            subtitle: 'Name, logo, and timezone.',
             onTap: () => context.push(AppRoutes.settingsCompany),
-            child: Row(
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _SettingsTile(
+            icon: Icons.schedule_outlined,
+            title: 'Attendance',
+            subtitle: 'Work hours, grace period, and working days.',
+            onTap: () => context.push(AppRoutes.settingsAttendance),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme text = Theme.of(context).textTheme;
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: <Widget>[
+          AppIconWell(icon: icon),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Icon(Icons.apartment_outlined),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Company', style: text.titleMedium),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        'Name, logo, and timezone.',
-                        style: text.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right),
+                Text(title, style: text.titleMedium),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(subtitle, style: text.bodySmall),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          AppCard(
-            onTap: () => context.push(AppRoutes.settingsAttendance),
-            child: Row(
-              children: <Widget>[
-                const Icon(Icons.schedule_outlined),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Attendance', style: text.titleMedium),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        'Work hours, grace period, and working days.',
-                        style: text.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right),
-              ],
-            ),
+          Icon(
+            Icons.chevron_right,
+            color: Theme.of(context).colorScheme.outline,
           ),
         ],
       ),

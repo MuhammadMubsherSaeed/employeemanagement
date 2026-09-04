@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
+import 'package:flutter_base/core/widgets/app_icon_well.dart';
 
 class LeaveSummaryCard extends StatelessWidget {
   const LeaveSummaryCard({
@@ -24,7 +25,7 @@ class LeaveSummaryCard extends StatelessWidget {
         onTap: onTap,
         child: Row(
           children: <Widget>[
-            const Icon(Icons.event_available_outlined),
+            const AppIconWell(icon: Icons.event_available_outlined),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -42,7 +43,11 @@ class LeaveSummaryCard extends StatelessWidget {
               ),
             ),
             Text('$pendingCount', style: text.headlineSmall),
-            if (onTap != null) const Icon(Icons.chevron_right),
+            if (onTap != null)
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.outline,
+              ),
           ],
         ),
       ),

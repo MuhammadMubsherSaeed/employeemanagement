@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
+import 'package:flutter_base/core/widgets/app_icon_well.dart';
 
 class QuickActionCard extends StatelessWidget {
   const QuickActionCard({
@@ -32,7 +33,7 @@ class QuickActionCard extends StatelessWidget {
           onTap: tappable ? onTap : null,
           child: Row(
             children: <Widget>[
-              Icon(icon),
+              AppIconWell(icon: icon, size: 40),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -46,7 +47,10 @@ class QuickActionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ],
           ),
         ),

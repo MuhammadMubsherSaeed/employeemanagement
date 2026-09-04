@@ -209,19 +209,41 @@ class _EmployeeDocumentsScreenState
                   document.id,
                 ),
               ),
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(document.documentType.icon),
-                title: Text(document.fileName),
-                subtitle: Text(
-                  <String>[
-                    document.documentType.label,
-                    formatFileSize(document.fileSize),
-                    if (document.createdAt != null)
-                      AppDateFormatter.date(document.createdAt!),
-                    if (document.uploadedBy != null) document.uploadedBy!.email,
-                  ].join(' · '),
-                ),
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    document.documentType.icon,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          document.fileName,
+                          style: Theme.of(context).textTheme.titleSmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          <String>[
+                            document.documentType.label,
+                            formatFileSize(document.fileSize),
+                            if (document.createdAt != null)
+                              AppDateFormatter.date(document.createdAt!),
+                            if (document.uploadedBy != null)
+                              document.uploadedBy!.email,
+                          ].join(' · '),
+                          style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           );

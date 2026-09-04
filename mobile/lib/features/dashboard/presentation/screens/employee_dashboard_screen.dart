@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
@@ -190,7 +191,7 @@ class _EmployeeDashboardScreenState
         PunchState.none;
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: AppSpacing.screen,
+      padding: AppBreakpoints.pagePadding(context),
       children: <Widget>[
         Text(
           '${dashboardGreeting(DateTime.now())}, $name',
@@ -228,6 +229,7 @@ class _EmployeeDashboardScreenState
           if (punch == PunchState.checkedIn)
             AppButton(
               label: today.isCheckingOut ? 'Checking out…' : 'Check Out',
+              variant: AppButtonVariant.outlined,
               isLoading: today.isCheckingOut,
               onPressed: today.isBusy ? null : _checkOut,
             ),

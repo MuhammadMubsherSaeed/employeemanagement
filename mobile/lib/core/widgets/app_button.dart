@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/theme/app_colors.dart';
+import 'package:flutter_base/core/theme/app_dimensions.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 
-enum AppButtonVariant { primary, secondary, outlined, text }
+enum AppButtonVariant { primary, secondary, outlined, text, danger }
 
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -24,16 +26,17 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
+    final bool enabled = onPressed != null && !isLoading;
     final Widget child = isLoading
         ? SizedBox(
-            width: 20,
-            height: 20,
+            width: AppDimensions.iconMd,
+            height: AppDimensions.iconMd,
             child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: variant == AppButtonVariant.primary ||
-                      variant == AppButtonVariant.secondary
-                  ? colors.onPrimary
-                  : colors.primary,
+              strokeWidth: AppDimensions.loaderStroke,
+              color: variant == AppButtonVariant.outlined ||
+                      variant == AppButtonVariant.text
+                  ? colors.primary
+                  : colors.onPrimary,
             ),
           )
         : Row(
@@ -41,15 +44,14 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               if (icon != null) ...<Widget>[
-                Icon(icon, size: 18),
+                Icon(icon, size: AppDimensions.iconMd),
                 const SizedBox(width: AppSpacing.xs),
               ],
-              Text(label),
+              Text(label, overflow: TextOverflow.ellipsis),
             ],
           );
 
-    final VoidCallback? callback = isLoading ? null : onPressed;
-
+    final VoidCallback? callback = enabled ? onPressed : null;
     final Widget button = switch (variant) {
       AppButtonVariant.primary =>
         ElevatedButton(onPressed: callback, child: child),
@@ -64,11 +66,21 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.outlined =>
         OutlinedButton(onPressed: callback, child: child),
       AppButtonVariant.text => TextButton(onPressed: callback, child: child),
+      AppButtonVariant.danger => ElevatedButton(
+          onPressed: callback,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.dangerOf(Theme.of(context).brightness),
+            foregroundColor: Colors.white,
+          ),
+          child: child,
+        ),
     };
 
-    if (!expand) {
-      return button;
-    }
-    return SizedBox(width: double.infinity, child: button);
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: expand ? SizedBox(width: double.infinity, child: button) : button,
+    );
   }
 }

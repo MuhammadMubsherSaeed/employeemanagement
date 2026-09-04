@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_bottom_sheet.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_text_field.dart';
 import 'package:flutter_base/features/leaves/presentation/providers/leave_action_controller.dart';
 
 Future<String?> showLeaveRejectSheet(BuildContext context) {
-  return showModalBottomSheet<String>(
+  return AppBottomSheet.show<String>(
     context: context,
-    isScrollControlled: true,
     builder: (BuildContext context) {
       return const LeaveRejectSheet();
     },

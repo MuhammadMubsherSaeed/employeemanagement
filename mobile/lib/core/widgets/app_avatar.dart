@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/theme/app_colors.dart';
+import 'package:flutter_base/core/theme/app_dimensions.dart';
 
 enum AppAvatarSize {
-  sm(32),
-  md(40),
-  lg(56);
+  sm(AppDimensions.avatarSm),
+  md(AppDimensions.avatarMd),
+  lg(AppDimensions.avatarLg),
+  xl(AppDimensions.avatarXl);
 
   const AppAvatarSize(this.pixels);
   final double pixels;
@@ -19,7 +21,7 @@ class AppAvatar extends StatelessWidget {
     this.assetPath,
     this.image,
     this.name,
-    this.size = 40,
+    this.size = AppDimensions.avatarMd,
   });
 
   final String? imageUrl;
@@ -31,50 +33,65 @@ class AppAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String initials = (name ?? '').initials;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     final Widget fallback = CircleAvatar(
       radius: size / 2,
-      backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+      backgroundColor: scheme.primary.withValues(alpha: 0.15),
       child: Text(
         initials,
         style: TextStyle(
-          color: AppColors.primary,
+          color: AppColors.infoOf(Theme.of(context).brightness),
           fontWeight: FontWeight.w600,
           fontSize: size * 0.35,
         ),
       ),
     );
 
+    Widget framed(Widget child) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: child,
+      );
+    }
+
     if (image != null) {
-      return CircleAvatar(
-        radius: size / 2,
-        backgroundImage: image,
-        onBackgroundImageError: (_, __) {},
-        child: fallback,
+      return framed(
+        CircleAvatar(
+          radius: size / 2,
+          backgroundImage: image,
+          onBackgroundImageError: (_, __) {},
+          child: fallback,
+        ),
       );
     }
 
     if (assetPath != null && assetPath!.isNotEmpty) {
-      return CircleAvatar(
-        radius: size / 2,
-        backgroundImage: AssetImage(assetPath!),
-        onBackgroundImageError: (_, __) {},
-        child: fallback,
+      return framed(
+        CircleAvatar(
+          radius: size / 2,
+          backgroundImage: AssetImage(assetPath!),
+          onBackgroundImageError: (_, __) {},
+          child: fallback,
+        ),
       );
     }
 
     if (imageUrl == null || imageUrl!.isEmpty) {
-      return fallback;
+      return framed(fallback);
     }
 
-    return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: imageUrl!,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        placeholder: (BuildContext context, String url) => fallback,
-        errorWidget: (BuildContext context, String url, Object error) =>
-            fallback,
+    return framed(
+      ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: imageUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          placeholder: (BuildContext context, String url) => fallback,
+          errorWidget: (BuildContext context, String url, Object error) =>
+              fallback,
+        ),
       ),
     );
   }

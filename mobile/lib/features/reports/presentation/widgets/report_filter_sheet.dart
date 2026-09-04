@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_bottom_sheet.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/core/widgets/app_text_field.dart';
@@ -22,9 +23,8 @@ Future<ReportQuery?> showReportFilterSheet({
   List<Employee> employees = const <Employee>[],
   List<LeaveType> leaveTypes = const <LeaveType>[],
 }) {
-  return showModalBottomSheet<ReportQuery>(
+  return AppBottomSheet.show<ReportQuery>(
     context: context,
-    isScrollControlled: true,
     builder: (BuildContext context) {
       return ReportFilterSheet(
         current: current,

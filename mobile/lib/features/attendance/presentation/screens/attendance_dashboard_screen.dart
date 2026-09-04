@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
@@ -122,7 +123,7 @@ class _AttendanceDashboardScreenState
         onRefresh: () => _refresh(summaryQuery),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: AppSpacing.screen,
+          padding: AppBreakpoints.pagePadding(context),
           children: <Widget>[
             if (today.isLoading)
               const AppLoader(message: 'Loading attendance…')
@@ -145,6 +146,7 @@ class _AttendanceDashboardScreenState
                   today.punchState == PunchState.checkedIn) ...<Widget>[
                 AppButton(
                   label: 'Check Out',
+                  variant: AppButtonVariant.outlined,
                   isLoading: today.isCheckingOut,
                   onPressed: today.isBusy ? null : _checkOut,
                 ),
