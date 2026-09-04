@@ -4,6 +4,7 @@ class AppRoutes {
   static const String root = '/';
   static const String splash = '/splash';
   static const String home = '/home';
+  static const String accessDenied = '/access-denied';
   static const String error = '/error';
   static const String login = '/login';
   static const String forgotPassword = '/forgot-password';
@@ -37,6 +38,7 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String settingsCompany = '/settings/company';
   static const String settingsAttendance = '/settings/attendance';
+  static const String auditLogs = '/audit-logs';
 
   static String employee(String id) => '/employees/$id';
 
@@ -70,4 +72,6 @@ class AppRoutes {
   static String deviceHistory(String id) => '/devices/$id/history';
 
   static String notification(String id) => '/notifications/$id';
+
+  static String auditLog(String id) => '/audit-logs/$id';
 }

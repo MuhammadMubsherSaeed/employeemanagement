@@ -1,4 +1,4 @@
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/reports/domain/entities/report_export.dart';
@@ -35,10 +35,7 @@ class ReportExportController
       );
       return;
     }
-    final AuthState auth = ref.read(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
-    if (!ReportAccess(role).canExport) {
+    if (!ReportAccess(ref.read(authorizationProvider)).canExport) {
       state = ReportExportState(
         phase: ReportExportPhase.error,
         format: format,

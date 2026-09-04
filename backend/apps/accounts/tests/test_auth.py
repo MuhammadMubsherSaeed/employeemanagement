@@ -54,6 +54,7 @@ class AuthAPITests(TestCase):
         self.assertEqual(user["email"], "user@example.com")
         self.assertEqual(user["full_name"], "User Name")
         self.assertEqual(user["role"], "EMPLOYEE")
+        self.assertEqual(user["permissions"], [])
         self.assertNotIn("password", user)
         self.assertNotIn("is_superuser", user)
         self.user.refresh_from_db()

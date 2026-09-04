@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/core/constants/app_constants.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/notifications/domain/notification_access.dart';
 import 'package:flutter_base/features/reports/domain/report_access.dart';
 import 'package:flutter_base/features/settings/domain/settings_access.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/notifications/presentation/widgets/unread_notification_badge.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -56,13 +59,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final AuthState auth = ref.watch(authControllerProvider);
     final User? user = auth is AuthAuthenticated ? auth.user : null;
+    final Authorization authorization = ref.watch(authorizationProvider);
     final ThemeMode themeMode = ref.watch(themeModeControllerProvider);
+    final EmployeeAccess employees = EmployeeAccess(authorization);
+    final AttendanceAccess attendance = AttendanceAccess(authorization);
+    final LeaveAccess leave = LeaveAccess(authorization);
+    final DeviceAccess devices = DeviceAccess(authorization);
+    final NotificationAccess notifications = NotificationAccess(authorization);
+    final ReportAccess reports = ReportAccess(authorization);
+    final SettingsAccess settings = SettingsAccess(authorization);
+    final bool canViewAuditLogs =
+        authorization.hasPermission(Permissions.auditLogsView) &&
+            authorization.hasTenant;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppConstants.appName),
         actions: <Widget>[
-          if (NotificationAccess(user?.role ?? UserRole.unknown).canView)
+          if (notifications.canView)
             IconButton(
               tooltip: 'Notifications',
               onPressed: () => context.push(AppRoutes.notifications),
@@ -131,36 +145,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              onTap: () {
-                final EmployeeAccess access = EmployeeAccess(
-                  user?.role ?? UserRole.unknown,
-                );
-                context.push(
-                  access.isSelfService
-                      ? AppRoutes.employeesMe
-                      : AppRoutes.employees,
-                );
-              },
-              child: Row(
-                children: <Widget>[
-                  const Icon(Icons.groups_outlined),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(
-                      (user?.role == UserRole.employee)
-                          ? 'My employee profile'
-                          : 'Employees',
-                      style: Theme.of(context).textTheme.titleMedium,
+            if (employees.canView) ...<Widget>[
+              const SizedBox(height: AppSpacing.md),
+              AppCard(
+                onTap: () {
+                  context.push(
+                    employees.isSelfService
+                        ? AppRoutes.employeesMe
+                        : AppRoutes.employees,
+                  );
+                },
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.groups_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        employees.isSelfService
+                            ? 'My employee profile'
+                            : 'Employees',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ),
-                  ),
-                  const Icon(Icons.chevron_right),
-                ],
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            if (AttendanceAccess(user?.role ?? UserRole.unknown).canView)
+            ],
+            if (attendance.canView) ...<Widget>[
+              const SizedBox(height: AppSpacing.md),
               AppCard(
                 onTap: () => context.push(AppRoutes.attendance),
                 child: Row(
@@ -177,9 +190,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (AttendanceAccess(user?.role ?? UserRole.unknown).canView)
+            ],
+            if (leave.canView) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
-            if (LeaveAccess(user?.role ?? UserRole.unknown).canView)
               AppCard(
                 onTap: () => context.push(AppRoutes.leaves),
                 child: Row(
@@ -196,9 +209,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (LeaveAccess(user?.role ?? UserRole.unknown).canView)
+            ],
+            if (devices.isSelfService) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
-            if (DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
               AppCard(
                 onTap: () => context.push(AppRoutes.myDevices),
                 child: Row(
@@ -215,10 +228,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
+            ],
+            if (devices.canView && !devices.isSelfService) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
-            if (DeviceAccess(user?.role ?? UserRole.unknown).canView &&
-                !DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
               AppCard(
                 onTap: () => context.push(AppRoutes.devices),
                 child: Row(
@@ -235,10 +247,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (DeviceAccess(user?.role ?? UserRole.unknown).canView &&
-                !DeviceAccess(user?.role ?? UserRole.unknown).isSelfService)
+            ],
+            if (notifications.canView) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
-            if (NotificationAccess(user?.role ?? UserRole.unknown).canView)
               AppCard(
                 onTap: () => context.push(AppRoutes.notifications),
                 child: Row(
@@ -257,9 +268,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (NotificationAccess(user?.role ?? UserRole.unknown).canView)
+            ],
+            if (reports.canView) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
-            if (ReportAccess(user?.role ?? UserRole.unknown).canView)
               AppCard(
                 onTap: () => context.push(AppRoutes.reports),
                 child: Row(
@@ -276,9 +287,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (ReportAccess(user?.role ?? UserRole.unknown).canView)
+            ],
+            if (canViewAuditLogs) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
-            if (SettingsAccess(user?.role ?? UserRole.unknown).canView)
+              AppCard(
+                onTap: () => context.push(AppRoutes.auditLogs),
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.policy_outlined),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'Audit logs',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ],
+            if (settings.canView) ...<Widget>[
+              const SizedBox(height: AppSpacing.md),
               AppCard(
                 onTap: () => context.push(AppRoutes.settings),
                 child: Row(
@@ -295,8 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (SettingsAccess(user?.role ?? UserRole.unknown).canView)
-              const SizedBox(height: AppSpacing.md),
+            ],
+            const SizedBox(height: AppSpacing.md),
             AppCard(
               child: Text(
                 'HRMS modules will be added to this home screen over time.',

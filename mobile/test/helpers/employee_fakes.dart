@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_base/features/employees/domain/entities/employee.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee_enums.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee_query.dart';
 import 'package:flutter_base/features/employees/domain/repositories/employee_repository.dart';
+
+import 'rbac_fixtures.dart';
 
 const User companyAdminUser = User(
   id: 10,
@@ -18,6 +21,8 @@ const User companyAdminUser = User(
   role: UserRole.companyAdmin,
   roleValue: 'COMPANY_ADMIN',
   isActive: true,
+  companyId: kSampleCompanyId,
+  permissions: Permissions.all,
 );
 
 const User managerUser = User(
@@ -29,6 +34,8 @@ const User managerUser = User(
   role: UserRole.manager,
   roleValue: 'MANAGER',
   isActive: true,
+  companyId: kSampleCompanyId,
+  permissions: kManagerPermissions,
 );
 
 const User superAdminUser = User(

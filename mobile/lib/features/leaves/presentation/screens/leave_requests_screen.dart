@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_query.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
@@ -26,9 +24,8 @@ class LeaveRequestsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState auth = ref.watch(authControllerProvider);
     final LeaveAccess access = LeaveAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final LeaveRequestsState list =
         ref.watch(leaveRequestsControllerProvider(kind));

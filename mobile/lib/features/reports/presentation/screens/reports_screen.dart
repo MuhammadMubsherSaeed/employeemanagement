@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/utils/date_formatter.dart';
 import 'package:flutter_base/features/attendance/domain/working_duration.dart';
 import 'package:flutter_base/features/attendance/presentation/widgets/attendance_status_badge.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/devices/presentation/widgets/device_status_badge.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
 import 'package:flutter_base/features/employees/presentation/providers/employee_providers.dart';
@@ -51,6 +49,9 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
     super.initState();
     _scroll.addListener(_onScroll);
     Future<void>.microtask(() {
+      if (!ReportAccess(ref.read(authorizationProvider)).canView) {
+        return;
+      }
       ref.read(reportListControllerProvider(widget.kind).notifier).loadInitial();
     });
   }
@@ -109,17 +110,13 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
   }
 
   ReportAccess get _access {
-    final AuthState auth = ref.read(authControllerProvider);
-    return ReportAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
-    );
+    return ReportAccess(ref.read(authorizationProvider));
   }
 
   @override
   Widget build(BuildContext context) {
-    final AuthState auth = ref.watch(authControllerProvider);
     final ReportAccess access = ReportAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     if (!access.canOpen(widget.kind)) {
       return Scaffold(
@@ -515,9 +512,8 @@ class ReportsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState auth = ref.watch(authControllerProvider);
     final ReportAccess access = ReportAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final List<_ReportEntry> entries = <_ReportEntry>[
       if (access.canOpen(ReportKind.attendance))

@@ -1,4 +1,4 @@
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
@@ -51,10 +51,7 @@ class LeaveRequestsController extends FamilyNotifier<LeaveRequestsState, LeaveLi
   }
 
   LeaveRequestQuery _sanitize(LeaveRequestQuery query) {
-    final AuthState auth = ref.read(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
-    if (LeaveAccess(role).isSelfService) {
+    if (LeaveAccess(ref.read(authorizationProvider)).isSelfService) {
       return query.copyWith(clearEmployee: true);
     }
     return query;

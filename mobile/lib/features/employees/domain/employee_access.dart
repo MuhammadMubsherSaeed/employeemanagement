@@ -1,26 +1,32 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 
-/// UI gates derived from [User.role] and the default RBAC seed.
-/// The Django API remains the security boundary.
+/// UI gates from backend permission codes. Django remains the security boundary.
 class EmployeeAccess {
-  const EmployeeAccess(this.role);
+  const EmployeeAccess(this.auth);
 
-  final UserRole role;
+  factory EmployeeAccess.of(User? user) =>
+      EmployeeAccess(Authorization.fromUser(user));
 
-  bool get canViewDirectory =>
-      role == UserRole.companyAdmin ||
-      role == UserRole.manager ||
-      role == UserRole.superAdmin;
+  final Authorization auth;
 
-  bool get isSelfService => role == UserRole.employee;
+  UserRole get role => auth.role;
 
-  bool get canCreate => role == UserRole.companyAdmin;
+  bool get canView => auth.hasPermission(Permissions.employeesView);
 
-  bool get canUpdate =>
-      role == UserRole.companyAdmin ||
-      role == UserRole.manager ||
-      role == UserRole.superAdmin;
+  bool get isSelfService =>
+      canView &&
+      !auth.hasPermission(Permissions.employeesCreate) &&
+      !auth.hasPermission(Permissions.employeesUpdate) &&
+      !auth.hasPermission(Permissions.employeesDelete);
 
-  bool get canDelete =>
-      role == UserRole.companyAdmin || role == UserRole.superAdmin;
+  bool get canViewDirectory => canView && !isSelfService;
+
+  bool get canCreate =>
+      auth.hasPermission(Permissions.employeesCreate) && auth.hasTenant;
+
+  bool get canUpdate => auth.hasPermission(Permissions.employeesUpdate);
+
+  bool get canDelete => auth.hasPermission(Permissions.employeesDelete);
 }

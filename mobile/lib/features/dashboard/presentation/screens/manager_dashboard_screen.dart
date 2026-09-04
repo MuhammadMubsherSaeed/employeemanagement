@@ -3,9 +3,7 @@ import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/dashboard/domain/entities/dashboard.dart';
 import 'package:flutter_base/features/dashboard/presentation/providers/manager_dashboard_controller.dart';
 import 'package:flutter_base/features/dashboard/presentation/states/dashboard_state.dart';
@@ -27,10 +25,7 @@ class ManagerDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final DashboardViewState<ManagerDashboard> state =
         ref.watch(managerDashboardControllerProvider);
-    final AuthState auth = ref.watch(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
-    final LeaveAccess leave = LeaveAccess(role);
+    final LeaveAccess leave = LeaveAccess(ref.watch(authorizationProvider));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Team dashboard'),

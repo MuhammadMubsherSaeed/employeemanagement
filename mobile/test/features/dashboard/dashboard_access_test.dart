@@ -1,37 +1,39 @@
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/dashboard/domain/dashboard_access.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/auth_fakes.dart';
+import '../../helpers/employee_fakes.dart';
+
 void main() {
-  test('primary dashboard follows company role without a second RBAC system', () {
+  test('primary dashboard follows permissions and tenant context', () {
     expect(
-      const DashboardAccess(UserRole.companyAdmin).primaryKind,
+      DashboardAccess.of(companyAdminUser).primaryKind,
       DashboardKind.admin,
     );
     expect(
-      const DashboardAccess(UserRole.manager).primaryKind,
+      DashboardAccess.of(managerUser).primaryKind,
       DashboardKind.manager,
     );
     expect(
-      const DashboardAccess(UserRole.employee).primaryKind,
+      DashboardAccess.of(sampleUser).primaryKind,
       DashboardKind.employee,
     );
-    expect(const DashboardAccess(UserRole.superAdmin).primaryKind, isNull);
-    expect(const DashboardAccess(UserRole.unknown).primaryKind, isNull);
+    expect(DashboardAccess.of(superAdminUser).primaryKind, isNull);
+    expect(DashboardAccess.of(null).primaryKind, isNull);
   });
 
   test('UI capability flags stay aligned with default catalog roles', () {
-    const DashboardAccess admin = DashboardAccess(UserRole.companyAdmin);
+    final DashboardAccess admin = DashboardAccess.of(companyAdminUser);
     expect(admin.canViewAdmin, isTrue);
     expect(admin.canViewManager, isTrue);
     expect(admin.canViewEmployee, isTrue);
 
-    const DashboardAccess manager = DashboardAccess(UserRole.manager);
+    final DashboardAccess manager = DashboardAccess.of(managerUser);
     expect(manager.canViewAdmin, isFalse);
     expect(manager.canViewManager, isTrue);
     expect(manager.canViewEmployee, isTrue);
 
-    const DashboardAccess employee = DashboardAccess(UserRole.employee);
+    final DashboardAccess employee = DashboardAccess.of(sampleUser);
     expect(employee.canViewAdmin, isFalse);
     expect(employee.canViewManager, isFalse);
     expect(employee.canViewEmployee, isTrue);

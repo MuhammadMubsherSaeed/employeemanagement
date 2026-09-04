@@ -1,38 +1,41 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 
-/// UI gates from [User.role] and the default RBAC catalog.
-/// Django remains the security boundary.
+/// UI gates from backend permission codes. Django remains the security boundary.
 class DeviceAccess {
-  const DeviceAccess(this.role);
+  const DeviceAccess(this.auth);
 
-  final UserRole role;
+  factory DeviceAccess.of(User? user) =>
+      DeviceAccess(Authorization.fromUser(user));
 
-  bool get canView =>
-      role == UserRole.employee ||
-      role == UserRole.manager ||
-      role == UserRole.companyAdmin ||
-      role == UserRole.superAdmin;
+  final Authorization auth;
+
+  UserRole get role => auth.role;
+
+  bool get canView => auth.hasPermission(Permissions.devicesView);
 
   bool get canCreate =>
-      role == UserRole.companyAdmin || role == UserRole.superAdmin;
+      auth.hasPermission(Permissions.devicesCreate) && auth.hasTenant;
 
-  bool get canUpdate => canCreate;
+  bool get canUpdate =>
+      auth.hasPermission(Permissions.devicesUpdate) && auth.hasTenant;
 
-  bool get canDelete => canCreate;
+  bool get canDelete =>
+      auth.hasPermission(Permissions.devicesDelete) && auth.hasTenant;
 
   bool get canAssign =>
-      role == UserRole.manager ||
-      role == UserRole.companyAdmin ||
-      role == UserRole.superAdmin;
+      auth.hasPermission(Permissions.devicesAssign) && auth.hasTenant;
 
-  bool get canReturn => canAssign;
+  bool get canReturn =>
+      auth.hasPermission(Permissions.devicesReturn) && auth.hasTenant;
 
-  bool get canSeeSensitive =>
-      role == UserRole.companyAdmin || role == UserRole.superAdmin;
+  bool get canSeeSensitive => canUpdate || canDelete;
 
   bool get canFilterByEmployee => canAssign;
 
-  bool get isSelfService => role == UserRole.employee;
+  bool get isSelfService =>
+      canView && !canCreate && !canUpdate && !canAssign && !canDelete;
 
   bool get canManageInventory => canCreate;
 }

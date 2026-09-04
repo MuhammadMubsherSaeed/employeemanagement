@@ -7,11 +7,12 @@ import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
+import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/attendance/presentation/widgets/attendance_profile_link.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/documents/domain/document_access.dart';
+import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/documents/presentation/screens/employee_documents_screen.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
@@ -38,10 +39,13 @@ class EmployeeDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final String lookup = isSelf ? 'me' : employeeId;
     final AsyncValue<Employee> async = ref.watch(employeeDetailProvider(lookup));
-    final AuthState auth = ref.watch(authControllerProvider);
     final EmployeeAccess access = EmployeeAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
+    final AttendanceAccess attendance = AttendanceAccess(access.auth);
+    final LeaveAccess leave = LeaveAccess(access.auth);
+    final DeviceAccess devices = DeviceAccess(access.auth);
+    final DocumentAccess documents = DocumentAccess(access.auth);
 
     return async.when(
       loading: () => const Scaffold(body: AppLoader()),
@@ -53,8 +57,35 @@ class EmployeeDetailsScreen extends ConsumerWidget {
         ),
       ),
       data: (Employee employee) {
+        final List<Tab> tabs = <Tab>[const Tab(text: 'Overview')];
+        final List<Widget> views = <Widget>[
+          _OverviewTab(employee: employee, access: documents),
+        ];
+        if (attendance.canView) {
+          tabs.add(const Tab(text: 'Attendance'));
+          views.add(
+            AttendanceProfileLink(auth: access.auth, isSelf: isSelf),
+          );
+        }
+        if (leave.canView) {
+          tabs.add(const Tab(text: 'Leaves'));
+          views.add(const UpcomingModulePlaceholder(title: 'Leaves'));
+        }
+        if (devices.canView) {
+          tabs.add(const Tab(text: 'Devices'));
+          views.add(const UpcomingModulePlaceholder(title: 'Devices'));
+        }
+        if (documents.canView) {
+          tabs.add(const Tab(text: 'Documents'));
+          views.add(
+            EmployeeDocumentsScreen(
+              employeeId: employee.id,
+              embedded: true,
+            ),
+          );
+        }
         return DefaultTabController(
-          length: 5,
+          length: tabs.length,
           child: Scaffold(
             appBar: AppBar(
               title: Text(isSelf ? 'My profile' : employee.fullName),
@@ -73,35 +104,9 @@ class EmployeeDetailsScreen extends ConsumerWidget {
                     icon: const Icon(Icons.delete_outline),
                   ),
               ],
-              bottom: const TabBar(
-                isScrollable: true,
-                tabs: <Widget>[
-                  Tab(text: 'Overview'),
-                  Tab(text: 'Attendance'),
-                  Tab(text: 'Leaves'),
-                  Tab(text: 'Devices'),
-                  Tab(text: 'Documents'),
-                ],
-              ),
+              bottom: TabBar(isScrollable: true, tabs: tabs),
             ),
-            body: TabBarView(
-              children: <Widget>[
-                _OverviewTab(
-                  employee: employee,
-                  access: DocumentAccess(access.role),
-                ),
-                AttendanceProfileLink(
-                  role: access.role,
-                  isSelf: isSelf,
-                ),
-                const UpcomingModulePlaceholder(title: 'Leaves'),
-                const UpcomingModulePlaceholder(title: 'Devices'),
-                EmployeeDocumentsScreen(
-                  employeeId: employee.id,
-                  embedded: true,
-                ),
-              ],
-            ),
+            body: TabBarView(children: views),
           ),
         );
       },

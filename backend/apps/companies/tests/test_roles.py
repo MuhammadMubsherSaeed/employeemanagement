@@ -73,12 +73,20 @@ class RoleAuthorizationTests(TenancyAPITestCase):
         self.assertEqual(data["role"], UserRole.EMPLOYEE)
         self.assertEqual(data["company"]["slug"], "acme")
         self.assertNotIn("memberships", data)
+        permissions = data["permissions"]
+        self.assertIn("employees.view", permissions)
+        self.assertIn("leave.create", permissions)
+        self.assertNotIn("employees.delete", permissions)
+        self.assertNotIn("settings.manage", permissions)
 
     def test_me_for_super_admin_has_no_company(self) -> None:
+        from apps.accounts.rbac_catalog import PERMISSION_CODES
+
         client = self.authenticate(self.super_admin)
         data = client.get("/api/v1/auth/me/").json()["data"]
         self.assertEqual(data["role"], UserRole.SUPER_ADMIN)
         self.assertIsNone(data["company"])
+        self.assertEqual(data["permissions"], list(PERMISSION_CODES))
 
     def test_profile_update_is_not_exposed(self) -> None:
         client = self.authenticate(self.employee_a)

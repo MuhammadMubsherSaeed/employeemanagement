@@ -9,6 +9,8 @@ class UserModel {
     required this.fullName,
     required this.role,
     this.isActive,
+    this.companyId,
+    this.permissions = const <String>[],
   });
 
   final int id;
@@ -18,6 +20,8 @@ class UserModel {
   final String fullName;
   final String role;
   final bool? isActive;
+  final String? companyId;
+  final List<String> permissions;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -28,6 +32,8 @@ class UserModel {
       fullName: _readString(json['full_name']),
       role: _readString(json['role']),
       isActive: json['is_active'] is bool ? json['is_active'] as bool : null,
+      companyId: _readCompanyId(json['company']),
+      permissions: _readPermissions(json['permissions']),
     );
   }
 
@@ -43,6 +49,8 @@ class UserModel {
       role: UserRole.fromApi(role),
       roleValue: role.isEmpty ? UserRole.unknown.apiValue : role,
       isActive: isActive,
+      companyId: companyId,
+      permissions: permissions,
     );
   }
 
@@ -58,5 +66,27 @@ class UserModel {
       return '';
     }
     return value.toString();
+  }
+
+  static String? _readCompanyId(dynamic value) {
+    if (value is Map) {
+      final Object? id = value['id'];
+      if (id == null) {
+        return null;
+      }
+      final String parsed = id.toString().trim();
+      return parsed.isEmpty ? null : parsed;
+    }
+    return null;
+  }
+
+  static List<String> _readPermissions(dynamic value) {
+    if (value is! List) {
+      return const <String>[];
+    }
+    return value
+        .map((dynamic item) => item.toString().trim())
+        .where((String item) => item.isNotEmpty)
+        .toList(growable: false);
   }
 }

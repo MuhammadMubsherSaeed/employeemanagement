@@ -1,40 +1,57 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/devices/domain/device_access.dart';
+import 'package:flutter_base/features/documents/domain/document_access.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/notifications/domain/notification_access.dart';
 import 'package:flutter_base/features/reports/domain/report_access.dart';
 import 'package:flutter_base/features/settings/domain/settings_access.dart';
 
-/// Role → route access. Backend authorization remains mandatory.
+/// Permission-aware route access. Backend authorization remains mandatory.
 class RoleRoutePolicy {
   const RoleRoutePolicy();
 
   bool canAccess({
-    required UserRole role,
+    required Authorization auth,
     required String path,
   }) {
-    final EmployeeAccess access = EmployeeAccess(role);
+    if (path == AppRoutes.accessDenied ||
+        path == AppRoutes.home ||
+        path == AppRoutes.dashboard) {
+      return true;
+    }
+    final EmployeeAccess employees = EmployeeAccess(auth);
     if (path == AppRoutes.employeesAdd) {
-      return access.canCreate;
+      return employees.canCreate;
     }
     if (path.startsWith('${AppRoutes.employees}/') && path.endsWith('/edit')) {
-      return access.canUpdate;
+      return employees.canUpdate;
+    }
+    if (path.contains('/documents')) {
+      final DocumentAccess documents = DocumentAccess(auth);
+      if (path.endsWith('/upload')) {
+        return documents.canUpload;
+      }
+      if (path.endsWith('/preview')) {
+        return documents.canDownload;
+      }
+      return documents.canView;
     }
     if (path == AppRoutes.employees ||
         path == AppRoutes.employeesMe ||
         path.startsWith('${AppRoutes.employees}/')) {
-      return true;
+      return employees.canView;
     }
     if (path == AppRoutes.attendance ||
         path == AppRoutes.attendanceHistory ||
         path == AppRoutes.attendanceCalendar ||
         path.startsWith('${AppRoutes.attendance}/')) {
-      return AttendanceAccess(role).canView;
+      return AttendanceAccess(auth).canView;
     }
-    final LeaveAccess leave = LeaveAccess(role);
+    final LeaveAccess leave = LeaveAccess(auth);
     if (path == AppRoutes.leavesApply) {
       return leave.canCreate;
     }
@@ -53,7 +70,7 @@ class RoleRoutePolicy {
         path.startsWith('${AppRoutes.leaves}/')) {
       return leave.canView;
     }
-    final DeviceAccess devices = DeviceAccess(role);
+    final DeviceAccess devices = DeviceAccess(auth);
     if (path == AppRoutes.devicesAdd) {
       return devices.canCreate;
     }
@@ -70,15 +87,19 @@ class RoleRoutePolicy {
     }
     if (path == AppRoutes.notifications ||
         path.startsWith('${AppRoutes.notifications}/')) {
-      return NotificationAccess(role).canView;
+      return NotificationAccess(auth).canView;
     }
     if (path == AppRoutes.reports ||
         path.startsWith('${AppRoutes.reports}/')) {
-      return ReportAccess(role).canView;
+      return ReportAccess(auth).canView;
+    }
+    if (path == AppRoutes.auditLogs ||
+        path.startsWith('${AppRoutes.auditLogs}/')) {
+      return auth.hasPermission(Permissions.auditLogsView) && auth.hasTenant;
     }
     if (path == AppRoutes.settings ||
         path.startsWith('${AppRoutes.settings}/')) {
-      return SettingsAccess(role).canView;
+      return SettingsAccess(auth).canView;
     }
     return true;
   }

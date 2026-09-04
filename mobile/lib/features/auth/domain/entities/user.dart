@@ -35,6 +35,8 @@ class User extends Equatable {
     required this.role,
     required this.roleValue,
     this.isActive,
+    this.companyId,
+    this.permissions = const <String>[],
   });
 
   final int id;
@@ -45,6 +47,35 @@ class User extends Equatable {
   final UserRole role;
   final String roleValue;
   final bool? isActive;
+  final String? companyId;
+  final List<String> permissions;
+
+  User copyWith({
+    int? id,
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? fullName,
+    UserRole? role,
+    String? roleValue,
+    bool? isActive,
+    String? companyId,
+    List<String>? permissions,
+    bool clearCompanyId = false,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      fullName: fullName ?? this.fullName,
+      role: role ?? this.role,
+      roleValue: roleValue ?? this.roleValue,
+      isActive: isActive ?? this.isActive,
+      companyId: clearCompanyId ? null : (companyId ?? this.companyId),
+      permissions: permissions ?? this.permissions,
+    );
+  }
 
   @override
   List<Object?> get props => <Object?>[
@@ -56,5 +87,7 @@ class User extends Equatable {
         role,
         roleValue,
         isActive,
+        companyId,
+        permissions,
       ];
 }

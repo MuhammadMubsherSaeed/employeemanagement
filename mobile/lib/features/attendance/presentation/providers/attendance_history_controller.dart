@@ -4,9 +4,7 @@ import 'package:flutter_base/features/attendance/domain/entities/attendance_quer
 import 'package:flutter_base/features/attendance/presentation/providers/attendance_error_mapper.dart';
 import 'package:flutter_base/features/attendance/presentation/providers/attendance_providers.dart';
 import 'package:flutter_base/features/attendance/presentation/states/attendance_history_state.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AttendanceHistoryController extends Notifier<AttendanceHistoryState> {
@@ -19,10 +17,7 @@ class AttendanceHistoryController extends Notifier<AttendanceHistoryState> {
   }
 
   bool get _selfOnly {
-    final AuthState auth = ref.read(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
-    return AttendanceAccess(role).isSelfService;
+    return AttendanceAccess(ref.read(authorizationProvider)).isSelfService;
   }
 
   Future<void> loadInitial() {

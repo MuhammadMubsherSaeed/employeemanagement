@@ -1,17 +1,24 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/reports/domain/entities/report_kind.dart';
 
-/// UI gates from [User.role] and the default RBAC catalog
-/// (`reports.view`, `reports.export`). Django remains the security boundary.
+/// UI gates from `reports.view` / `reports.export`. Django remains authoritative.
 class ReportAccess {
-  const ReportAccess(this.role);
+  const ReportAccess(this.auth);
 
-  final UserRole role;
+  factory ReportAccess.of(User? user) =>
+      ReportAccess(Authorization.fromUser(user));
+
+  final Authorization auth;
+
+  UserRole get role => auth.role;
 
   bool get canView =>
-      role == UserRole.companyAdmin || role == UserRole.manager;
+      auth.hasPermission(Permissions.reportsView) && auth.hasTenant;
 
-  bool get canExport => role == UserRole.companyAdmin;
+  bool get canExport =>
+      auth.hasPermission(Permissions.reportsExport) && auth.hasTenant;
 
   bool get canFilterByEmployee => canView;
 

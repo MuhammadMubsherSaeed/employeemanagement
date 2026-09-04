@@ -7,9 +7,7 @@ import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/documents/presentation/providers/document_providers.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
@@ -106,9 +104,8 @@ class LeaveRequestDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState auth = ref.watch(authControllerProvider);
     final LeaveAccess access = LeaveAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final LeaveActionState action = ref.watch(leaveActionControllerProvider);
     final AsyncValue<LeaveRequest> async =

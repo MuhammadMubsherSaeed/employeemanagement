@@ -157,7 +157,7 @@ void main() {
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.leavesTypes,
       ),
-      AppRoutes.dashboard,
+      AppRoutes.accessDenied,
     );
     expect(
       AuthRedirect.resolve(
@@ -195,14 +195,14 @@ void main() {
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.devicesAdd,
       ),
-      AppRoutes.dashboard,
+      AppRoutes.accessDenied,
     );
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.deviceAssign('dev-1'),
       ),
-      AppRoutes.dashboard,
+      AppRoutes.accessDenied,
     );
     expect(
       AuthRedirect.resolve(
@@ -243,21 +243,21 @@ void main() {
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.reports,
       ),
-      AppRoutes.dashboard,
+      AppRoutes.accessDenied,
     );
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.reportsAttendance,
       ),
-      AppRoutes.dashboard,
+      AppRoutes.accessDenied,
     );
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.authenticated(sampleUser),
         location: AppRoutes.reportsEmployees,
       ),
-      AppRoutes.dashboard,
+      AppRoutes.accessDenied,
     );
     expect(
       AuthRedirect.resolve(
@@ -303,7 +303,7 @@ void main() {
     expect(
       AuthRedirect.resolve(
         auth: const AuthState.authenticated(sampleUser),
-        location: AppRoutes.home,
+        location: AppRoutes.accessDenied,
       ),
       isNull,
     );

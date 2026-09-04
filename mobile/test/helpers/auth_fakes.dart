@@ -8,6 +8,8 @@ import 'package:flutter_base/features/auth/data/models/user_model.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/domain/repositories/auth_repository.dart';
 
+import 'rbac_fixtures.dart';
+
 const User sampleUser = User(
   id: 1,
   email: 'user@example.com',
@@ -17,6 +19,8 @@ const User sampleUser = User(
   role: UserRole.employee,
   roleValue: 'EMPLOYEE',
   isActive: true,
+  companyId: kSampleCompanyId,
+  permissions: kEmployeePermissions,
 );
 
 const UserModel sampleUserModel = UserModel(
@@ -27,6 +31,8 @@ const UserModel sampleUserModel = UserModel(
   fullName: 'User Name',
   role: 'EMPLOYEE',
   isActive: true,
+  companyId: kSampleCompanyId,
+  permissions: kEmployeePermissions,
 );
 
 class InMemoryTokenStorage implements TokenStorage {

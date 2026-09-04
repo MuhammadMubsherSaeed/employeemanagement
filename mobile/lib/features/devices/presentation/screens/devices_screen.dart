@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/devices/domain/entities/device.dart';
 import 'package:flutter_base/features/devices/domain/entities/device_query.dart';
@@ -20,9 +18,8 @@ class DevicesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState auth = ref.watch(authControllerProvider);
     final DeviceAccess access = DeviceAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final DeviceListState list =
         ref.watch(deviceListControllerProvider(DeviceListKind.inventory));

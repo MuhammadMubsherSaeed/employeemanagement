@@ -6,9 +6,7 @@ import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/documents/domain/document_access.dart';
 import 'package:flutter_base/features/documents/domain/document_validation.dart';
 import 'package:flutter_base/features/documents/domain/entities/document.dart';
@@ -67,9 +65,8 @@ class _EmployeeDocumentsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final AuthState auth = ref.watch(authControllerProvider);
     final DocumentAccess access = DocumentAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final DocumentListState list =
         ref.watch(employeeDocumentsProvider(widget.employeeId));

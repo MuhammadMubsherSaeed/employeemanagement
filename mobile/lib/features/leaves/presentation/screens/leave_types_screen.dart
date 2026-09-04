@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
 import 'package:flutter_base/core/widgets/app_status_badge.dart';
+import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_enums.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave_query.dart';
@@ -57,11 +59,13 @@ class LeaveTypesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Leave types')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push(AppRoutes.leavesTypesAdd),
-        tooltip: 'Create leave type',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: LeaveAccess(ref.watch(authorizationProvider)).canManage
+          ? FloatingActionButton(
+              onPressed: () => context.push(AppRoutes.leavesTypesAdd),
+              tooltip: 'Create leave type',
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: async.when(
         loading: () => const AppLoader(message: 'Loading leave types…'),
         error: (Object error, _) => AppErrorWidget(

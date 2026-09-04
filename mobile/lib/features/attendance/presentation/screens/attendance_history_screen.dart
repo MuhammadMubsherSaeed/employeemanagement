@@ -11,9 +11,7 @@ import 'package:flutter_base/features/attendance/presentation/providers/attendan
 import 'package:flutter_base/features/attendance/presentation/states/attendance_history_state.dart';
 import 'package:flutter_base/features/attendance/presentation/widgets/attendance_card.dart';
 import 'package:flutter_base/features/attendance/presentation/widgets/attendance_filter_sheet.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -60,9 +58,8 @@ class _AttendanceHistoryScreenState
   Future<void> _openFilters() async {
     final AttendanceHistoryState list =
         ref.read(attendanceHistoryControllerProvider);
-    final AuthState auth = ref.read(authControllerProvider);
     final AttendanceAccess access = AttendanceAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.read(authorizationProvider),
     );
     final AttendanceQuery? next = await showAttendanceFilterSheet(
       context: context,
@@ -81,9 +78,8 @@ class _AttendanceHistoryScreenState
   Widget build(BuildContext context) {
     final AttendanceHistoryState list =
         ref.watch(attendanceHistoryControllerProvider);
-    final AuthState auth = ref.watch(authControllerProvider);
     final AttendanceAccess access = AttendanceAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final int filters = list.query.activeFilterCount;
 
