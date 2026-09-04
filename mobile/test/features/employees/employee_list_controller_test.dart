@@ -124,6 +124,48 @@ void main() {
     expect(repository.listCalls, 2);
   });
 
+  test('load-more errors keep the current page so retry does not skip', () async {
+    bool failPage2 = true;
+    final FakeEmployeeRepository repository = FakeEmployeeRepository()
+      ..pageBuilder = (EmployeeQuery query) {
+        if (query.page == 1) {
+          return _page(
+            page: 1,
+            hasMore: true,
+            results: <Employee>[sampleEmployee(id: 'a')],
+          );
+        }
+        if (failPage2) {
+          throw const NetworkException();
+        }
+        return _page(
+          page: 2,
+          hasMore: false,
+          results: <Employee>[sampleEmployee(id: 'b', code: 'EMP-002')],
+        );
+      };
+    final ProviderContainer container = _container(repository);
+    addTearDown(container.dispose);
+    final EmployeeListController controller =
+        container.read(employeeListControllerProvider.notifier);
+    await controller.loadInitial();
+
+    await controller.loadMore();
+    final EmployeeListState failed =
+        container.read(employeeListControllerProvider);
+    expect(failed.error, isNotNull);
+    expect(failed.query.page, 1);
+    expect(failed.items.length, 1);
+
+    failPage2 = false;
+    await controller.loadMore();
+    final EmployeeListState recovered =
+        container.read(employeeListControllerProvider);
+    expect(recovered.error, isNull);
+    expect(recovered.items.length, 2);
+    expect(repository.listQueries.last.page, 2);
+  });
+
   test('refresh, search, and filters reset pagination', () async {
     final FakeEmployeeRepository repository = FakeEmployeeRepository()
       ..pageBuilder = (EmployeeQuery query) => _page(

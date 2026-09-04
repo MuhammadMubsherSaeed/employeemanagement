@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/storage/token_storage.dart';
 import 'package:flutter_base/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -90,6 +92,7 @@ class FakeAuthRepository implements AuthRepository {
   int loginCalls = 0;
   int meCalls = 0;
   int refreshCalls = 0;
+  Completer<User>? meHold;
 
   @override
   Future<User> login({required String email, required String password}) async {
@@ -119,6 +122,9 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<User> getCurrentUser() async {
     meCalls += 1;
+    if (meHold != null) {
+      return meHold!.future;
+    }
     if (meError != null) {
       throw meError!;
     }

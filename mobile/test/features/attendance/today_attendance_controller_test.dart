@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/features/attendance/domain/entities/attendance.dart';
 import 'package:flutter_base/features/attendance/domain/entities/attendance_enums.dart';
@@ -165,5 +167,34 @@ void main() {
     expect(container.read(attendanceHistoryControllerProvider).items, isNotEmpty);
     expect(repository.myCalls, greaterThan(0));
     expect(repository.historyCalls, 0);
+  });
+
+  test('a stale today-attendance response does not overwrite a newer refresh',
+      () async {
+    final Completer<AttendanceRecord?> hold = Completer<AttendanceRecord?>();
+    final FakeAttendanceRepository repository = FakeAttendanceRepository(
+      today: null,
+    )..todayHold = hold;
+    final ProviderContainer container = _container(repository);
+    addTearDown(container.dispose);
+    final TodayAttendanceController controller =
+        container.read(todayAttendanceProvider.notifier);
+
+    final Future<void> first = controller.load();
+    repository.todayHold = null;
+    repository.todayRecord = sampleAttendance(checkOut: null, totalMinutes: null);
+    await controller.refresh();
+    expect(
+      container.read(todayAttendanceProvider).punchState,
+      PunchState.checkedIn,
+    );
+
+    hold.complete(null);
+    await first;
+    expect(
+      container.read(todayAttendanceProvider).punchState,
+      PunchState.checkedIn,
+    );
+    expect(container.read(todayAttendanceProvider).record, isNotNull);
   });
 }

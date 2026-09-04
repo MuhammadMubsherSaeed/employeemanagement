@@ -75,33 +75,53 @@ class DeviceEmployeePickerController extends Notifier<EmployeeListState> {
     try {
       final EmployeePage<Employee> result =
           await ref.read(getEmployeesProvider)(requested);
-      final List<Employee> merged = reset
-          ? result.results
-          : _unique(<Employee>[...state.items, ...result.results]);
-      state = state.copyWith(
-        items: merged,
-        count: result.count,
-        hasMore: result.hasMore,
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        query: requested,
-        clearError: true,
-      );
+      if (_sameListQuery(state.query, requested)) {
+        final List<Employee> merged = reset
+            ? result.results
+            : _unique(<Employee>[...state.items, ...result.results]);
+        state = state.copyWith(
+          items: merged,
+          count: result.count,
+          hasMore: result.hasMore,
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: requested,
+          clearError: true,
+        );
+      }
     } catch (error) {
-      state = state.copyWith(
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        error: EmployeeErrorMapper.message(error),
-      );
+      if (_sameListQuery(state.query, requested)) {
+        state = state.copyWith(
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: reset
+              ? requested
+              : requested.copyWith(
+                  page: requested.page > 1 ? requested.page - 1 : 1,
+                ),
+          error: EmployeeErrorMapper.message(error),
+        );
+      }
     } finally {
       _pageRequestInFlight = false;
     }
-    if (_pendingReload) {
+    if (!_sameListQuery(state.query, requested) || _pendingReload) {
       _pendingReload = false;
       await _load(reset: true, refreshing: false);
     }
+  }
+
+  bool _sameListQuery(EmployeeQuery current, EmployeeQuery requested) {
+    return current.search == requested.search &&
+        current.departmentId == requested.departmentId &&
+        current.positionId == requested.positionId &&
+        current.status == requested.status &&
+        current.employmentType == requested.employmentType &&
+        current.managerId == requested.managerId &&
+        current.ordering == requested.ordering &&
+        current.pageSize == requested.pageSize;
   }
 
   List<Employee> _unique(List<Employee> items) {

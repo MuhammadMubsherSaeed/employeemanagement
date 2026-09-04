@@ -26,53 +26,55 @@ class LeaveBalanceScreen extends ConsumerWidget {
     final TextEditingController controller = TextEditingController(
       text: '${balance.allocatedDays}',
     );
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Set allocated days'),
-          content: AppTextField(
-            controller: controller,
-            label: 'Allocated days',
-            keyboardType: TextInputType.number,
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+    try {
+      final bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Set allocated days'),
+            content: AppTextField(
+              controller: controller,
+              label: 'Allocated days',
+              keyboardType: TextInputType.number,
             ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-    if (confirmed != true) {
-      controller.dispose();
-      return;
-    }
-    final int? days = int.tryParse(controller.text.trim());
-    controller.dispose();
-    if (days == null || !context.mounted) {
-      return;
-    }
-    final LeaveBalance? updated =
-        await ref.read(leaveActionControllerProvider.notifier).allocate(
-              id: balance.id,
-              allocatedDays: days,
-            );
-    if (!context.mounted) {
-      return;
-    }
-    if (updated != null) {
-      context.showSnack('Leave allocation updated.');
-    } else {
-      final String? error = ref.read(leaveActionControllerProvider).error;
-      if (error != null) {
-        context.showSnack(error);
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
+      if (confirmed != true) {
+        return;
       }
+      final int? days = int.tryParse(controller.text.trim());
+      if (days == null || !context.mounted) {
+        return;
+      }
+      final LeaveBalance? updated =
+          await ref.read(leaveActionControllerProvider.notifier).allocate(
+                id: balance.id,
+                allocatedDays: days,
+              );
+      if (!context.mounted) {
+        return;
+      }
+      if (updated != null) {
+        context.showSnack('Leave allocation updated.');
+      } else {
+        final String? error = ref.read(leaveActionControllerProvider).error;
+        if (error != null) {
+          context.showSnack(error);
+        }
+      }
+    } finally {
+      controller.dispose();
     }
   }
 

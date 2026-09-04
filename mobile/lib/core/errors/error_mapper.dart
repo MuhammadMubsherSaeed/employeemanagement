@@ -54,6 +54,10 @@ class ErrorMapper {
         return ForbiddenException(message, body.code);
       case 404:
         return NotFoundException(message, body.code);
+      case 409:
+        return ConflictException(message, body.code);
+      case 429:
+        return RateLimitException(message, body.code);
       default:
         if (status >= 500) {
           return ServerException(message, status, body.code);

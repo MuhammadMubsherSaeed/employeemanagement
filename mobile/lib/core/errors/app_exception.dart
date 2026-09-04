@@ -60,6 +60,20 @@ class ValidationException extends AppException {
   final Map<String, List<String>>? fieldErrors;
 }
 
+class ConflictException extends AppException {
+  const ConflictException([
+    String message = 'This action conflicts with the current state.',
+    String? code,
+  ]) : super(message, statusCode: 409, code: code);
+}
+
+class RateLimitException extends AppException {
+  const RateLimitException([
+    String message = 'Too many requests. Please wait and try again.',
+    String? code,
+  ]) : super(message, statusCode: 429, code: code);
+}
+
 class ServerException extends AppException {
   const ServerException([
     String message = 'Something went wrong on the server.',

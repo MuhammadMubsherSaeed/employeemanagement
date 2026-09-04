@@ -1,5 +1,6 @@
 import 'package:flutter_base/core/network/api_client_provider.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
+import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/documents/data/datasources/document_remote_datasource.dart';
 import 'package:flutter_base/features/documents/data/repositories/document_repository_impl.dart';
 import 'package:flutter_base/features/documents/domain/entities/document.dart';
@@ -82,7 +83,9 @@ class DocumentLookup {
 
 final documentDetailsProvider = FutureProvider.autoDispose
     .family<EmployeeDocument, DocumentLookup>((Ref ref, DocumentLookup lookup) {
-  ref.watch(authControllerProvider);
+  ref.watch(authControllerProvider.select((AuthState state) {
+    return state is AuthAuthenticated ? state.user.id : null;
+  }));
   return ref.watch(getEmployeeDocumentProvider)(
     employeeId: lookup.employeeId,
     documentId: lookup.documentId,

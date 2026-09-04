@@ -150,22 +150,21 @@ class ReportListController extends FamilyNotifier<ReportListState, ReportKind> {
     );
     try {
       final ReportPage<Object> result = await _fetch(requested);
-      if (!state.query.matchesListQuery(requested)) {
-        return;
+      if (state.query.matchesListQuery(requested)) {
+        final List<Object> merged = reset
+            ? result.results
+            : _unique(<Object>[...state.items, ...result.results]);
+        state = state.copyWith(
+          items: merged,
+          count: result.count,
+          hasMore: result.hasMore,
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: requested,
+          clearError: true,
+        );
       }
-      final List<Object> merged = reset
-          ? result.results
-          : _unique(<Object>[...state.items, ...result.results]);
-      state = state.copyWith(
-        items: merged,
-        count: result.count,
-        hasMore: result.hasMore,
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        query: requested,
-        clearError: true,
-      );
     } catch (error) {
       if (state.query.matchesListQuery(requested)) {
         state = state.copyWith(

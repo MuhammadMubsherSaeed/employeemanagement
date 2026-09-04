@@ -74,28 +74,32 @@ class AttendanceHistoryController extends Notifier<AttendanceHistoryState> {
         requested,
         selfOnly: _selfOnly,
       );
-      if (!_sameQuery(state.query, requested)) {
-        return;
+      if (_sameQuery(state.query, requested)) {
+        final List<AttendanceRecord> merged = reset
+            ? result.results
+            : _unique(<AttendanceRecord>[...state.items, ...result.results]);
+        state = state.copyWith(
+          items: merged,
+          count: result.count,
+          hasMore: result.hasMore,
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: requested,
+          clearError: true,
+        );
       }
-      final List<AttendanceRecord> merged = reset
-          ? result.results
-          : _unique(<AttendanceRecord>[...state.items, ...result.results]);
-      state = state.copyWith(
-        items: merged,
-        count: result.count,
-        hasMore: result.hasMore,
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        query: requested,
-        clearError: true,
-      );
     } catch (error) {
       if (_sameQuery(state.query, requested)) {
         state = state.copyWith(
           isInitialLoading: false,
           isLoadingMore: false,
           isRefreshing: false,
+          query: reset
+              ? requested
+              : requested.copyWith(
+                  page: requested.page > 1 ? requested.page - 1 : 1,
+                ),
           error: AttendanceErrorMapper.message(error),
         );
       }

@@ -6,6 +6,8 @@ import 'package:flutter_base/features/attendance/presentation/states/today_atten
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TodayAttendanceController extends Notifier<TodayAttendanceState> {
+  int _loadGeneration = 0;
+
   @override
   TodayAttendanceState build() {
     return const TodayAttendanceState(isLoading: true);
@@ -68,6 +70,7 @@ class TodayAttendanceController extends Notifier<TodayAttendanceState> {
   }
 
   Future<void> _load({required bool refreshing}) async {
+    final int generation = ++_loadGeneration;
     state = state.copyWith(
       isLoading: !refreshing && state.record == null,
       isRefreshing: refreshing,
@@ -76,6 +79,9 @@ class TodayAttendanceController extends Notifier<TodayAttendanceState> {
     try {
       final AttendanceRecord? record =
           await ref.read(getTodayAttendanceProvider)();
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = state.copyWith(
         record: record,
         clearRecord: record == null,
@@ -84,6 +90,9 @@ class TodayAttendanceController extends Notifier<TodayAttendanceState> {
         clearError: true,
       );
     } catch (error) {
+      if (generation != _loadGeneration) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         isRefreshing: false,

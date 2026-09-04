@@ -81,12 +81,17 @@ class AppAvatar extends StatelessWidget {
       return framed(fallback);
     }
 
+    final int cachePx =
+        (size * (MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1)).round();
+
     return framed(
       ClipOval(
         child: CachedNetworkImage(
           imageUrl: imageUrl!,
           width: size,
           height: size,
+          memCacheWidth: cachePx,
+          memCacheHeight: cachePx,
           fit: BoxFit.cover,
           placeholder: (BuildContext context, String url) => fallback,
           errorWidget: (BuildContext context, String url, Object error) =>

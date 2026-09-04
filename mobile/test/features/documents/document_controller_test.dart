@@ -93,4 +93,22 @@ void main() {
     );
     expect(repository.lastEmployeeId, 'emp-b');
   });
+
+  test('a newer search is not overwritten by a slower in-flight list', () async {
+    final FakeDocumentRepository repository = FakeDocumentRepository(
+      items: <EmployeeDocument>[sampleDocument()],
+    )..delay = const Duration(milliseconds: 40);
+    final ProviderContainer container = containerOf(repository);
+    addTearDown(container.dispose);
+    final DocumentListController controller =
+        container.read(employeeDocumentsProvider('emp-1').notifier);
+
+    final Future<void> first = controller.loadInitial();
+    await controller.setSearch('zzz-no-match', immediate: true);
+    await first;
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+
+    expect(container.read(employeeDocumentsProvider('emp-1')).items, isEmpty);
+    expect(repository.lastQuery?.search, 'zzz-no-match');
+  });
 }
