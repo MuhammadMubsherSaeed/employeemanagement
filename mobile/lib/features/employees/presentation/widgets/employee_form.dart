@@ -41,7 +41,6 @@ class _EmployeeFormState extends State<EmployeeForm> {
   late final TextEditingController _code;
   late final TextEditingController _phone;
   late final TextEditingController _address;
-  late final TextEditingController _image;
   late final TextEditingController _emergencyName;
   late final TextEditingController _emergencyRelationship;
   late final TextEditingController _emergencyPhone;
@@ -66,7 +65,6 @@ class _EmployeeFormState extends State<EmployeeForm> {
     _code = TextEditingController(text: initial?.employeeCode ?? '');
     _phone = TextEditingController(text: initial?.phone ?? '');
     _address = TextEditingController(text: initial?.address ?? '');
-    _image = TextEditingController(text: initial?.profileImage ?? '');
     _emergencyName = TextEditingController(
       text: initial?.emergencyContactName ?? '',
     );
@@ -105,7 +103,6 @@ class _EmployeeFormState extends State<EmployeeForm> {
     _code.text = employee.employeeCode;
     _phone.text = employee.phone;
     _address.text = employee.address;
-    _image.text = employee.profileImage;
     _emergencyName.text = employee.emergencyContactName;
     _emergencyRelationship.text = employee.emergencyContactRelationship;
     _emergencyPhone.text = employee.emergencyContactPhone;
@@ -131,7 +128,6 @@ class _EmployeeFormState extends State<EmployeeForm> {
     _code.dispose();
     _phone.dispose();
     _address.dispose();
-    _image.dispose();
     _emergencyName.dispose();
     _emergencyRelationship.dispose();
     _emergencyPhone.dispose();
@@ -203,9 +199,6 @@ class _EmployeeFormState extends State<EmployeeForm> {
           lastName: _lastName.text.trim(),
           employmentType: _employmentType,
           status: _status,
-          profileImage: _image.text.trim().startsWith('http')
-              ? _image.text.trim()
-              : '',
           gender: _gender,
           dateOfBirth: _dob,
           phone: _phone.text.trim(),

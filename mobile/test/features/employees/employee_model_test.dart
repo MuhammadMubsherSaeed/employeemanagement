@@ -88,5 +88,37 @@ void main() {
     expect(write.toJson()['joining_date'], '2023-05-01');
     expect(write.toJson()['department'], 'dept-1');
     expect(write.toJson()['position'], isNull);
+    expect(write.toJson().containsKey('profile_image'), isFalse);
+  });
+
+  test('EmployeeWrite omits blank profile_image so PATCH cannot wipe storage keys', () {
+    const EmployeeWrite blank = EmployeeWrite(
+      employeeCode: 'EMP-010',
+      firstName: 'Grace',
+      lastName: 'Hopper',
+      employmentType: EmploymentType.fullTime,
+      status: EmployeeStatus.active,
+      profileImage: '',
+    );
+    const EmployeeWrite storageKey = EmployeeWrite(
+      employeeCode: 'EMP-011',
+      firstName: 'Grace',
+      lastName: 'Hopper',
+      employmentType: EmploymentType.fullTime,
+      status: EmployeeStatus.active,
+      profileImage: 'companies/acme/employees/1/profile/x.png',
+    );
+    const EmployeeWrite publicUrl = EmployeeWrite(
+      employeeCode: 'EMP-012',
+      firstName: 'Grace',
+      lastName: 'Hopper',
+      employmentType: EmploymentType.fullTime,
+      status: EmployeeStatus.active,
+      profileImage: 'https://cdn.example.com/photo.png',
+    );
+
+    expect(blank.toJson().containsKey('profile_image'), isFalse);
+    expect(storageKey.toJson().containsKey('profile_image'), isFalse);
+    expect(publicUrl.toJson()['profile_image'], 'https://cdn.example.com/photo.png');
   });
 }

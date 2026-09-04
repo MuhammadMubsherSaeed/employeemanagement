@@ -101,6 +101,39 @@ class ProfileImageAPITests(EmployeeFixtureMixin, TestCase):
         self.assertEqual(detail.status_code, 200)
         self.assertEqual(detail.json()["data"]["profile_image"], "")
 
+    def test_employee_patch_without_profile_image_keeps_private_key(self) -> None:
+        key = (
+            f"companies/{self.company_a.id}/employees/{self.emp_a1.id}/profile/x.png"
+        )
+        self.emp_a1.profile_image = key
+        self.emp_a1.save(update_fields=["profile_image"])
+        client = self.authenticate(self.admin_a)
+        response = client.patch(
+            f"{EMPLOYEES}/{self.emp_a1.id}/",
+            {"first_name": "Ada"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.emp_a1.refresh_from_db()
+        self.assertEqual(self.emp_a1.profile_image, key)
+        self.assertEqual(response.json()["data"]["profile_image"], "")
+
+    def test_employee_patch_empty_profile_image_clears_private_key(self) -> None:
+        key = (
+            f"companies/{self.company_a.id}/employees/{self.emp_a1.id}/profile/x.png"
+        )
+        self.emp_a1.profile_image = key
+        self.emp_a1.save(update_fields=["profile_image"])
+        client = self.authenticate(self.admin_a)
+        response = client.patch(
+            f"{EMPLOYEES}/{self.emp_a1.id}/",
+            {"profile_image": ""},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.emp_a1.refresh_from_db()
+        self.assertEqual(self.emp_a1.profile_image, "")
+
     def test_mismatched_image_content_rejected(self) -> None:
         client = self.authenticate(self.admin_a)
         with TemporaryDirectory() as media:

@@ -174,13 +174,14 @@ class EmployeeWrite extends Equatable {
   final DateTime? joiningDate;
 
   Map<String, dynamic> toJson() {
+    final String? publicImage = publicProfileImageValue(profileImage);
     return <String, dynamic>{
       'employee_code': employeeCode,
       'first_name': firstName,
       'last_name': lastName,
       'employment_type': employmentType.apiValue,
       'status': status.apiValue,
-      if (profileImage != null) 'profile_image': profileImage,
+      if (publicImage != null) 'profile_image': publicImage,
       if (gender != null && gender != EmployeeGender.unknown)
         'gender': gender!.apiValue,
       if (dateOfBirth != null)
@@ -199,6 +200,17 @@ class EmployeeWrite extends Equatable {
       'manager': managerId,
       if (joiningDate != null) 'joining_date': _dateOnly(joiningDate!),
     };
+  }
+
+  /// Django stores private object keys. List/detail JSON returns "" for those
+  /// keys; sending that empty value on PATCH would wipe the stored photo.
+  /// Photos must use `POST/DELETE employees/{id}/profile-image/`.
+  static String? publicProfileImageValue(String? raw) {
+    final String text = (raw ?? '').trim();
+    if (text.startsWith('http://') || text.startsWith('https://')) {
+      return text;
+    }
+    return null;
   }
 
   static String _dateOnly(DateTime value) {
