@@ -14,7 +14,7 @@ class AppConstants {
 class ApiPaths {
   ApiPaths._();
 
-  static const String health = '/api/health/';
+  static const String health = '/api/v1/health/';
   static const String v1 = '/api/v1';
   static const String authLogin = 'auth/login/';
   static const String authRefresh = 'auth/refresh/';

@@ -4,6 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('API path constants are initialized', () {
     expect(ApiPaths.v1, '/api/v1');
-    expect(ApiPaths.health, '/api/health/');
+    expect(ApiPaths.health, '/api/v1/health/');
   });
 }
