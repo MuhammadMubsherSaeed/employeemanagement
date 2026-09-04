@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
@@ -182,6 +183,7 @@ class _EmployeesScreenState extends ConsumerState<EmployeesScreen> {
         subtitle: list.query.search.isEmpty
             ? 'Add an employee or adjust filters.'
             : 'Try a different name, code, email, or phone.',
+        icon: Icons.groups_outlined,
       );
     }
 
@@ -190,7 +192,7 @@ class _EmployeesScreenState extends ConsumerState<EmployeesScreen> {
           ref.read(employeeListControllerProvider.notifier).refresh(),
       child: ListView.separated(
         controller: _scroll,
-        padding: AppSpacing.screen,
+        padding: AppBreakpoints.pagePadding(context),
         itemCount: list.items.length + (list.isLoadingMore ? 1 : 0),
         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
         itemBuilder: (BuildContext context, int index) {

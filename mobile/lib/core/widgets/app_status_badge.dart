@@ -14,31 +14,40 @@ class AppStatusBadge extends StatelessWidget {
   final String label;
   final AppBadgeTone tone;
 
+  static Color colorOf(BuildContext context, AppBadgeTone tone) {
+    final Brightness brightness = Theme.of(context).brightness;
+    return switch (tone) {
+      AppBadgeTone.success => AppColors.successOf(brightness),
+      AppBadgeTone.warning => AppColors.warningOf(brightness),
+      AppBadgeTone.error => AppColors.dangerOf(brightness),
+      AppBadgeTone.info => AppColors.infoOf(brightness),
+      AppBadgeTone.neutral => Theme.of(context).colorScheme.onSurfaceVariant,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Color color = switch (tone) {
-      AppBadgeTone.success => AppColors.success,
-      AppBadgeTone.warning => AppColors.warning,
-      AppBadgeTone.error => AppColors.danger,
-      AppBadgeTone.info => AppColors.info,
-      AppBadgeTone.neutral => Theme.of(context).colorScheme.outline,
-    };
+    final Color color = colorOf(context, tone);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+    return Semantics(
+      label: label,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xxs,
+        ),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: AppRadius.badge,
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: color,
+              ),
+        ),
       ),
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/constants/app_constants.dart';
+import 'package:flutter_base/core/theme/app_dimensions.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 
@@ -28,12 +30,20 @@ class AuthScaffold extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.center,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
+                    constraints: const BoxConstraints(
+                      maxWidth: AppDimensions.maxFormWidth,
+                    ),
                     child: AppCard(
+                      variant: AppCardVariant.elevated,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
+                          Text(
+                            AppConstants.appName,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
                           Text(
                             title,
                             style: Theme.of(context).textTheme.headlineSmall,

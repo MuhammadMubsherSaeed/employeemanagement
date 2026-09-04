@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/theme/app_dimensions.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_avatar.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
@@ -18,6 +19,13 @@ class EmployeeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme text = Theme.of(context).textTheme;
+    final String meta = <String?>[
+      employee.department?.name,
+      employee.position?.title,
+    ]
+        .whereType<String>()
+        .where((String v) => v.isNotEmpty)
+        .join(' · ');
     return Semantics(
       button: onTap != null,
       label: '${employee.fullName}, ${employee.employeeCode}',
@@ -30,33 +38,46 @@ class EmployeeCard extends StatelessWidget {
               imageUrl: employee.profileImage.isEmpty
                   ? null
                   : employee.profileImage,
-              size: 48,
+              size: AppDimensions.avatarLg,
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(employee.fullName, style: text.titleMedium),
+                  Text(
+                    employee.fullName,
+                    style: text.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     employee.employeeCode,
                     style: text.bodySmall,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    [
-                      employee.department?.name,
-                      employee.position?.title,
-                    ]
-                        .whereType<String>()
-                        .where((String v) => v.isNotEmpty)
-                        .join(' · '),
-                    style: text.bodyMedium,
-                  ),
+                  if (meta.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      meta,
+                      style: text.bodyMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (employee.manager != null) ...<Widget>[
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      employee.manager!.fullName,
+                      style: text.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),
+            const SizedBox(width: AppSpacing.xs),
             EmployeeStatusBadge(status: employee.status),
           ],
         ),
@@ -93,11 +114,13 @@ class EmployeeListItem extends StatelessWidget {
         ),
         title: Text(employee.fullName),
         subtitle: Text(
-          [
+          <String?>[
             employee.employeeCode,
             employee.department?.name,
             employee.position?.title,
           ].whereType<String>().where((String v) => v.isNotEmpty).join(' · '),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         trailing: EmployeeStatusBadge(status: employee.status),
       ),

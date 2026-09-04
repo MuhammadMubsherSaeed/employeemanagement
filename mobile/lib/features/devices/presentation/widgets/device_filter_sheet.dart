@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_bottom_sheet.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/core/widgets/app_text_field.dart';
@@ -20,9 +21,8 @@ Future<DeviceQuery?> showDeviceFilterSheet({
   required BuildContext context,
   required DeviceQuery current,
 }) {
-  return showModalBottomSheet<DeviceQuery>(
+  return AppBottomSheet.show<DeviceQuery>(
     context: context,
-    isScrollControlled: true,
     builder: (BuildContext context) {
       return DeviceFilterSheet(current: current);
     },

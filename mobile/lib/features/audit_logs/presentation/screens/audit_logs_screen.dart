@@ -6,7 +6,9 @@ import 'package:flutter_base/core/utils/date_formatter.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
+import 'package:flutter_base/core/widgets/app_info_row.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
+import 'package:flutter_base/core/widgets/app_status_badge.dart';
 import 'package:flutter_base/features/audit_logs/domain/audit_log_access.dart';
 import 'package:flutter_base/features/audit_logs/domain/entities/audit_log.dart';
 import 'package:flutter_base/features/audit_logs/presentation/providers/audit_log_list_controller.dart';
@@ -118,21 +120,35 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
         final AuditLogEntry entry = list.items[index];
         return AppCard(
           onTap: () => context.push(AppRoutes.auditLog(entry.id), extra: entry),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(entry.action, style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: AppSpacing.xxs),
-              Text(
-                '${entry.entityType}${entry.entityId == null ? '' : ' · ${entry.entityId}'}',
+              AppStatusBadge(
+                label: entry.action,
+                tone: AppBadgeTone.info,
               ),
-              if (entry.user != null)
-                Text(entry.user!.name, style: Theme.of(context).textTheme.bodySmall),
-              if (entry.createdAt != null)
-                Text(
-                  AppDateFormatter.dateTime(entry.createdAt!.toLocal()),
-                  style: Theme.of(context).textTheme.bodySmall,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      '${entry.entityType}${entry.entityId == null ? '' : ' · ${entry.entityId}'}',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    if (entry.user != null)
+                      Text(
+                        entry.user!.name,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    if (entry.createdAt != null)
+                      Text(
+                        AppDateFormatter.dateTime(entry.createdAt!.toLocal()),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                  ],
                 ),
+              ),
             ],
           ),
         );
@@ -169,13 +185,19 @@ class AuditLogDetailsScreen extends StatelessWidget {
                     children: <Widget>[
                       Text(log.action, style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: AppSpacing.sm),
-                      Text('Entity: ${log.entityType}'),
-                      if (log.entityId != null) Text('ID: ${log.entityId}'),
-                      if (log.user != null) Text('Actor: ${log.user!.name}'),
-                      if (log.ipAddress != null) Text('IP: ${log.ipAddress}'),
+                      AppInfoRow(label: 'Entity', value: log.entityType),
+                      if (log.entityId != null)
+                        AppInfoRow(label: 'ID', value: log.entityId!),
+                      if (log.user != null)
+                        AppInfoRow(label: 'Actor', value: log.user!.name),
+                      if (log.ipAddress != null)
+                        AppInfoRow(label: 'IP', value: log.ipAddress!),
                       if (log.createdAt != null)
-                        Text(
-                          AppDateFormatter.dateTime(log.createdAt!.toLocal()),
+                        AppInfoRow(
+                          label: 'When',
+                          value: AppDateFormatter.dateTime(
+                            log.createdAt!.toLocal(),
+                          ),
                         ),
                     ],
                   ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/theme/app_dimensions.dart';
+import 'package:flutter_base/core/widgets/app_button.dart';
 
 class AppDialog {
   AppDialog._();
@@ -10,6 +12,7 @@ class AppDialog {
     String confirmLabel = 'OK',
     String cancelLabel = 'Cancel',
     bool barrierDismissible = true,
+    bool destructive = false,
   }) {
     return showDialog<bool>(
       context: context,
@@ -17,16 +20,28 @@ class AppDialog {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(title),
-          content: Text(message),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppDimensions.dialogMaxWidth,
+            ),
+            child: Text(message),
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
               child: Text(cancelLabel),
             ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(confirmLabel),
-            ),
+            destructive
+                ? AppButton(
+                    label: confirmLabel,
+                    variant: AppButtonVariant.danger,
+                    expand: false,
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                  )
+                : FilledButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    child: Text(confirmLabel),
+                  ),
           ],
         );
       },
@@ -46,7 +61,12 @@ class AppDialog {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(title),
-          content: Text(message),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppDimensions.dialogMaxWidth,
+            ),
+            child: Text(message),
+          ),
           actions: <Widget>[
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(),

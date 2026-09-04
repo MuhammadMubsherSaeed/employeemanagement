@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_bottom_sheet.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
@@ -12,9 +13,8 @@ Future<EmployeeQuery?> showEmployeeFilterSheet({
   required List<Department> departments,
   required List<Position> positions,
 }) {
-  return showModalBottomSheet<EmployeeQuery>(
+  return AppBottomSheet.show<EmployeeQuery>(
     context: context,
-    isScrollControlled: true,
     builder: (BuildContext context) {
       return EmployeeFilterSheet(
         current: current,

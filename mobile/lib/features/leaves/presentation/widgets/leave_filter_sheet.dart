@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/utils/date_formatter.dart';
+import 'package:flutter_base/core/widgets/app_bottom_sheet.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
@@ -13,9 +14,8 @@ Future<LeaveRequestQuery?> showLeaveFilterSheet({
   required List<LeaveType> leaveTypes,
   required bool canFilterByEmployee,
 }) {
-  return showModalBottomSheet<LeaveRequestQuery>(
+  return AppBottomSheet.show<LeaveRequestQuery>(
     context: context,
-    isScrollControlled: true,
     builder: (BuildContext context) {
       return LeaveFilterSheet(
         current: current,

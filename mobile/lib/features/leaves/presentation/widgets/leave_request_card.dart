@@ -33,7 +33,12 @@ class LeaveRequestCard extends StatelessWidget {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: Text(typeName, style: text.titleMedium),
+                  child: Text(
+                    typeName,
+                    style: text.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 LeaveStatusBadge(status: request.status),
               ],
@@ -49,7 +54,7 @@ class LeaveRequestCard extends StatelessWidget {
             ),
             Text(
               leaveDaysLabel(request.totalDays),
-              style: text.bodyMedium,
+              style: text.bodySmall,
             ),
             if (request.createdAt != null)
               Text(

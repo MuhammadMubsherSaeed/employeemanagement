@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/theme/app_colors.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/features/leaves/domain/entities/leave.dart';
@@ -20,6 +21,11 @@ class LeaveBalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme text = Theme.of(context).textTheme;
     final String typeName = balance.leaveType?.name ?? 'Leave';
+    final int remaining = balance.remainingDays;
+    final int allocated = balance.allocatedDays;
+    final double progress = allocated <= 0
+        ? 0
+        : (remaining / allocated).clamp(0, 1).toDouble();
     return AppCard(
       onTap: onAllocate,
       child: Column(
@@ -41,6 +47,17 @@ class LeaveBalanceCard extends StatelessWidget {
           Text(
             'Remaining: ${leaveDaysLabel(balance.remainingDays)}',
             style: text.titleSmall,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              color: AppColors.successOf(Theme.of(context).brightness),
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(

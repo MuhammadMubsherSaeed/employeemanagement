@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_bottom_sheet.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification_enums.dart';
@@ -9,9 +10,8 @@ Future<NotificationQuery?> showNotificationFilterSheet({
   required BuildContext context,
   required NotificationQuery current,
 }) {
-  return showModalBottomSheet<NotificationQuery>(
+  return AppBottomSheet.show<NotificationQuery>(
     context: context,
-    isScrollControlled: true,
     builder: (BuildContext context) {
       return NotificationFilterSheet(current: current);
     },

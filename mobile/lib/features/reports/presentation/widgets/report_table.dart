@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
 import 'package:flutter_base/features/reports/presentation/widgets/report_empty_state.dart';
 
-const double kReportTabletBreakpoint = 700;
+const double kReportTabletBreakpoint = AppBreakpoints.medium;
 
 class ReportColumn {
   const ReportColumn({
@@ -61,7 +62,7 @@ class ReportTable extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final bool tablet = constraints.maxWidth >= kReportTabletBreakpoint;
+        final bool tablet = constraints.maxWidth >= AppBreakpoints.medium;
         if (tablet) {
           return _table(context);
         }
