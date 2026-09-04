@@ -3,7 +3,7 @@ import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
-import 'package:flutter_base/core/widgets/app_loader.dart';
+import 'package:flutter_base/core/widgets/app_skeleton.dart';
 import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/dashboard/domain/entities/dashboard.dart';
 import 'package:flutter_base/features/dashboard/presentation/providers/manager_dashboard_controller.dart';
@@ -63,7 +63,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: const <Widget>[
-          SizedBox(height: 120, child: AppLoader(message: 'Loading dashboard…')),
+          SizedBox(height: 8),
+          SizedBox(height: 320, child: AppSkeletonList()),
         ],
       );
     }

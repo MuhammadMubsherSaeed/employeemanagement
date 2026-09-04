@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
+import 'package:flutter_base/core/widgets/app_icon_well.dart';
 
 class ReportTypeCard extends StatelessWidget {
   const ReportTypeCard({
@@ -26,7 +27,7 @@ class ReportTypeCard extends StatelessWidget {
         onTap: onTap,
         child: Row(
           children: <Widget>[
-            Icon(icon),
+            AppIconWell(icon: icon),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(

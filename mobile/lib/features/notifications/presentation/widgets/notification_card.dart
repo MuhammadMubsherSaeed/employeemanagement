@@ -68,7 +68,10 @@ class NotificationCard extends StatelessWidget {
             ),
             if (!notification.isRead)
               Padding(
-                padding: const EdgeInsets.only(left: AppSpacing.xs, top: 6),
+                padding: const EdgeInsets.only(
+                  left: AppSpacing.xs,
+                  top: AppSpacing.xxs,
+                ),
                 child: Container(
                   width: 8,
                   height: 8,

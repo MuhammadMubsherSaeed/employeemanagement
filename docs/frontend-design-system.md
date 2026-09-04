@@ -27,7 +27,14 @@ Screens (permission-aware navigation and actions unchanged)
 | `lib/core/theme/app_motion.dart` | Short professional durations |
 | `lib/core/theme/app_breakpoints.dart` | Compact / tablet / expanded layout |
 
-Prefer `Theme.of(context)` and these tokens over one-off `Color`, `fontSize`, and `BorderRadius.circular`.
+## Shared widgets
+
+| File | Use |
+|---|---|
+| `lib/core/widgets/app_search_field.dart` | Shared search field |
+| `lib/core/widgets/app_date_field.dart` | Date picker field matching inputs |
+| `lib/core/widgets/app_form_section.dart` | Form section titles |
+| `lib/core/widgets/app_divider.dart` | Themed divider |
 
 ## Adding UI
 

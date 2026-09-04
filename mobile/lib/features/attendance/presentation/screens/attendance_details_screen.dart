@@ -3,6 +3,7 @@ import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/utils/date_formatter.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
+import 'package:flutter_base/core/widgets/app_info_row.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
 import 'package:flutter_base/features/attendance/domain/entities/attendance.dart';
 import 'package:flutter_base/features/attendance/domain/working_duration.dart';
@@ -66,12 +67,11 @@ class AttendanceDetailsScreen extends ConsumerWidget {
                       ),
                     ],
                     const SizedBox(height: AppSpacing.md),
-                    _row(context, 'Check in', _time(record.checkIn)),
-                    _row(context, 'Check out', _time(record.checkOut)),
-                    _row(
-                      context,
-                      'Working',
-                      WorkingDuration.format(record.totalMinutes),
+                    AppInfoRow(label: 'Check in', value: _time(record.checkIn)),
+                    AppInfoRow(label: 'Check out', value: _time(record.checkOut)),
+                    AppInfoRow(
+                      label: 'Working',
+                      value: WorkingDuration.format(record.totalMinutes),
                     ),
                   ],
                 ),
@@ -88,22 +88,25 @@ class AttendanceDetailsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       if (record.checkInIp != null)
-                        _row(context, 'Check-in IP', record.checkInIp!),
+                        AppInfoRow(label: 'Check-in IP', value: record.checkInIp!),
                       if (record.checkOutIp != null)
-                        _row(context, 'Check-out IP', record.checkOutIp!),
+                        AppInfoRow(
+                          label: 'Check-out IP',
+                          value: record.checkOutIp!,
+                        ),
                       if (record.checkInLatitude != null &&
                           record.checkInLongitude != null)
-                        _row(
-                          context,
-                          'Check-in GPS',
-                          '${record.checkInLatitude}, ${record.checkInLongitude}',
+                        AppInfoRow(
+                          label: 'Check-in GPS',
+                          value:
+                              '${record.checkInLatitude}, ${record.checkInLongitude}',
                         ),
                       if (record.checkOutLatitude != null &&
                           record.checkOutLongitude != null)
-                        _row(
-                          context,
-                          'Check-out GPS',
-                          '${record.checkOutLatitude}, ${record.checkOutLongitude}',
+                        AppInfoRow(
+                          label: 'Check-out GPS',
+                          value:
+                              '${record.checkOutLatitude}, ${record.checkOutLongitude}',
                         ),
                     ],
                   ),
@@ -112,24 +115,6 @@ class AttendanceDetailsScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _row(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            width: 120,
-            child: Text(label, style: Theme.of(context).textTheme.bodySmall),
-          ),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyLarge),
-          ),
-        ],
       ),
     );
   }

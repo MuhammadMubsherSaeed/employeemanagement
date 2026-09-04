@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
+import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/features/documents/domain/document_validation.dart';
 import 'package:flutter_base/features/documents/domain/entities/document.dart';
@@ -76,7 +78,8 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Upload document')),
       body: ListView(
-        padding: AppSpacing.screen,
+        padding: AppBreakpoints.pagePadding(context),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: <Widget>[
           AppDropdown<DocumentType>(
             key: ValueKey<String>('type-${_type.apiValue}'),
@@ -97,18 +100,20 @@ class _UploadDocumentScreenState extends ConsumerState<UploadDocumentScreen> {
             },
           ),
           const SizedBox(height: AppSpacing.md),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.attach_file),
-            title: Text(_file?.name ?? 'No file selected'),
-            subtitle: _file == null
-                ? const Text('PDF, Word, Excel, JPEG, or PNG')
-                : Text(formatFileSize(_file!.size)),
-            trailing: AppButton(
-              label: 'Choose',
-              variant: AppButtonVariant.outlined,
-              expand: false,
-              onPressed: mutation.uploading ? null : _pick,
+          AppCard(
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.attach_file),
+              title: Text(_file?.name ?? 'No file selected'),
+              subtitle: _file == null
+                  ? const Text('PDF, Word, Excel, JPEG, or PNG')
+                  : Text(formatFileSize(_file!.size)),
+              trailing: AppButton(
+                label: 'Choose',
+                variant: AppButtonVariant.outlined,
+                expand: false,
+                onPressed: mutation.uploading ? null : _pick,
+              ),
             ),
           ),
           if (_fileError != null)

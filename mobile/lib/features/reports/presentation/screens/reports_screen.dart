@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/utils/date_formatter.dart';
+import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/features/attendance/domain/working_duration.dart';
 import 'package:flutter_base/features/attendance/presentation/widgets/attendance_status_badge.dart';
 import 'package:flutter_base/features/devices/presentation/widgets/device_status_badge.dart';
@@ -549,14 +551,13 @@ class ReportsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Reports')),
       body: entries.isEmpty
-          ? const Center(
-              child: Padding(
-                padding: AppSpacing.screen,
-                child: Text('You do not have access to company reports.'),
-              ),
+          ? const AppEmptyState(
+              title: 'No reports available',
+              subtitle: 'You do not have access to company reports.',
+              icon: Icons.assessment_outlined,
             )
           : ListView.separated(
-              padding: AppSpacing.screen,
+              padding: AppBreakpoints.pagePadding(context),
               itemCount: entries.length,
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
               itemBuilder: (BuildContext context, int index) {

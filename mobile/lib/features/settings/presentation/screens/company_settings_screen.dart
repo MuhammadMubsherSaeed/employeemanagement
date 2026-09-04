@@ -272,7 +272,7 @@ class _LogoPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BorderRadius radius = BorderRadius.circular(AppSpacing.sm);
+    const BorderRadius radius = AppRadius.image;
     Widget child;
     if (picked != null) {
       child = Image.file(

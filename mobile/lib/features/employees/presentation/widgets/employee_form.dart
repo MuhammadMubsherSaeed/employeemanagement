@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
-import 'package:flutter_base/core/utils/date_formatter.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
+import 'package:flutter_base/core/widgets/app_date_field.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/core/widgets/app_text_field.dart';
 import 'package:flutter_base/features/employees/domain/entities/employee.dart';
@@ -237,14 +237,16 @@ class _EmployeeFormState extends State<EmployeeForm> {
               _departmentId == null || item.departmentId == _departmentId,
         )
         .toList();
-    final TextTheme text = Theme.of(context).textTheme;
 
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text('Basic information', style: text.titleMedium),
+          Text(
+            'Basic information',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
           AppTextField(
             controller: _firstName,
@@ -292,15 +294,13 @@ class _EmployeeFormState extends State<EmployeeForm> {
             },
           ),
           const SizedBox(height: AppSpacing.sm),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Date of birth'),
-            subtitle: Text(
-              _dob == null ? 'Optional' : AppDateFormatter.date(_dob!),
-            ),
-            trailing: const Icon(Icons.calendar_today_outlined),
+          AppDateField(
+            label: 'Date of birth',
+            value: _dob,
+            hint: 'Optional',
             onTap: () => _pickDate(joining: false),
           ),
+          const SizedBox(height: AppSpacing.sm),
           AppTextField(
             controller: _phone,
             label: 'Phone',
@@ -316,7 +316,10 @@ class _EmployeeFormState extends State<EmployeeForm> {
             errorText: errors['address'],
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Employment', style: text.titleMedium),
+          Text(
+            'Employment',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
           AppDropdown<String?>(
             key: ValueKey<String>('dept-$_departmentId'),
@@ -372,17 +375,14 @@ class _EmployeeFormState extends State<EmployeeForm> {
             ],
             onChanged: (String? value) => setState(() => _managerId = value),
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Joining date'),
-            subtitle: Text(
-              _joining == null
-                  ? 'Required'
-                  : AppDateFormatter.date(_joining!),
-            ),
-            trailing: const Icon(Icons.event_outlined),
+          AppDateField(
+            label: 'Joining date',
+            value: _joining,
+            hint: 'Required',
+            icon: Icons.event_outlined,
             onTap: () => _pickDate(joining: true),
           ),
+          const SizedBox(height: AppSpacing.sm),
           AppDropdown<EmploymentType>(
             key: ValueKey<String>('type-$_employmentType'),
             label: 'Employment type',
@@ -423,7 +423,10 @@ class _EmployeeFormState extends State<EmployeeForm> {
             },
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Emergency contact', style: text.titleMedium),
+          Text(
+            'Emergency contact',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
           AppTextField(
             controller: _emergencyName,

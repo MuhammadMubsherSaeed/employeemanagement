@@ -50,7 +50,7 @@ class LeaveBalanceCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           ClipRRect(
-            borderRadius: BorderRadius.circular(99),
+            borderRadius: AppRadius.badge,
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,

@@ -283,7 +283,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: destinations.length < 2
+      bottomNavigationBar: destinations.length < 2 ||
+              AppBreakpoints.isTablet(context)
           ? null
           : NavigationBar(
               selectedIndex: 0,

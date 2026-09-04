@@ -34,6 +34,16 @@ class AppColors {
   static const Color disabledLight = Color(0xFFB8BFC9);
   static const Color disabledDark = Color(0xFF6B7380);
 
+  static const Color background = canvasLight;
+  static const Color card = surfaceLight;
+  static const Color textPrimary = heading;
+  static const Color textSecondary = body;
+  static const Color textMuted = muted;
+  static const Color border = borderLight;
+  static const Color divider = borderLight;
+  static const Color disabled = disabledLight;
+  static const Color error = danger;
+
   static const ColorScheme lightScheme = ColorScheme(
     brightness: Brightness.light,
     primary: primary,

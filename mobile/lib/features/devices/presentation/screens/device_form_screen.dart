@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
-import 'package:flutter_base/core/utils/date_formatter.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
+import 'package:flutter_base/core/widgets/app_date_field.dart';
 import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
@@ -184,7 +185,8 @@ class _DeviceFormScreenState extends ConsumerState<DeviceFormScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(_isEdit ? 'Edit device' : 'Add device')),
       body: ListView(
-        padding: AppSpacing.screen,
+        padding: AppBreakpoints.pagePadding(context),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: <Widget>[
           AppTextField(
             controller: _assetCode,
@@ -226,33 +228,21 @@ class _DeviceFormScreenState extends ConsumerState<DeviceFormScreen> {
             errorText: form.fieldErrors['serial_number'],
           ),
           const SizedBox(height: AppSpacing.md),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Purchase date'),
-            subtitle: Text(
-              _purchaseDate == null
-                  ? 'Not set'
-                  : AppDateFormatter.date(_purchaseDate!),
-            ),
-            trailing: const Icon(Icons.calendar_today_outlined),
+          AppDateField(
+            label: 'Purchase date',
+            value: _purchaseDate,
+            hint: 'Not set',
             onTap: () => _pickDate(purchase: true),
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Warranty expiry'),
-            subtitle: Text(
-              _warrantyExpiry == null
-                  ? 'Not set'
-                  : AppDateFormatter.date(_warrantyExpiry!),
-            ),
-            trailing: const Icon(Icons.event_outlined),
+          const SizedBox(height: AppSpacing.md),
+          AppDateField(
+            label: 'Warranty expiry',
+            value: _warrantyExpiry,
+            hint: 'Not set',
+            icon: Icons.event_outlined,
+            errorText: form.fieldErrors['warranty_expiry'],
             onTap: () => _pickDate(purchase: false),
           ),
-          if (form.fieldErrors['warranty_expiry'] != null)
-            Text(
-              form.fieldErrors['warranty_expiry']!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(
             controller: _cost,

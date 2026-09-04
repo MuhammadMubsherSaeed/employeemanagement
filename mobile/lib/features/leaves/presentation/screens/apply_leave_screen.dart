@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_text_field.dart';
@@ -71,7 +72,7 @@ class _ApplyLeaveScreenState extends ConsumerState<ApplyLeaveScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Apply for leave')),
       body: ListView(
-        padding: AppSpacing.screen,
+        padding: AppBreakpoints.pagePadding(context),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: <Widget>[
           LeaveTypeSelector(

@@ -8,7 +8,7 @@ import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
-import 'package:flutter_base/core/widgets/app_loader.dart';
+import 'package:flutter_base/core/widgets/app_skeleton.dart';
 import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/attendance/domain/entities/attendance_enums.dart';
@@ -169,7 +169,8 @@ class _EmployeeDashboardScreenState
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: const <Widget>[
-          SizedBox(height: 120, child: AppLoader(message: 'Loading dashboard…')),
+          SizedBox(height: 8),
+          SizedBox(height: 320, child: AppSkeletonList()),
         ],
       );
     }

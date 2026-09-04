@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_base/core/theme/app_spacing.dart';
+import 'package:flutter_base/core/widgets/app_empty_state.dart';
 
 class UpcomingModulePlaceholder extends StatelessWidget {
   const UpcomingModulePlaceholder({super.key, required this.title});
@@ -8,15 +8,10 @@ class UpcomingModulePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: AppSpacing.screen,
-      child: Center(
-        child: Text(
-          '$title module coming soon.',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ),
+    return AppEmptyState(
+      title: '$title module coming soon.',
+      subtitle: 'Related records will appear here when this section is available.',
+      icon: Icons.upcoming_outlined,
     );
   }
 }

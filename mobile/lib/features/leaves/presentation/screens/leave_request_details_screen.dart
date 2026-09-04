@@ -6,6 +6,7 @@ import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
+import 'package:flutter_base/core/widgets/app_info_row.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
 import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/documents/presentation/providers/document_providers.dart';
@@ -79,6 +80,7 @@ class LeaveRequestDetailsScreen extends ConsumerWidget {
       message: 'Are you sure you want to cancel this leave request?',
       confirmLabel: 'Cancel request',
       cancelLabel: 'Keep',
+      destructive: true,
     );
     if (confirmed != true) {
       return;
@@ -167,42 +169,42 @@ class LeaveRequestDetailsScreen extends ConsumerWidget {
                         ),
                       ],
                       const SizedBox(height: AppSpacing.md),
-                      _row(
-                        context,
-                        'Dates',
-                        AppDateFormatter.dateRange(
+                      AppInfoRow(
+                        label: 'Dates',
+                        value: AppDateFormatter.dateRange(
                           request.startDate,
                           request.endDate,
                         ),
                       ),
-                      _row(
-                        context,
-                        'Total days',
-                        leaveDaysLabel(request.totalDays),
+                      AppInfoRow(
+                        label: 'Total days',
+                        value: leaveDaysLabel(request.totalDays),
                       ),
                       if (request.reason.isNotEmpty)
-                        _row(context, 'Reason', request.reason),
+                        AppInfoRow(label: 'Reason', value: request.reason),
                       if (request.createdAt != null)
-                        _row(
-                          context,
-                          'Created',
-                          AppDateFormatter.dateTime(request.createdAt!.toLocal()),
+                        AppInfoRow(
+                          label: 'Created',
+                          value: AppDateFormatter.dateTime(
+                            request.createdAt!.toLocal(),
+                          ),
                         ),
                       if (request.approvedAt != null)
-                        _row(
-                          context,
-                          'Approved at',
-                          AppDateFormatter.dateTime(
+                        AppInfoRow(
+                          label: 'Approved at',
+                          value: AppDateFormatter.dateTime(
                             request.approvedAt!.toLocal(),
                           ),
                         ),
                       if (request.approvedBy != null)
-                        _row(context, 'Approved by', '${request.approvedBy}'),
+                        AppInfoRow(
+                          label: 'Approved by',
+                          value: '${request.approvedBy}',
+                        ),
                       if (request.rejectionReason.isNotEmpty)
-                        _row(
-                          context,
-                          'Rejection reason',
-                          request.rejectionReason,
+                        AppInfoRow(
+                          label: 'Rejection reason',
+                          value: request.rejectionReason,
                         ),
                     ],
                   ),
@@ -279,24 +281,6 @@ class LeaveRequestDetailsScreen extends ConsumerWidget {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _row(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            width: 140,
-            child: Text(label, style: Theme.of(context).textTheme.bodySmall),
-          ),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyLarge),
-          ),
-        ],
       ),
     );
   }

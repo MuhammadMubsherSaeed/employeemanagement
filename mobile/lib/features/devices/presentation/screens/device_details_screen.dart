@@ -82,6 +82,7 @@ class _DeviceDetailsScreenState extends ConsumerState<DeviceDetailsScreen> {
       message:
           'Are you sure you want to delete this device? Devices with assignment history may need to be retired instead.',
       confirmLabel: 'Delete',
+      destructive: true,
     );
     if (confirmed != true || !context.mounted) {
       return;

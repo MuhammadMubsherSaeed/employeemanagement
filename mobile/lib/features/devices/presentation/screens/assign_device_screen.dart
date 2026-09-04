@@ -190,7 +190,7 @@ class _AssignDeviceScreenState extends ConsumerState<AssignDeviceScreen> {
         final bool selected = _selected?.id == employee.id;
         return DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: selected
                 ? Border.all(color: Theme.of(context).colorScheme.primary)
                 : null,

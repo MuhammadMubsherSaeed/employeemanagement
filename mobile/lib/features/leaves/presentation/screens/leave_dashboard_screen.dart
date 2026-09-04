@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
+import 'package:flutter_base/core/theme/app_breakpoints.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
@@ -84,7 +85,7 @@ class _LeaveDashboardScreenState extends ConsumerState<LeaveDashboardScreen> {
         onRefresh: _refresh,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: AppSpacing.screen,
+          padding: AppBreakpoints.pagePadding(context),
           children: <Widget>[
             Text('Leave balances', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.sm),

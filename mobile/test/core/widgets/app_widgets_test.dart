@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_theme.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
+import 'package:flutter_base/core/widgets/app_date_field.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
+import 'package:flutter_base/core/widgets/app_search_field.dart';
 import 'package:flutter_base/core/widgets/app_status_badge.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -96,5 +98,31 @@ void main() {
       ),
     );
     expect(find.text('Delete'), findsOneWidget);
+  });
+
+  testWidgets('AppSearchField and AppDateField render labels',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              AppSearchField(
+                hintText: 'Search employees',
+                onChanged: (_) {},
+              ),
+              AppDateField(
+                label: 'Start date',
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Search employees'), findsOneWidget);
+    expect(find.text('Start date'), findsOneWidget);
+    expect(find.text('Select a date'), findsOneWidget);
   });
 }
