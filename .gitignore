@@ -72,6 +72,10 @@ app.*.map.json
 
 # Docker
 docker/postgres/data/
+docker/nginx/certs/*.pem
+docker/nginx/certs/*.key
+docker/nginx/certs/*.crt
+!docker/nginx/certs/.gitkeep
 
 # OS
 Thumbs.db

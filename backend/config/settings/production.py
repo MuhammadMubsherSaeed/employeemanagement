@@ -17,11 +17,13 @@ if not ALLOWED_HOSTS or ALLOWED_HOSTS == ["*"]:
         "DJANGO_ALLOWED_HOSTS must be a non-wildcard list in production."
     )
 
-postgres_password = env("POSTGRES_PASSWORD", default="")
+postgres_password = env("DB_PASSWORD", default="") or env(
+    "POSTGRES_PASSWORD", default=""
+)
 if not postgres_password:
-    raise ImproperlyConfigured("POSTGRES_PASSWORD must be set in production.")
+    raise ImproperlyConfigured("POSTGRES_PASSWORD or DB_PASSWORD must be set.")
 DATABASES["default"]["PASSWORD"] = postgres_password
-DATABASES["default"]["CONN_MAX_AGE"] = 60
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
 
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")
 if not CORS_ALLOWED_ORIGINS:
@@ -30,14 +32,32 @@ if not CORS_ALLOWED_ORIGINS:
     )
 CORS_ALLOW_ALL_ORIGINS = False
 
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[]) or list(
+    CORS_ALLOWED_ORIGINS
+)
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+SECURE_REFERRER_POLICY = "same-origin"
+
+# Keep False until Nginx terminates TLS. Enabling this on HTTP-only Docker
+# makes the API redirect in a loop.
+SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
+if SECURE_SSL_REDIRECT:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = env.int("DJANGO_SECURE_HSTS_SECONDS", default=31536000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = env.bool("DJANGO_SECURE_HSTS_PRELOAD", default=False)
+else:
+    SESSION_COOKIE_SECURE = env.bool("DJANGO_SESSION_COOKIE_SECURE", default=False)
+    CSRF_COOKIE_SECURE = env.bool("DJANGO_CSRF_COOKIE_SECURE", default=False)
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
 
 SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = [
     "rest_framework.permissions.IsAdminUser",
@@ -49,10 +69,10 @@ LOGGING["loggers"]["django.request"]["level"] = "ERROR"
 
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND",
-    default="django.core.mail.backends.smtp.EmailBackend",
+    default="django.core.mail.backends.console.EmailBackend",
 )
 if EMAIL_BACKEND.endswith("smtp.EmailBackend") and not EMAIL_HOST:
     raise ImproperlyConfigured(
         "EMAIL_HOST must be set when using SMTP in production."
     )
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost")

@@ -76,11 +76,12 @@ ASGI_APPLICATION = "config.asgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("POSTGRES_DB", default="hrms"),
-        "USER": env("POSTGRES_USER", default="hrms"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default=""),
-        "HOST": env("POSTGRES_HOST", default="localhost"),
-        "PORT": env("POSTGRES_PORT"),
+        "NAME": env("DB_NAME", default="") or env("POSTGRES_DB", default="hrms"),
+        "USER": env("DB_USER", default="") or env("POSTGRES_USER", default="hrms"),
+        "PASSWORD": env("DB_PASSWORD", default="")
+        or env("POSTGRES_PASSWORD", default=""),
+        "HOST": env("DB_HOST", default="") or env("POSTGRES_HOST", default="localhost"),
+        "PORT": env.int("DB_PORT", default=0) or env.int("POSTGRES_PORT", default=5432),
         "CONN_MAX_AGE": 0,
         "CONN_HEALTH_CHECKS": True,
         "OPTIONS": {
@@ -89,6 +90,22 @@ DATABASES = {
         "ATOMIC_REQUESTS": False,
     }
 }
+
+REDIS_URL = env("REDIS_URL", default="")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="") or REDIS_URL
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="") or CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = env("DJANGO_TIME_ZONE", default="UTC")
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = env.int("CELERY_TASK_TIME_LIMIT", default=300)
+CELERY_TASK_SOFT_TIME_LIMIT = env.int("CELERY_TASK_SOFT_TIME_LIMIT", default=240)
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_WORKER_REDIRECT_STDOUTS = False
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -321,6 +338,16 @@ LOGGING = {
             "propagate": False,
         },
         "apps": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "celery": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "gunicorn.error": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
