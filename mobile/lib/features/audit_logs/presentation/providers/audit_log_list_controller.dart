@@ -17,6 +17,7 @@ final auditLogRemoteDataSourceProvider = Provider<AuditLogRemoteDataSource>((
 
 class AuditLogListController extends Notifier<AuditLogListState> {
   bool _inFlight = false;
+  bool _pendingReload = false;
 
   @override
   AuditLogListState build() {
@@ -32,7 +33,10 @@ class AuditLogListController extends Notifier<AuditLogListState> {
   Future<void> loadInitial() => _load(reset: true);
 
   Future<void> loadMore() {
-    if (!state.hasMore || state.isInitialLoading || state.isLoadingMore) {
+    if (!state.hasMore ||
+        state.isInitialLoading ||
+        state.isLoadingMore ||
+        _inFlight) {
       return Future<void>.value();
     }
     return _load(reset: false);
@@ -50,9 +54,15 @@ class AuditLogListController extends Notifier<AuditLogListState> {
       return;
     }
     if (_inFlight) {
+      if (reset) {
+        _pendingReload = true;
+      }
       return;
     }
     _inFlight = true;
+    if (reset) {
+      _pendingReload = false;
+    }
     final int page = reset ? 1 : state.page + 1;
     state = state.copyWith(
       isInitialLoading: reset && state.items.isEmpty,
@@ -65,7 +75,7 @@ class AuditLogListController extends Notifier<AuditLogListState> {
           await ref.read(auditLogRemoteDataSourceProvider).getLogs(page: page);
       final List<AuditLogEntry> merged = reset
           ? result.results
-          : <AuditLogEntry>[...state.items, ...result.results];
+          : _unique(<AuditLogEntry>[...state.items, ...result.results]);
       state = state.copyWith(
         items: merged,
         count: result.count,
@@ -79,11 +89,21 @@ class AuditLogListController extends Notifier<AuditLogListState> {
       state = state.copyWith(
         isInitialLoading: false,
         isLoadingMore: false,
+        page: reset ? page : (page > 1 ? page - 1 : 1),
         error: ErrorMapper.map(error).message,
       );
     } finally {
       _inFlight = false;
     }
+    if (_pendingReload) {
+      _pendingReload = false;
+      await _load(reset: true);
+    }
+  }
+
+  List<AuditLogEntry> _unique(List<AuditLogEntry> items) {
+    final Set<String> seen = <String>{};
+    return items.where((AuditLogEntry item) => seen.add(item.id)).toList();
   }
 }
 

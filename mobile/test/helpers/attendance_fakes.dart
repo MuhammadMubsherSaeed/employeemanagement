@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_base/features/attendance/data/datasources/attendance_remote_datasource.dart';
 import 'package:flutter_base/features/attendance/domain/entities/attendance.dart';
 import 'package:flutter_base/features/attendance/domain/entities/attendance_enums.dart';
@@ -170,11 +172,15 @@ class FakeAttendanceRepository implements AttendanceRepository {
   final List<AttendanceQuery> historyQueries = <AttendanceQuery>[];
   final List<AttendanceSummaryQuery> summaryQueries = <AttendanceSummaryQuery>[];
   String? lastDetailId;
+  Completer<AttendanceRecord?>? todayHold;
   AttendancePage<AttendanceRecord> Function(AttendanceQuery query)? pageBuilder;
 
   @override
   Future<AttendanceRecord?> getTodayAttendance({DateTime? now}) async {
     todayCalls += 1;
+    if (todayHold != null) {
+      return todayHold!.future;
+    }
     if (delay > Duration.zero) {
       await Future<void>.delayed(delay);
     }

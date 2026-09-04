@@ -16,10 +16,14 @@ class RestoreSessionUseCase {
     if (!await _tokenStorage.hasRefreshToken()) {
       return null;
     }
+    final String? refreshAtStart = await _tokenStorage.getRefreshToken();
     try {
       return await _repository.getCurrentUser();
     } catch (_) {
-      await _tokenStorage.clearTokens();
+      final String? refreshNow = await _tokenStorage.getRefreshToken();
+      if (refreshNow == refreshAtStart) {
+        await _tokenStorage.clearTokens();
+      }
       return null;
     }
   }

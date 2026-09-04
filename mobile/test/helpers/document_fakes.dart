@@ -111,6 +111,9 @@ class FakeDocumentRepository implements DocumentRepository {
   Object? downloadError;
   bool uploading = false;
   String? lastEmployeeId;
+  DocumentQuery? lastQuery;
+  Duration delay = Duration.zero;
+  final List<DocumentQuery> queries = <DocumentQuery>[];
 
   @override
   Future<DocumentPage<EmployeeDocument>> listDocuments({
@@ -118,13 +121,26 @@ class FakeDocumentRepository implements DocumentRepository {
     required DocumentQuery query,
   }) async {
     lastEmployeeId = employeeId;
+    lastQuery = query;
+    queries.add(query);
+    if (delay > Duration.zero) {
+      await Future<void>.delayed(delay);
+    }
     if (listError != null) {
       throw listError!;
     }
+    final String search = query.search.trim().toLowerCase();
+    final List<EmployeeDocument> results = search.isEmpty
+        ? items
+        : items
+            .where((EmployeeDocument item) =>
+                item.title.toLowerCase().contains(search) ||
+                item.fileName.toLowerCase().contains(search))
+            .toList();
     return DocumentPage<EmployeeDocument>(
-      results: items,
-      count: items.length,
-      next: query.page == 1 && items.length > 1 ? 'next' : null,
+      results: results,
+      count: results.length,
+      next: query.page == 1 && results.length > 1 ? 'next' : null,
     );
   }
 

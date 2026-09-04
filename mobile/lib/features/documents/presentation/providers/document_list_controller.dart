@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
+import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/documents/domain/entities/document.dart';
 import 'package:flutter_base/features/documents/domain/entities/document_query.dart';
 import 'package:flutter_base/features/documents/presentation/providers/document_error_mapper.dart';
@@ -12,12 +13,15 @@ class DocumentListController
     extends AutoDisposeFamilyNotifier<DocumentListState, String> {
   Timer? _debounce;
   bool _pageRequestInFlight = false;
+  bool _pendingReload = false;
 
   static const Duration searchDebounce = Duration(milliseconds: 400);
 
   @override
   DocumentListState build(String employeeId) {
-    ref.watch(authControllerProvider);
+    ref.watch(authControllerProvider.select((AuthState state) {
+      return state is AuthAuthenticated ? state.user.id : null;
+    }));
     ref.onDispose(() => _debounce?.cancel());
     return const DocumentListState();
   }
@@ -87,47 +91,83 @@ class DocumentListController
 
   Future<void> _load({required bool reset, required bool refreshing}) async {
     if (_pageRequestInFlight) {
+      if (reset) {
+        _pendingReload = true;
+      }
       return;
     }
     _pageRequestInFlight = true;
-    final DocumentQuery query = reset
-        ? state.query.copyWith(page: 1)
-        : state.query.copyWith(page: state.query.page + 1);
+    if (reset) {
+      _pendingReload = false;
+    }
+    final int page = reset ? 1 : state.query.page + 1;
+    final DocumentQuery requested = state.query.copyWith(page: page);
     state = state.copyWith(
-      query: query,
+      query: requested,
       isInitialLoading: reset && !refreshing && state.items.isEmpty,
       isLoadingMore: !reset,
       isRefreshing: refreshing,
       clearError: true,
     );
     try {
-      final DocumentPage<EmployeeDocument> page =
+      final DocumentPage<EmployeeDocument> result =
           await ref.read(listEmployeeDocumentsProvider)(
         employeeId: employeeId,
-        query: query,
+        query: requested,
       );
-      final List<EmployeeDocument> items = reset
-          ? page.results
-          : <EmployeeDocument>[...state.items, ...page.results];
-      state = state.copyWith(
-        items: items,
-        count: page.count,
-        hasMore: page.hasMore,
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        clearError: true,
-      );
+      if (_sameListQuery(state.query, requested)) {
+        final List<EmployeeDocument> items = reset
+            ? result.results
+            : _unique(<EmployeeDocument>[...state.items, ...result.results]);
+        state = state.copyWith(
+          items: items,
+          count: result.count,
+          hasMore: result.hasMore,
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: requested,
+          clearError: true,
+        );
+      }
     } catch (error) {
-      state = state.copyWith(
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        error: DocumentErrorMapper.message(error),
-      );
+      if (_sameListQuery(state.query, requested)) {
+        state = state.copyWith(
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: reset
+              ? requested
+              : requested.copyWith(
+                  page: requested.page > 1 ? requested.page - 1 : 1,
+                ),
+          error: DocumentErrorMapper.message(error),
+        );
+      }
     } finally {
       _pageRequestInFlight = false;
     }
+    if (!_sameListQuery(state.query, requested) || _pendingReload) {
+      _pendingReload = false;
+      await _load(reset: true, refreshing: false);
+    }
+  }
+
+  bool _sameListQuery(DocumentQuery current, DocumentQuery requested) {
+    return current.search == requested.search &&
+        current.documentType == requested.documentType &&
+        current.uploadedBy == requested.uploadedBy &&
+        current.dateFrom == requested.dateFrom &&
+        current.dateTo == requested.dateTo &&
+        current.ordering == requested.ordering &&
+        current.pageSize == requested.pageSize;
+  }
+
+  List<EmployeeDocument> _unique(List<EmployeeDocument> items) {
+    final Set<String> seen = <String>{};
+    return items
+        .where((EmployeeDocument item) => seen.add(item.id))
+        .toList();
   }
 }
 

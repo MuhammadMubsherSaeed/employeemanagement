@@ -129,28 +129,32 @@ class EmployeeListController extends Notifier<EmployeeListState> {
     try {
       final EmployeePage<Employee> result =
           await ref.read(getEmployeesProvider)(requested);
-      if (!_sameListQuery(state.query, requested)) {
-        return;
+      if (_sameListQuery(state.query, requested)) {
+        final List<Employee> merged = reset
+            ? result.results
+            : _unique(<Employee>[...state.items, ...result.results]);
+        state = state.copyWith(
+          items: merged,
+          count: result.count,
+          hasMore: result.hasMore,
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: requested,
+          clearError: true,
+        );
       }
-      final List<Employee> merged = reset
-          ? result.results
-          : _unique(<Employee>[...state.items, ...result.results]);
-      state = state.copyWith(
-        items: merged,
-        count: result.count,
-        hasMore: result.hasMore,
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        query: requested,
-        clearError: true,
-      );
     } catch (error) {
       if (_sameListQuery(state.query, requested)) {
         state = state.copyWith(
           isInitialLoading: false,
           isLoadingMore: false,
           isRefreshing: false,
+          query: reset
+              ? requested
+              : requested.copyWith(
+                  page: requested.page > 1 ? requested.page - 1 : 1,
+                ),
           error: EmployeeErrorMapper.message(error),
         );
       }

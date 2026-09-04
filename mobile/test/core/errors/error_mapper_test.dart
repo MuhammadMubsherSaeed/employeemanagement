@@ -99,6 +99,35 @@ void main() {
       );
     });
 
+    test('maps 409 conflicts and 429 rate limits', () {
+      expect(
+        ErrorMapper.fromResponse(
+          Response<dynamic>(requestOptions: options(), statusCode: 409),
+        ),
+        isA<ConflictException>(),
+      );
+      expect(
+        ErrorMapper.fromResponse(
+          Response<dynamic>(
+            requestOptions: options(),
+            statusCode: 429,
+            data: <String, dynamic>{'message': 'Slow down'},
+          ),
+        ),
+        isA<RateLimitException>(),
+      );
+      expect(
+        ErrorMapper.fromResponse(
+          Response<dynamic>(
+            requestOptions: options(),
+            statusCode: 429,
+            data: <String, dynamic>{'message': 'Slow down'},
+          ),
+        ).message,
+        'Slow down',
+      );
+    });
+
     test('maps validation errors', () {
       final AppException exception = ErrorMapper.fromResponse(
         Response<dynamic>(

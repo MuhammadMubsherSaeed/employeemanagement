@@ -141,22 +141,21 @@ class DeviceListController
     try {
       final DevicePage<Device> result =
           await ref.read(getDevicesUseCaseProvider)(requested);
-      if (!_sameQuery(state.query, requested)) {
-        return;
+      if (_sameQuery(state.query, requested)) {
+        final List<Device> merged = reset
+            ? result.results
+            : _unique(<Device>[...state.items, ...result.results]);
+        state = state.copyWith(
+          items: merged,
+          count: result.count,
+          hasMore: result.hasMore,
+          isInitialLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+          query: requested,
+          clearError: true,
+        );
       }
-      final List<Device> merged = reset
-          ? result.results
-          : _unique(<Device>[...state.items, ...result.results]);
-      state = state.copyWith(
-        items: merged,
-        count: result.count,
-        hasMore: result.hasMore,
-        isInitialLoading: false,
-        isLoadingMore: false,
-        isRefreshing: false,
-        query: requested,
-        clearError: true,
-      );
     } catch (error) {
       if (_sameQuery(state.query, requested)) {
         state = state.copyWith(

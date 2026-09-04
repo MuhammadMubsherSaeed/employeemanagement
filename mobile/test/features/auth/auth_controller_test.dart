@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/session/session_invalidator.dart';
 import 'package:flutter_base/core/session/session_store.dart';
 import 'package:flutter_base/core/storage/token_storage.dart';
+import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:flutter_base/features/auth/domain/usecases/login_usecase.dart';
 import 'package:flutter_base/features/auth/domain/usecases/logout_usecase.dart';
@@ -168,5 +171,37 @@ void main() {
       container.read(authControllerProvider),
       const AuthState.unauthenticated(),
     );
+  });
+
+  test('in-flight restore cannot overwrite a newer login', () async {
+    final Completer<User> hold = Completer<User>();
+    final FakeAuthRepository repository = FakeAuthRepository()..meHold = hold;
+    final InMemoryTokenStorage tokens =
+        InMemoryTokenStorage(refresh: 'refresh-old');
+    final ProviderContainer container = _container(
+      repository: repository,
+      tokens: tokens,
+    );
+    addTearDown(container.dispose);
+    container.read(authControllerProvider);
+    await Future<void>.delayed(Duration.zero);
+
+    await container.read(authControllerProvider.notifier).login(
+          email: 'user@example.com',
+          password: 'secret',
+        );
+    await tokens.saveTokens(
+      accessToken: 'access-new',
+      refreshToken: 'refresh-new',
+    );
+
+    hold.completeError(const UnauthorizedException());
+    await Future<void>.delayed(Duration.zero);
+
+    expect(
+      container.read(authControllerProvider),
+      const AuthState.authenticated(sampleUser),
+    );
+    expect(tokens.refresh, 'refresh-new');
   });
 }

@@ -16,6 +16,8 @@ import 'package:flutter_base/features/auth/presentation/providers/auth_state.dar
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthController extends Notifier<AuthState> {
+  int _epoch = 0;
+
   @override
   AuthState build() {
     final SessionInvalidator invalidator = ref.read(sessionInvalidatorProvider);
@@ -26,19 +28,32 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> restoreSession() async {
+    if (state is AuthAuthenticated) {
+      return;
+    }
+    final int epoch = _epoch;
     state = const AuthState.loading();
     try {
       final RestoreSessionUseCase restore =
           ref.read(restoreSessionUseCaseProvider);
       final User? user = await restore();
+      if (epoch != _epoch) {
+        return;
+      }
       if (user == null) {
         await _clearAuthorization();
         state = const AuthState.unauthenticated();
         return;
       }
       await _persistAuthorization(user);
+      if (epoch != _epoch) {
+        return;
+      }
       state = AuthState.authenticated(user);
     } catch (_) {
+      if (epoch != _epoch) {
+        return;
+      }
       await _clearAuthorization();
       state = const AuthState.unauthenticated();
     }
@@ -48,7 +63,11 @@ class AuthController extends Notifier<AuthState> {
     final LoginUseCase login = ref.read(loginUseCaseProvider);
     try {
       final User user = await login(email: email, password: password);
+      final int epoch = ++_epoch;
       await _persistAuthorization(user);
+      if (epoch != _epoch) {
+        return;
+      }
       state = AuthState.authenticated(user);
     } catch (error) {
       state = AuthState.error(AuthErrorMapper.message(error));
@@ -57,6 +76,7 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
+    _epoch++;
     try {
       await ref.read(logoutSideEffectsProvider).run();
     } catch (_) {
@@ -77,11 +97,21 @@ class AuthController extends Notifier<AuthState> {
     if (state is! AuthAuthenticated) {
       return;
     }
+    final int epoch = _epoch;
     try {
       final User user = await ref.read(authRepositoryProvider).getCurrentUser();
+      if (epoch != _epoch) {
+        return;
+      }
       await _persistAuthorization(user);
+      if (epoch != _epoch) {
+        return;
+      }
       state = AuthState.authenticated(user);
     } catch (error) {
+      if (epoch != _epoch) {
+        return;
+      }
       final AppException mapped = ErrorMapper.map(error);
       if (mapped is UnauthorizedException) {
         await logout();
@@ -90,6 +120,7 @@ class AuthController extends Notifier<AuthState> {
   }
 
   void _onSessionInvalidated() {
+    _epoch++;
     unawaited(_clearAuthorization());
     if (state is AuthUnauthenticated) {
       return;
