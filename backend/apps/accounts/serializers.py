@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.accounts.models import User
+from apps.accounts.rbac_catalog import PERMISSION_CODES
 
 
 class CompanySummarySerializer(serializers.Serializer):
@@ -18,6 +19,7 @@ class LoginUserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="get_full_name", read_only=True)
     role = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -29,6 +31,7 @@ class LoginUserSerializer(serializers.ModelSerializer):
             "full_name",
             "role",
             "company",
+            "permissions",
         )
         read_only_fields = fields
 
@@ -41,6 +44,16 @@ class LoginUserSerializer(serializers.ModelSerializer):
         if company is None:
             return None
         return CompanySummarySerializer(company).data
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_permissions(self, user: User) -> list[str]:
+        """Permission codes for the Flutter UX layer. Django remains authoritative."""
+        if user.is_platform_admin:
+            return list(PERMISSION_CODES)
+        membership = user.get_active_membership()
+        if membership is None:
+            return []
+        return list(membership.role.permissions.values_list("code", flat=True))
 
 
 class CurrentUserSerializer(LoginUserSerializer):

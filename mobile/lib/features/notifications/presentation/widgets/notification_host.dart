@@ -6,7 +6,8 @@ import 'package:flutter_base/core/errors/error_mapper.dart';
 import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_router.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification.dart';
@@ -106,7 +107,7 @@ class _NotificationHostState extends ConsumerState<NotificationHost>
       return;
     }
     final GoRouter router = ref.read(goRouterProvider);
-    final UserRole role = auth.user.role;
+    final Authorization authz = ref.read(authorizationProvider);
     try {
       if (message.payload.hasNotificationId) {
         final AppNotification notification =
@@ -120,7 +121,7 @@ class _NotificationHostState extends ConsumerState<NotificationHost>
         );
         final NotificationDestination destination = ref
             .read(notificationNavigationServiceProvider)
-            .destination(notification: notification, role: role);
+            .destination(notification: notification, auth: authz);
         router.push(destination.location);
         return;
       }

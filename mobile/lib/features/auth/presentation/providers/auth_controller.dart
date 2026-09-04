@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/errors/error_mapper.dart';
 import 'package:flutter_base/core/session/logout_side_effects.dart';
 import 'package:flutter_base/core/session/session_invalidator.dart';
+import 'package:flutter_base/core/session/session_store.dart';
+import 'package:flutter_base/core/session/user_session.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/domain/usecases/login_usecase.dart';
 import 'package:flutter_base/features/auth/domain/usecases/logout_usecase.dart';
@@ -28,11 +32,14 @@ class AuthController extends Notifier<AuthState> {
           ref.read(restoreSessionUseCaseProvider);
       final User? user = await restore();
       if (user == null) {
+        await _clearAuthorization();
         state = const AuthState.unauthenticated();
         return;
       }
+      await _persistAuthorization(user);
       state = AuthState.authenticated(user);
     } catch (_) {
+      await _clearAuthorization();
       state = const AuthState.unauthenticated();
     }
   }
@@ -41,6 +48,7 @@ class AuthController extends Notifier<AuthState> {
     final LoginUseCase login = ref.read(loginUseCaseProvider);
     try {
       final User user = await login(email: email, password: password);
+      await _persistAuthorization(user);
       state = AuthState.authenticated(user);
     } catch (error) {
       state = AuthState.error(AuthErrorMapper.message(error));
@@ -60,6 +68,7 @@ class AuthController extends Notifier<AuthState> {
     } catch (_) {
       // Tokens are cleared in the repository even when the API call fails.
     } finally {
+      await _clearAuthorization();
       state = const AuthState.unauthenticated();
     }
   }
@@ -70,6 +79,7 @@ class AuthController extends Notifier<AuthState> {
     }
     try {
       final User user = await ref.read(authRepositoryProvider).getCurrentUser();
+      await _persistAuthorization(user);
       state = AuthState.authenticated(user);
     } catch (error) {
       final AppException mapped = ErrorMapper.map(error);
@@ -80,10 +90,42 @@ class AuthController extends Notifier<AuthState> {
   }
 
   void _onSessionInvalidated() {
+    unawaited(_clearAuthorization());
     if (state is AuthUnauthenticated) {
       return;
     }
     state = const AuthState.unauthenticated();
+  }
+
+  Future<void> _persistAuthorization(User user) async {
+    try {
+      final SessionStore store = ref.read(sessionStoreProvider);
+      final String? companyId = user.companyId?.trim();
+      if (companyId == null || companyId.isEmpty) {
+        await store.clear();
+      } else {
+        await store.save(
+          UserSession(
+            userId: user.id.toString(),
+            companyId: companyId,
+            role: user.roleValue,
+            permissions: user.permissions,
+          ),
+        );
+      }
+      ref.invalidate(currentSessionProvider);
+    } catch (_) {
+      // Tests without secure storage still authenticate.
+    }
+  }
+
+  Future<void> _clearAuthorization() async {
+    try {
+      await ref.read(sessionStoreProvider).clear();
+      ref.invalidate(currentSessionProvider);
+    } catch (_) {
+      // Missing storage must not block logout.
+    }
   }
 }
 

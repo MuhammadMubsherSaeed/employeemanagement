@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/devices/domain/device_access.dart';
@@ -112,10 +112,7 @@ class DeviceListController
     if (arg == DeviceListKind.mine) {
       next = next.copyWith(assigned: true, clearEmployee: true);
     }
-    final AuthState auth = ref.read(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
-    if (!DeviceAccess(role).canFilterByEmployee) {
+    if (!DeviceAccess(ref.read(authorizationProvider)).canFilterByEmployee) {
       return next.copyWith(clearEmployee: true);
     }
     return next;

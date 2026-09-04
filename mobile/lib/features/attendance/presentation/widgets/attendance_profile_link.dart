@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/auth/authorization.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_button.dart';
 import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:go_router/go_router.dart';
 
 class AttendanceProfileLink extends StatelessWidget {
   const AttendanceProfileLink({
     super.key,
-    required this.role,
+    required this.auth,
     this.isSelf = false,
   });
 
-  final UserRole role;
+  final Authorization auth;
   final bool isSelf;
 
   @override
   Widget build(BuildContext context) {
-    final AttendanceAccess access = AttendanceAccess(role);
+    final AttendanceAccess access = AttendanceAccess(auth);
     final String subtitle = isSelf
         ? 'Open your attendance dashboard to check in, check out, and review your records.'
         : access.canViewTeam

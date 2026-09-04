@@ -1,37 +1,43 @@
 import 'package:flutter_base/core/router/app_routes.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/domain/role_route_policy.dart';
 import 'package:flutter_base/features/employees/domain/employee_access.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../helpers/auth_fakes.dart';
+import '../../helpers/employee_fakes.dart';
+import '../../helpers/rbac_fixtures.dart';
 
 void main() {
   const RoleRoutePolicy policy = RoleRoutePolicy();
 
   test('COMPANY_ADMIN can view, create, update, and delete', () {
-    const EmployeeAccess access = EmployeeAccess(UserRole.companyAdmin);
+    final EmployeeAccess access = EmployeeAccess.of(companyAdminUser);
     expect(access.canViewDirectory, isTrue);
     expect(access.canCreate, isTrue);
     expect(access.canUpdate, isTrue);
     expect(access.canDelete, isTrue);
     expect(
-      policy.canAccess(role: UserRole.companyAdmin, path: AppRoutes.employeesAdd),
+      policy.canAccess(
+        auth: authOf(companyAdminUser),
+        path: AppRoutes.employeesAdd,
+      ),
       isTrue,
     );
   });
 
   test('MANAGER can view and update but cannot create or delete', () {
-    const EmployeeAccess access = EmployeeAccess(UserRole.manager);
+    final EmployeeAccess access = EmployeeAccess.of(managerUser);
     expect(access.canViewDirectory, isTrue);
     expect(access.canCreate, isFalse);
     expect(access.canUpdate, isTrue);
     expect(access.canDelete, isFalse);
     expect(
-      policy.canAccess(role: UserRole.manager, path: AppRoutes.employeesAdd),
+      policy.canAccess(auth: authOf(managerUser), path: AppRoutes.employeesAdd),
       isFalse,
     );
     expect(
       policy.canAccess(
-        role: UserRole.manager,
+        auth: authOf(managerUser),
         path: AppRoutes.employeeEdit('id-1'),
       ),
       isTrue,
@@ -39,30 +45,30 @@ void main() {
   });
 
   test('EMPLOYEE is self-service only', () {
-    const EmployeeAccess access = EmployeeAccess(UserRole.employee);
+    final EmployeeAccess access = EmployeeAccess.of(sampleUser);
     expect(access.isSelfService, isTrue);
     expect(access.canCreate, isFalse);
     expect(access.canUpdate, isFalse);
     expect(access.canDelete, isFalse);
     expect(
-      policy.canAccess(role: UserRole.employee, path: AppRoutes.employeesAdd),
+      policy.canAccess(auth: authOf(sampleUser), path: AppRoutes.employeesAdd),
       isFalse,
     );
     expect(
       policy.canAccess(
-        role: UserRole.employee,
+        auth: authOf(sampleUser),
         path: AppRoutes.employeeEdit('id-1'),
       ),
       isFalse,
     );
     expect(
-      policy.canAccess(role: UserRole.employee, path: AppRoutes.employeesMe),
+      policy.canAccess(auth: authOf(sampleUser), path: AppRoutes.employeesMe),
       isTrue,
     );
   });
 
   test('SUPER_ADMIN cannot create without company context', () {
-    const EmployeeAccess access = EmployeeAccess(UserRole.superAdmin);
+    final EmployeeAccess access = EmployeeAccess.of(superAdminUser);
     expect(access.canCreate, isFalse);
     expect(access.canUpdate, isTrue);
     expect(access.canDelete, isTrue);

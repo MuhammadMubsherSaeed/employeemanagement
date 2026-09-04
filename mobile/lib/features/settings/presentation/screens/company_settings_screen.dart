@@ -10,9 +10,7 @@ import 'package:flutter_base/core/widgets/app_dropdown.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
 import 'package:flutter_base/core/widgets/app_text_field.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/settings/domain/entities/company_settings.dart';
 import 'package:flutter_base/features/settings/domain/iana_timezones.dart';
 import 'package:flutter_base/features/settings/domain/settings_access.dart';
@@ -46,10 +44,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
   }
 
   SettingsAccess get _access {
-    final AuthState auth = ref.read(authControllerProvider);
-    return SettingsAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
-    );
+    return SettingsAccess(ref.read(authorizationProvider));
   }
 
   bool get _dirty {

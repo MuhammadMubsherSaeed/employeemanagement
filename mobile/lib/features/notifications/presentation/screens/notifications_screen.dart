@@ -3,9 +3,7 @@ import 'package:flutter_base/core/extensions/context_extensions.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification_query.dart';
 import 'package:flutter_base/features/notifications/domain/notification_access.dart';
@@ -24,10 +22,9 @@ class NotificationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState auth = ref.watch(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
-    final NotificationAccess access = NotificationAccess(role);
+    final NotificationAccess access = NotificationAccess(
+      ref.watch(authorizationProvider),
+    );
     final NotificationListState list =
         ref.watch(notificationListControllerProvider);
     final NotificationActionState actions =
@@ -95,7 +92,7 @@ class NotificationsScreen extends ConsumerWidget {
           Expanded(
             child: NotificationListView(
               onOpen: (AppNotification notification) {
-                _open(context, ref, notification, role);
+                _open(context, ref, notification);
               },
             ),
           ),
@@ -149,14 +146,16 @@ class NotificationsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppNotification notification,
-    UserRole role,
   ) {
     ref.read(notificationActionControllerProvider.notifier).markAsRead(
           notification,
         );
     final NotificationDestination destination = ref
         .read(notificationNavigationServiceProvider)
-        .destination(notification: notification, role: role);
+        .destination(
+          notification: notification,
+          auth: ref.read(authorizationProvider),
+        );
     if (destination.isInboxFallback) {
       context.push(AppRoutes.notification(notification.id));
       return;

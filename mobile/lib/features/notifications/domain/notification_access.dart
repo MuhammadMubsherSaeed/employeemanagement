@@ -1,26 +1,30 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 
-/// UI gates from [User.role] and the default RBAC catalog.
-/// Django remains the security boundary. Inbox is always recipient-specific.
+/// UI gates from notification codes. Inbox remains recipient-specific on the API.
 class NotificationAccess {
-  const NotificationAccess(this.role);
+  const NotificationAccess(this.auth);
 
-  final UserRole role;
+  factory NotificationAccess.of(User? user) =>
+      NotificationAccess(Authorization.fromUser(user));
 
-  bool get canView =>
-      role == UserRole.employee ||
-      role == UserRole.manager ||
-      role == UserRole.companyAdmin ||
-      role == UserRole.superAdmin;
+  final Authorization auth;
 
-  bool get canMarkRead => canView;
+  UserRole get role => auth.role;
 
-  bool get canManage =>
-      role == UserRole.companyAdmin || role == UserRole.superAdmin;
+  bool get canView => auth.hasPermission(Permissions.notificationsView);
+
+  bool get canMarkRead =>
+      auth.hasPermission(Permissions.notificationsMarkRead);
+
+  bool get canManage => auth.hasPermission(Permissions.notificationsManage);
 
   bool get canOpenLeaveRequest => canView;
 
-  bool get canOpenDevice => canView;
+  bool get canOpenDevice =>
+      canView && auth.hasPermission(Permissions.devicesView);
 
-  bool get canOpenAttendance => canView;
+  bool get canOpenAttendance =>
+      canView && auth.hasPermission(Permissions.attendanceView);
 }

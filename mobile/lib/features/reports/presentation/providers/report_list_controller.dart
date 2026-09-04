@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/core/session/session_store.dart';
 import 'package:flutter_base/core/session/user_session.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_base/features/auth/presentation/providers/auth_state.dar
 import 'package:flutter_base/features/reports/domain/entities/report_items.dart';
 import 'package:flutter_base/features/reports/domain/entities/report_kind.dart';
 import 'package:flutter_base/features/reports/domain/entities/report_query.dart';
+import 'package:flutter_base/features/reports/domain/report_access.dart';
 import 'package:flutter_base/features/reports/presentation/providers/report_error_mapper.dart';
 import 'package:flutter_base/features/reports/presentation/providers/report_providers.dart';
 import 'package:flutter_base/features/reports/presentation/states/report_list_state.dart';
@@ -106,6 +108,15 @@ class ReportListController extends FamilyNotifier<ReportListState, ReportKind> {
     final AuthState auth = ref.read(authControllerProvider);
     if (auth is! AuthAuthenticated) {
       state = ReportListState(query: ReportQuery(kind: arg));
+      return;
+    }
+    if (!ReportAccess(ref.read(authorizationProvider)).canView) {
+      state = state.copyWith(
+        isInitialLoading: false,
+        isLoadingMore: false,
+        isRefreshing: false,
+        error: ReportErrorMapper.forbidden,
+      );
       return;
     }
     final ReportQuery candidate = state.query.sanitized();

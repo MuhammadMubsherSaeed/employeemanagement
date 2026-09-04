@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_spacing.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/dashboard/domain/dashboard_access.dart';
 import 'package:flutter_base/features/dashboard/presentation/screens/admin_dashboard_screen.dart';
 import 'package:flutter_base/features/dashboard/presentation/screens/employee_dashboard_screen.dart';
@@ -15,10 +13,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState auth = ref.watch(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
-    switch (DashboardAccess(role).primaryKind) {
+    switch (DashboardAccess(ref.watch(authorizationProvider)).primaryKind) {
       case DashboardKind.admin:
         return const AdminDashboardScreen();
       case DashboardKind.manager:

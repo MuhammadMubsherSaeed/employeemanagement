@@ -8,6 +8,7 @@ import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_empty_state.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/attendance/domain/attendance_access.dart';
 import 'package:flutter_base/features/attendance/domain/entities/attendance_enums.dart';
 import 'package:flutter_base/features/attendance/domain/working_duration.dart';
@@ -108,11 +109,12 @@ class _EmployeeDashboardScreenState
     final TodayAttendanceState today = ref.watch(todayAttendanceProvider);
     final AuthState auth = ref.watch(authControllerProvider);
     final User? user = auth is AuthAuthenticated ? auth.user : null;
-    final UserRole role = user?.role ?? UserRole.unknown;
-    final AttendanceAccess attendance = AttendanceAccess(role);
-    final LeaveAccess leave = LeaveAccess(role);
-    final DeviceAccess devices = DeviceAccess(role);
-    final NotificationAccess notifications = NotificationAccess(role);
+    final AttendanceAccess attendance = AttendanceAccess(
+      ref.watch(authorizationProvider),
+    );
+    final LeaveAccess leave = LeaveAccess(attendance.auth);
+    final DeviceAccess devices = DeviceAccess(attendance.auth);
+    final NotificationAccess notifications = NotificationAccess(attendance.auth);
     final String name = (user?.firstName.isNotEmpty == true)
         ? user!.firstName
         : (user?.fullName.isNotEmpty == true ? user!.fullName : 'there');

@@ -9,9 +9,8 @@ import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
 import 'package:flutter_base/core/widgets/app_status_badge.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification.dart';
 import 'package:flutter_base/features/notifications/domain/services/notification_navigation_service.dart';
 import 'package:flutter_base/features/notifications/presentation/providers/notification_action_controller.dart';
@@ -31,9 +30,7 @@ class NotificationDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<AppNotification> detail =
         ref.watch(notificationDetailProvider(notificationId));
-    final AuthState auth = ref.watch(authControllerProvider);
-    final UserRole role =
-        auth is AuthAuthenticated ? auth.user.role : UserRole.unknown;
+    final Authorization auth = ref.watch(authorizationProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Notification')),
@@ -47,7 +44,7 @@ class NotificationDetailsScreen extends ConsumerWidget {
         data: (AppNotification notification) {
           return _NotificationDetailsBody(
             notification: notification,
-            role: role,
+            auth: auth,
           );
         },
       ),
@@ -58,11 +55,11 @@ class NotificationDetailsScreen extends ConsumerWidget {
 class _NotificationDetailsBody extends ConsumerStatefulWidget {
   const _NotificationDetailsBody({
     required this.notification,
-    required this.role,
+    required this.auth,
   });
 
   final AppNotification notification;
-  final UserRole role;
+  final Authorization auth;
 
   @override
   ConsumerState<_NotificationDetailsBody> createState() =>
@@ -91,7 +88,7 @@ class _NotificationDetailsBodyState
         ref.watch(notificationNavigationServiceProvider);
     final NotificationDestination destination = navigation.destination(
       notification: notification,
-      role: widget.role,
+      auth: widget.auth,
     );
     final String? actionLabel = navigation.relatedActionLabel(notification);
     final DateTime? created = notification.createdAt;

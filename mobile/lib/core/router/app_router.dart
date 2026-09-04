@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/core/presentation/access_denied_screen.dart';
 import 'package:flutter_base/core/presentation/app_error_screen.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
 import 'package:flutter_base/core/router/auth_redirect.dart';
+import 'package:flutter_base/features/audit_logs/domain/entities/audit_log.dart';
+import 'package:flutter_base/features/audit_logs/presentation/screens/audit_logs_screen.dart';
 import 'package:flutter_base/features/attendance/presentation/screens/attendance_calendar_screen.dart';
 import 'package:flutter_base/features/attendance/presentation/screens/attendance_dashboard_screen.dart';
 import 'package:flutter_base/features/attendance/presentation/screens/attendance_details_screen.dart';
@@ -108,6 +111,13 @@ GoRouter createAppRouter({
         name: 'home',
         builder: (BuildContext context, GoRouterState state) {
           return const HomeScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.accessDenied,
+        name: 'access-denied',
+        builder: (BuildContext context, GoRouterState state) {
+          return const AccessDeniedScreen();
         },
       ),
       GoRoute(
@@ -435,6 +445,23 @@ GoRouter createAppRouter({
             },
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.auditLogs,
+        name: 'audit-logs',
+        builder: (BuildContext context, GoRouterState state) {
+          return const AuditLogsScreen();
+        },
+      ),
+      GoRoute(
+        path: '/audit-logs/:id',
+        name: 'audit-log-detail',
+        builder: (BuildContext context, GoRouterState state) {
+          final Object? extra = state.extra;
+          return AuditLogDetailsScreen(
+            entry: extra is AuditLogEntry ? extra : null,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.error,

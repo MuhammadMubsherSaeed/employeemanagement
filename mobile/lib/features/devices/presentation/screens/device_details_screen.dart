@@ -8,9 +8,7 @@ import 'package:flutter_base/core/widgets/app_card.dart';
 import 'package:flutter_base/core/widgets/app_dialog.dart';
 import 'package:flutter_base/core/widgets/app_error_widget.dart';
 import 'package:flutter_base/core/widgets/app_loader.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/devices/domain/device_access.dart';
 import 'package:flutter_base/features/devices/domain/entities/device.dart';
 import 'package:flutter_base/features/devices/domain/entities/device_query.dart';
@@ -106,9 +104,8 @@ class _DeviceDetailsScreenState extends ConsumerState<DeviceDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AuthState auth = ref.watch(authControllerProvider);
     final DeviceAccess access = DeviceAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final AsyncValue<Device> async =
         ref.watch(deviceDetailProvider(widget.deviceId));

@@ -1,40 +1,42 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 
-/// UI gates from [User.role] and the default RBAC catalog.
-/// Django remains the security boundary.
+/// UI gates from `dashboard.*.view`. Django remains the security boundary.
 class DashboardAccess {
-  const DashboardAccess(this.role);
+  const DashboardAccess(this.auth);
 
-  final UserRole role;
+  factory DashboardAccess.of(User? user) =>
+      DashboardAccess(Authorization.fromUser(user));
+
+  final Authorization auth;
+
+  UserRole get role => auth.role;
 
   bool get canViewAdmin =>
-      role == UserRole.companyAdmin || role == UserRole.superAdmin;
+      auth.hasPermission(Permissions.dashboardAdminView) && auth.hasTenant;
 
   bool get canViewManager =>
-      role == UserRole.manager ||
-      role == UserRole.companyAdmin ||
-      role == UserRole.superAdmin;
+      auth.hasPermission(Permissions.dashboardManagerView) && auth.hasTenant;
 
   bool get canViewEmployee =>
-      role == UserRole.employee ||
-      role == UserRole.manager ||
-      role == UserRole.companyAdmin ||
-      role == UserRole.superAdmin;
+      auth.hasPermission(Permissions.dashboardEmployeeView) && auth.hasTenant;
 
-  /// Primary dashboard for this role. Super-admin and unknown roles
-  /// have no company dashboard.
+  /// Prefer the most specific dashboard the session is allowed to open.
   DashboardKind? get primaryKind {
-    switch (role) {
-      case UserRole.companyAdmin:
-        return DashboardKind.admin;
-      case UserRole.manager:
-        return DashboardKind.manager;
-      case UserRole.employee:
-        return DashboardKind.employee;
-      case UserRole.superAdmin:
-      case UserRole.unknown:
-        return null;
+    if (!auth.hasTenant) {
+      return null;
     }
+    if (canViewAdmin) {
+      return DashboardKind.admin;
+    }
+    if (canViewManager) {
+      return DashboardKind.manager;
+    }
+    if (canViewEmployee) {
+      return DashboardKind.employee;
+    }
+    return null;
   }
 }
 

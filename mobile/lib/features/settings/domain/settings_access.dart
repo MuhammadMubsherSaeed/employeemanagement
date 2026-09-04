@@ -1,16 +1,20 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 
-/// UI gates from [User.role] and the default RBAC catalog (`settings.manage`).
-/// Django remains the security boundary.
+/// UI gates from `settings.manage`. Signed-in company members may view.
 class SettingsAccess {
-  const SettingsAccess(this.role);
+  const SettingsAccess(this.auth);
 
-  final UserRole role;
+  factory SettingsAccess.of(User? user) =>
+      SettingsAccess(Authorization.fromUser(user));
 
-  bool get canView =>
-      role == UserRole.companyAdmin ||
-      role == UserRole.manager ||
-      role == UserRole.employee;
+  final Authorization auth;
 
-  bool get canEdit => role == UserRole.companyAdmin;
+  UserRole get role => auth.role;
+
+  bool get canView => auth.isAuthenticated && auth.hasTenant;
+
+  bool get canEdit =>
+      auth.hasPermission(Permissions.settingsManage) && auth.hasTenant;
 }

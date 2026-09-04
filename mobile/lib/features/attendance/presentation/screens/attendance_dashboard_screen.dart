@@ -16,9 +16,7 @@ import 'package:flutter_base/features/attendance/presentation/providers/today_at
 import 'package:flutter_base/features/attendance/presentation/states/today_attendance_state.dart';
 import 'package:flutter_base/features/attendance/presentation/widgets/attendance_summary_card.dart';
 import 'package:flutter_base/features/attendance/presentation/widgets/today_attendance_card.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
-import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -88,9 +86,8 @@ class _AttendanceDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final TodayAttendanceState today = ref.watch(todayAttendanceProvider);
-    final AuthState auth = ref.watch(authControllerProvider);
     final AttendanceAccess access = AttendanceAccess(
-      auth is AuthAuthenticated ? auth.user.role : UserRole.unknown,
+      ref.watch(authorizationProvider),
     );
     final DateTime now = DateTime.now();
     final AttendanceSummaryQuery summaryQuery = AttendanceSummaryQuery(

@@ -1,9 +1,11 @@
+import 'package:flutter_base/core/auth/authorization.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification_enums.dart';
 import 'package:flutter_base/features/notifications/domain/services/notification_navigation_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/auth_fakes.dart';
+import '../../helpers/employee_fakes.dart';
 import '../../helpers/notification_fakes.dart';
 
 void main() {
@@ -17,7 +19,7 @@ void main() {
         entityType: NotificationEntityType.leaveRequest,
         entityId: 'leave-1',
       ),
-      role: UserRole.manager,
+      auth: Authorization.fromUser(managerUser),
     );
     expect(dest.location, AppRoutes.leaveRequest('leave-1'));
     expect(dest.isInboxFallback, isFalse);
@@ -28,7 +30,7 @@ void main() {
       notification: sampleNotification(
         type: AppNotificationType.leaveSubmitted,
       ),
-      role: UserRole.manager,
+      auth: Authorization.fromUser(managerUser),
     );
     expect(dest.location, AppRoutes.leavesRequests);
   });
@@ -42,7 +44,7 @@ void main() {
               entityType: NotificationEntityType.leaveRequest,
               entityId: 'leave-2',
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.leaveRequest('leave-2'),
@@ -55,7 +57,7 @@ void main() {
               entityType: NotificationEntityType.leaveRequest,
               entityId: 'leave-3',
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.leaveRequest('leave-3'),
@@ -71,7 +73,7 @@ void main() {
               entityType: NotificationEntityType.device,
               entityId: 'dev-1',
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.device('dev-1'),
@@ -84,7 +86,7 @@ void main() {
               entityType: NotificationEntityType.device,
               entityId: 'dev-1',
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.device('dev-1'),
@@ -98,7 +100,7 @@ void main() {
             notification: sampleNotification(
               type: AppNotificationType.attendanceReminder,
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.attendance,
@@ -111,7 +113,7 @@ void main() {
               entityType: NotificationEntityType.attendance,
               entityId: 'att-1',
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.attendanceDetail('att-1'),
@@ -129,7 +131,7 @@ void main() {
               entityType: NotificationEntityType.employeeDocument,
               entityId: 'doc-1',
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.notification('n-doc'),
@@ -138,7 +140,7 @@ void main() {
       navigation
           .destination(
             notification: sampleNotification(id: 'n-sys'),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .isInboxFallback,
       isTrue,
@@ -150,7 +152,7 @@ void main() {
               id: 'n-unknown',
               type: AppNotificationType.unknown,
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .location,
       AppRoutes.notification('n-unknown'),
@@ -162,7 +164,7 @@ void main() {
               id: 'n-leave',
               type: AppNotificationType.leaveApproved,
             ),
-            role: UserRole.employee,
+            auth: Authorization.fromUser(sampleUser),
           )
           .isInboxFallback,
       isTrue,

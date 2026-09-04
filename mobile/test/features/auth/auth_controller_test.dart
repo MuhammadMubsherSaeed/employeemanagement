@@ -1,5 +1,6 @@
 import 'package:flutter_base/core/errors/app_exception.dart';
 import 'package:flutter_base/core/session/session_invalidator.dart';
+import 'package:flutter_base/core/session/session_store.dart';
 import 'package:flutter_base/core/storage/token_storage.dart';
 import 'package:flutter_base/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:flutter_base/features/auth/domain/usecases/login_usecase.dart';
@@ -35,6 +36,7 @@ ProviderContainer _container({
         ResetPasswordUseCase(repository),
       ),
       sessionInvalidatorProvider.overrideWithValue(SessionInvalidator()),
+      sessionStoreProvider.overrideWithValue(SessionStore.memory()),
     ],
   );
 }

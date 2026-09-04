@@ -1,27 +1,30 @@
 import 'package:flutter_base/core/router/app_routes.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_base/features/auth/domain/role_route_policy.dart';
 import 'package:flutter_base/features/notifications/domain/notification_access.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../helpers/auth_fakes.dart';
+import '../../helpers/employee_fakes.dart';
+import '../../helpers/rbac_fixtures.dart';
 
 void main() {
   const RoleRoutePolicy policy = RoleRoutePolicy();
 
   test('EMPLOYEE can view and mark own notifications', () {
-    const NotificationAccess access = NotificationAccess(UserRole.employee);
+    final NotificationAccess access = NotificationAccess.of(sampleUser);
     expect(access.canView, isTrue);
     expect(access.canMarkRead, isTrue);
     expect(access.canManage, isFalse);
     expect(
       policy.canAccess(
-        role: UserRole.employee,
+        auth: authOf(sampleUser),
         path: AppRoutes.notifications,
       ),
       isTrue,
     );
     expect(
       policy.canAccess(
-        role: UserRole.employee,
+        auth: authOf(sampleUser),
         path: AppRoutes.notification('n-1'),
       ),
       isTrue,
@@ -29,22 +32,24 @@ void main() {
   });
 
   test('MANAGER has inbox access without manage', () {
-    const NotificationAccess access = NotificationAccess(UserRole.manager);
+    final NotificationAccess access = NotificationAccess.of(managerUser);
     expect(access.canView, isTrue);
     expect(access.canManage, isFalse);
     expect(
-      policy.canAccess(role: UserRole.manager, path: AppRoutes.notifications),
+      policy.canAccess(
+        auth: authOf(managerUser),
+        path: AppRoutes.notifications,
+      ),
       isTrue,
     );
   });
 
   test('COMPANY_ADMIN can manage', () {
-    const NotificationAccess access =
-        NotificationAccess(UserRole.companyAdmin);
+    final NotificationAccess access = NotificationAccess.of(companyAdminUser);
     expect(access.canManage, isTrue);
     expect(
       policy.canAccess(
-        role: UserRole.companyAdmin,
+        auth: authOf(companyAdminUser),
         path: AppRoutes.notifications,
       ),
       isTrue,
@@ -53,7 +58,7 @@ void main() {
 
   test('unknown roles cannot open notification routes', () {
     expect(
-      policy.canAccess(role: UserRole.unknown, path: AppRoutes.notifications),
+      policy.canAccess(auth: anonymousAuth(), path: AppRoutes.notifications),
       isFalse,
     );
   });

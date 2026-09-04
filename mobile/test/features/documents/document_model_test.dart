@@ -5,10 +5,11 @@ import 'package:flutter_base/features/documents/domain/entities/document.dart';
 import 'package:flutter_base/features/documents/domain/entities/document_query.dart';
 import 'package:flutter_base/features/documents/domain/usecases/document_usecases.dart';
 import 'package:flutter_base/core/router/app_routes.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/auth_fakes.dart';
 import '../../helpers/document_fakes.dart';
+import '../../helpers/employee_fakes.dart';
 
 void main() {
   test('parses document JSON without storing a file URL', () {
@@ -121,11 +122,11 @@ void main() {
   });
 
   test('RBAC UI gates match backend defaults', () {
-    expect(const DocumentAccess(UserRole.companyAdmin).canDelete, isTrue);
-    expect(const DocumentAccess(UserRole.manager).canUpload, isTrue);
-    expect(const DocumentAccess(UserRole.manager).canDelete, isFalse);
-    expect(const DocumentAccess(UserRole.employee).canUpload, isTrue);
-    expect(const DocumentAccess(UserRole.employee).canDelete, isFalse);
+    expect(DocumentAccess.of(companyAdminUser).canDelete, isTrue);
+    expect(DocumentAccess.of(managerUser).canUpload, isTrue);
+    expect(DocumentAccess.of(managerUser).canDelete, isFalse);
+    expect(DocumentAccess.of(sampleUser).canUpload, isTrue);
+    expect(DocumentAccess.of(sampleUser).canDelete, isFalse);
   });
 
   test('document routes are nested under the employee', () {

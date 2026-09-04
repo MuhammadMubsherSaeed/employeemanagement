@@ -1,32 +1,32 @@
+import 'package:flutter_base/core/auth/authorization.dart';
+import 'package:flutter_base/core/auth/permissions.dart';
 import 'package:flutter_base/features/auth/domain/entities/user.dart';
 
-/// UI gates from [User.role] and the default RBAC catalog.
-/// Django remains the security boundary.
+/// UI gates from backend permission codes. Django remains the security boundary.
 class AttendanceAccess {
-  const AttendanceAccess(this.role);
+  const AttendanceAccess(this.auth);
 
-  final UserRole role;
+  factory AttendanceAccess.of(User? user) =>
+      AttendanceAccess(Authorization.fromUser(user));
 
-  bool get canView =>
-      role == UserRole.employee ||
-      role == UserRole.manager ||
-      role == UserRole.companyAdmin ||
-      role == UserRole.superAdmin;
+  final Authorization auth;
+
+  UserRole get role => auth.role;
+
+  bool get canView => auth.hasPermission(Permissions.attendanceView);
 
   bool get canCheckIn =>
-      role == UserRole.employee || role == UserRole.companyAdmin;
+      auth.hasPermission(Permissions.attendanceCheckIn) && auth.hasTenant;
 
-  bool get canCheckOut => canCheckIn;
+  bool get canCheckOut =>
+      auth.hasPermission(Permissions.attendanceCheckOut) && auth.hasTenant;
 
-  bool get canViewTeam =>
-      role == UserRole.manager ||
-      role == UserRole.companyAdmin ||
-      role == UserRole.superAdmin;
+  bool get canManage =>
+      auth.hasPermission(Permissions.attendanceManage) && auth.hasTenant;
+
+  bool get canViewTeam => canManage;
 
   bool get canFilterByEmployee => canViewTeam;
 
-  bool get canManage =>
-      role == UserRole.manager || role == UserRole.companyAdmin;
-
-  bool get isSelfService => role == UserRole.employee;
+  bool get isSelfService => canView && !canManage;
 }

@@ -1,6 +1,8 @@
+import 'package:flutter_base/core/auth/authorization_providers.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_controller.dart';
 import 'package:flutter_base/features/auth/presentation/providers/auth_state.dart';
 import 'package:flutter_base/features/settings/domain/entities/company_settings.dart';
+import 'package:flutter_base/features/settings/domain/settings_access.dart';
 import 'package:flutter_base/features/settings/presentation/providers/settings_error_mapper.dart';
 import 'package:flutter_base/features/settings/presentation/providers/settings_providers.dart';
 import 'package:flutter_base/features/settings/presentation/states/settings_update_state.dart';
@@ -20,6 +22,10 @@ class SettingsUpdateController extends Notifier<SettingsUpdateState> {
   }
 
   Future<CompanySettings?> save(CompanySettingsPatch patch) async {
+    if (!SettingsAccess(ref.read(authorizationProvider)).canEdit) {
+      state = const SettingsUpdateState(error: SettingsErrorMapper.forbidden);
+      return null;
+    }
     if (state.isSubmitting) {
       return null;
     }

@@ -1,5 +1,5 @@
 import 'package:flutter_base/core/router/app_routes.dart';
-import 'package:flutter_base/features/auth/domain/entities/user.dart';
+import 'package:flutter_base/core/auth/authorization.dart';
 import 'package:flutter_base/features/leaves/domain/leave_access.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification.dart';
 import 'package:flutter_base/features/notifications/domain/entities/notification_enums.dart';
@@ -24,9 +24,9 @@ class NotificationNavigationService {
 
   NotificationDestination destination({
     required AppNotification notification,
-    required UserRole role,
+    required Authorization auth,
   }) {
-    final NotificationAccess access = NotificationAccess(role);
+    final NotificationAccess access = NotificationAccess(auth);
     if (!access.canView) {
       return NotificationDestination(
         location: AppRoutes.notification(notification.id),
@@ -41,7 +41,7 @@ class NotificationNavigationService {
             location: AppRoutes.leaveRequest(notification.entityId!),
           );
         }
-        if (LeaveAccess(role).canApprove) {
+        if (LeaveAccess(auth).canApprove) {
           return const NotificationDestination(
             location: AppRoutes.leavesRequests,
           );
