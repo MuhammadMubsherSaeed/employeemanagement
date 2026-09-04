@@ -58,13 +58,23 @@ python manage.py runserver
 
 ## Docker
 
+Production (Nginx → Gunicorn → Django, internal PostgreSQL and Redis, Celery worker):
+
 ```bash
 cp .env.example .env
-cp backend/.env.example backend/.env
-docker compose up --build
+docker compose build
+docker compose up -d
 ```
 
-Compose starts PostgreSQL 16 and the Django app. Redis, Celery, and object storage are documented for later — they are not enabled yet.
+Health (through Nginx): `GET http://127.0.0.1/api/v1/health/`
+
+Local development (runserver + published Postgres):
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Full production notes: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Roles
 

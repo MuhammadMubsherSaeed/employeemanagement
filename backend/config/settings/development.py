@@ -50,6 +50,9 @@ EMAIL_BACKEND = env(
     default="django.core.mail.backends.console.EmailBackend",
 )
 
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+
 LOGGING["root"]["level"] = "DEBUG"
 LOGGING["loggers"]["apps"]["level"] = "DEBUG"
 LOGGING["handlers"]["console"]["formatter"] = "console"

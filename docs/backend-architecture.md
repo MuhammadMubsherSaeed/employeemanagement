@@ -16,6 +16,7 @@ backend/
 │   │   ├── base.py
 │   │   ├── development.py
 │   │   └── production.py
+│   ├── celery.py          # worker app; Beat is not enabled
 │   ├── urls.py
 │   ├── asgi.py
 │   └── wsgi.py
@@ -33,6 +34,10 @@ backend/
 │   ├── reports/              # Attendance, leave, employee, and device reports
 │   └── audit_logs/           # Immutable company-scoped AuditLog query API
 
+├── gunicorn.conf.py
+├── scripts/
+│   ├── entrypoint.sh
+│   └── wait_for_deps.py
 ├── requirements/
 │   ├── base.txt
 │   ├── development.txt
@@ -51,7 +56,7 @@ backend/
 | --- | --- |
 | `config.settings.base` | Apps, middleware, DRF, JWT, Spectacular, logging, static/media, Postgres engine |
 | `config.settings.development` | Local defaults, browsable API, public schema, `CONN_MAX_AGE=0` |
-| `config.settings.production` | Required secrets, HTTPS cookies, no wildcard hosts/CORS, `CONN_MAX_AGE=60` |
+| `config.settings.production` | Required secrets, env-driven HTTPS flags, no wildcard hosts/CORS, `CONN_MAX_AGE=60` |
 
 Set `DJANGO_SETTINGS_MODULE` to `config.settings.development` or `config.settings.production`. `manage.py` defaults to development.
 
@@ -64,8 +69,9 @@ Production **raises** `ImproperlyConfigured` if `DJANGO_SECRET_KEY` is missing o
 Copy `backend/.env.example` to `backend/.env`. Required names:
 
 - `DJANGO_SETTINGS_MODULE`, `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_TIME_ZONE`
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT` (Django also accepts `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT`)
 - `CORS_ALLOWED_ORIGINS`
+- Docker production also needs `REDIS_PASSWORD` (Compose builds `REDIS_URL`). See [`docs/DEPLOYMENT.md`](DEPLOYMENT.md).
 - `JWT_ACCESS_MINUTES`, `JWT_REFRESH_DAYS`
 
 Do not commit `.env`. Values compiled or shipped to Flutter are public; Django secrets stay on the server.

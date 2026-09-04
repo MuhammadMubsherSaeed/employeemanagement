@@ -1,52 +1,171 @@
+# Production stack. Only Nginx is published.
+# Postgres (5432) and Redis (6379) stay on the internal network.
+# Celery Beat is omitted: there are no periodic tasks yet.
+#
+#   docker compose --env-file .env up -d
+
+name: hrms
+
 services:
   db:
     image: postgres:16-alpine
-    container_name: hrms-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-hrms}
       POSTGRES_USER: ${POSTGRES_USER:-hrms}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hrms}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hrms} -d ${POSTGRES_DB:-hrms}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 8
+      start_period: 10s
+    networks:
+      - internal
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  backend:
-    build:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "--no-auth-warning",
+          "-a",
+          "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}",
+          "ping",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 5s
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    networks:
+      - internal
+    logging: *default-logging
+
+  web:
+    build: &backend-build
       context: ./backend
       dockerfile: ../docker/backend/Dockerfile
-    container_name: hrms-backend
+    image: hrms-backend:production
     restart: unless-stopped
     env_file:
-      - ./backend/.env
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.development
+      - .env
+    environment: &django-env
+      DJANGO_SETTINGS_MODULE: config.settings.production
       POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      POSTGRES_PORT: "5432"
+      DB_HOST: db
+      DB_PORT: "5432"
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/1
+      RUN_STARTUP_TASKS: "1"
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-3}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-90}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,web}
+    volumes:
+      - static_files:/app/staticfiles
+      - media_files:/app/media
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
-    command: python manage.py runserver 0.0.0.0:8000
+      redis:
+        condition: service_healthy
+    stop_grace_period: 35s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/api/v1/health/"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - internal
+    logging: *default-logging
 
-  # Future (not enabled in this initialization):
-  # redis:
-  #   image: redis:7-alpine
-  # celery:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: ../docker/backend/Dockerfile
-  #   command: celery -A config worker -l info
-  #   depends_on: [db, redis]
+  celery_worker:
+    build: *backend-build
+    image: hrms-backend:production
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      <<: *django-env
+      RUN_STARTUP_TASKS: "0"
+    command:
+      - celery
+      - -A
+      - config.celery
+      - worker
+      - --loglevel=info
+      - --concurrency=${CELERY_CONCURRENCY:-2}
+    volumes:
+      - media_files:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config.celery inspect ping --timeout 8 | grep -qi pong"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 40s
+    networks:
+      - internal
+    logging: *default-logging
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/certs:/etc/nginx/certs:ro
+      - static_files:/var/www/static:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/api/v1/health/"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - internal
+    logging: *default-logging
 
 volumes:
   postgres_data:
+  redis_data:
+  static_files:
+  media_files:
+
+networks:
+  internal:
+    driver: bridge

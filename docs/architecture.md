@@ -362,7 +362,7 @@ Not built now; compose file comments and this section are the placeholders.
 | **Redis** | Cache, JWT blacklist (optional), Celery broker |
 | **Celery** | Leave emails, attendance reminders, report exports, push |
 | **S3-compatible storage** | Profile photos, documents (`django-storages`) |
-| **Docker** | `docker-compose` today: `db` + `backend`. Later: redis, celery worker/beat, nginx |
+| **Docker** | Production: Nginx, Gunicorn, Postgres, Redis, Celery worker (`docker-compose.yml`). Dev runserver: `docker-compose.dev.yml`. |
 | **Horizontal scale** | Stateless API behind a load balancer; Postgres primary; Redis for shared session/cache |
 | **Read load** | Read replicas only if directory/search needs it |
 | **API growth** | Keep `/api/v1/`; add `/api/v2/` rather than breaking clients |
